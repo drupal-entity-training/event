@@ -1,0 +1,11 @@
+event.test:
+  path: '/test'
+  defaults:
+    _title: Test
+    _controller: 'Drupal\event\Controller\TestController::test'
+  # Grant anyone access to this route.
+  requirements:
+    _access: 'TRUE'
+  # Make sure that the result of this route is never cached.
+  options:
+    no_cache: true
