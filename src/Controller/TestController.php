@@ -37,6 +37,7 @@ class TestController implements ContainerInjectionInterface {
    */
   public function __construct(EntityDefinitionUpdateManagerInterface $entity_definition_update_manager, EntityTypeManagerInterface $entity_type_manager) {
     $this->entityDefinitionUpdateManager = $entity_definition_update_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
