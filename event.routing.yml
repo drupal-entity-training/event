@@ -1,3 +1,4 @@
+# Provide a route to place example code into.
 event.test:
   path: '/test'
   defaults:
@@ -9,3 +10,13 @@ event.test:
   # Make sure that the result of this route is never cached.
   options:
     no_cache: true
+
+# Provide a route to apply entity updates.
+event.entity_updates:
+  path: '/entity-updates'
+  defaults:
+    _title: 'Entity updates'
+    _controller: 'entity.definition_update_manager:applyUpdates'
+  # Grant anyone access to this route.
+  requirements:
+    _access: 'TRUE'
