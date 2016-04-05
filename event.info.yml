@@ -1,0 +1,5 @@
+name: Event
+description: 'Allows adding and managing events on the your site.'
+type: module
+core: 8.x
+package: Content
