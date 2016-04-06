@@ -63,7 +63,7 @@ class TestController implements ContainerInjectionInterface {
    *
    * @see event.routing.yml
    */
-  public function test() {
+  public function evaluateTestCode() {
 
     // Place any test code here.
 
