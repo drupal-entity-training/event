@@ -26,11 +26,14 @@ class Event extends ContentEntityBase {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['title'] = BaseFieldDefinition::create('string');
+    $fields['title'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Title'));
 
-    $fields['date'] = BaseFieldDefinition::create('datetime');
+    $fields['date'] = BaseFieldDefinition::create('datetime')
+      ->setLabel(t('Date'));
 
-    $fields['description'] = BaseFieldDefinition::create('text_long');
+    $fields['description'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Description'));
 
     return $fields;
   }
