@@ -70,6 +70,11 @@ class TestController implements ContainerInjectionInterface {
     // $uuid = Event::load($id)->uuid();
     // drupal_set_message('The UUID for event with ID ' . $id . ' is ' . $uuid . '.');
 
+    // This deletes an event by its ID.
+    // $id = 1;
+    // Event::load($id)->delete();
+    // drupal_set_message('The event with ID ' . $id . ' was successfully deleted');
+
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
 
