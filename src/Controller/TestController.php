@@ -64,7 +64,7 @@ class TestController implements ContainerInjectionInterface {
    *
    * @see event.routing.yml
    */
-  public function test() {
+  public function evaluateTestCode() {
 
     // This creates a new event and saves it to the database:
     // Event::create()->save();
