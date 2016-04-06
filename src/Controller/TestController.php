@@ -36,6 +36,7 @@ class TestController implements ContainerInjectionInterface {
    */
   public function __construct(EntityDefinitionUpdateManagerInterface $entity_definition_update_manager, EntityTypeManagerInterface $entity_type_manager) {
     $this->entityDefinitionUpdateManager = $entity_definition_update_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -86,7 +87,7 @@ class TestController implements ContainerInjectionInterface {
       }
       $this->entityDefinitionUpdateManager->applyUpdates();
 
-      drupal_set_message('Entity/field updates depicted below successfully applied.');
+      drupal_set_message('The entity/field definition updates listed below have been applied successfully.');
     }
     else {
       $build[] = ['#markup' => 'No outstanding entity/field definition updates.'];
