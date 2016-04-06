@@ -55,6 +55,10 @@ class TestController implements ContainerInjectionInterface {
    *
    * This is exposed at the '/test' path on your site.
    *
+   * If Drush is available you can also run arbitrary code in the context of a
+   * bootstrapped Drupal site with the "drupal php-eval" (or "drush ev")
+   * command.
+   *
    * @return array
    *   A renderable array that contains instruction text for this controller.
    *
@@ -81,8 +85,11 @@ class TestController implements ContainerInjectionInterface {
   /**
    * Provides a test controller to update entity/field definitions.
    *
-   * If Drush 8 is available, this can be achieved by running
-   * "drush entity-updates" instead.
+   * This is exposed at the '/update-entity-field-definitions' path on your
+   * site.
+   *
+   * If Drush is available, this can be achieved by running
+   * "drush entity-updates" (or "drush entup") instead.
    *
    * @return array
    *   A renderable array that contains a summary of the applied entity/field
