@@ -84,7 +84,6 @@ class TestController implements ContainerInjectionInterface {
     $build = [];
 
     if ($change_summary = $this->entityDefinitionUpdateManager->getChangeSummary()) {
-      $build[] = ['#markup' => 'Outstanding entity/field changes:'];
       foreach ($change_summary as $entity_type_id => $changes) {
         $build[] = [
           '#theme' => 'item_list',
@@ -94,7 +93,7 @@ class TestController implements ContainerInjectionInterface {
       }
       $this->entityDefinitionUpdateManager->applyUpdates();
 
-      drupal_set_message('Entity/field updates depicted below successfully applied.');
+      drupal_set_message('The entity/field definition updates listed below have been applied successfully.');
     }
     else {
       $build[] = ['#markup' => 'No outstanding entity/field definition updates.'];
