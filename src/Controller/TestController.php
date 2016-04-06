@@ -67,17 +67,24 @@ class TestController implements ContainerInjectionInterface {
   }
 
   /**
-   * Provides a test controller to updates entity/field definitions.
+   * Provides a test controller to update entity/field definitions.
+   *
+   * If Drush 8 is available, this can be achieved by running
+   * "drush entity-updates" instead.
    *
    * @return array
    *   A renderable array that contains a summary of the applied entity/field
    *   definitions.
+   *
+   * @see \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface::applyUpdates()
    */
   public function updateEntityFieldDefinitions() {
     $build = [];
 
+    // This code mimics the code that displays the list of needed entity/field
+    // definition updates on the status report at /admin/reports/status.
+    /** @see system_requirements() */
     if ($change_summary = $this->entityDefinitionUpdateManager->getChangeSummary()) {
-      $build[] = ['#markup' => 'Outstanding entity/field changes:'];
       foreach ($change_summary as $entity_type_id => $changes) {
         $build[] = [
           '#theme' => 'item_list',
@@ -85,6 +92,11 @@ class TestController implements ContainerInjectionInterface {
           '#items' => $changes,
         ];
       }
+
+      // This line of code is the only one that is not related to the output of
+      // this controller. It proves that the functionality to update the
+      // entity/field definitions is given by Drupal core itself although no UI
+      // exists for it at this point.
       $this->entityDefinitionUpdateManager->applyUpdates();
 
       drupal_set_message('The entity/field definition updates listed below have been applied successfully.');
