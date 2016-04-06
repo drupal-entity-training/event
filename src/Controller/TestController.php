@@ -76,7 +76,7 @@ class TestController implements ContainerInjectionInterface {
    * This is exposed at the '/update-entity-field-definitions' path on your
    * site.
    *
-   * If Drush 8 is available, this can be achieved by running
+   * If Drush is available, this can be achieved by running
    * "drush entity-updates" (or "drush entup") instead.
    *
    * @return array
