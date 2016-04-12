@@ -17,20 +17,9 @@ event.update_entity_field_definitions:
   defaults:
     _title: 'Update entity/field definitions'
     _controller: 'Drupal\event\Controller\TestController::updateEntityFieldDefinitions'
-    _controller: 'entity.definition_update_manager:applyUpdates'
   # Grant anyone access to this route.
   requirements:
     _access: 'TRUE'
   # Make sure that the result of this route is never cached.
   options:
     no_cache: true
-
-# Provide a route to apply entity updates.
-event.entity_updates:
-  path: '/entity-updates'
-  defaults:
-    _title: 'Entity updates'
-    _controller: 'entity.definition_update_manager:applyUpdates'
-  # Grant anyone access to this route.
-  requirements:
-    _access: 'TRUE'

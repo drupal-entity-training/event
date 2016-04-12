@@ -11,6 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "event",
+ *   label = @Translation("Event"),
  *   base_table = "event",
  *   entity_keys = {
  *     "id" = "id",
