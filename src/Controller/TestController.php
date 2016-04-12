@@ -82,6 +82,13 @@ class TestController implements ContainerInjectionInterface {
     // $id = 1;
     // $event = Event::load($id);
 
+    // Just there are generic id() and uuid() methods for all entities, there is
+    // a generic method for displaying an entities label. For this entity type
+    // we have decided that the 'title' field represents what is generically c
+    // considered the label.
+    // $label = $event->label();
+    // drupal_set_message('The label of the event with the ID ' . $id . ' is ' . $label . '.');
+
     // This displays the title of the event loaded above in a message.
     // There are multiple ways to retrieve a field value in Drupal 8:
     // 1. This is the format that is most similar to Drupal 7.
@@ -117,11 +124,11 @@ class TestController implements ContainerInjectionInterface {
     // method.
     /** @see \Drupal\Core\TypedData\TypedDataInterface::getValue() */
     // $title = $string->getValue();
-    // drupal_set_message('The title of the event with the ID ' . $id . ' is ' . $title);
+    // drupal_set_message('The title of the event with the ID ' . $id . ' is ' . $title . '.');
 
     // This displays the date of the event loaded above in a message.
     // $date = $event->get('date')->value;
-    // drupal_set_message('The date of the event with the ID ' . $id . ' is ' . $date);
+    // drupal_set_message('The date of the event with the ID ' . $id . ' is ' . $date . '.');
 
     // This displays the description of the event loaded above in a message.
     // Text fields store two property values in the database:
