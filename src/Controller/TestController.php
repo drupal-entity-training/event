@@ -130,8 +130,14 @@ class TestController implements ContainerInjectionInterface {
     // Additionally, they expose a so-called "computed" property called
     // 'processed' which contains the processed text after application of the
     // text format.
+    drupal_set_message('The description for event with the ID ' . $id . ' is:');
+    // drupal_set_message() hides duplicate messages by default but in this case
+    // it even hides messages which are not strictly equal as is proven by the
+    // output.
+    $description = $event->get('description')->value;
+    drupal_set_message($description, 'status', TRUE);
     $description = $event->get('description')->processed;
-    drupal_set_message('The description for event with the ID ' . $id . ' is ' . $description . '.');
+    drupal_set_message($description, 'status', TRUE);
 
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
