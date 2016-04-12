@@ -50,9 +50,6 @@ class Event extends ContentEntityBase {
       ->setLabel(t('Title'))
       ->setDisplayOptions('form', [
         'weight' => 0,
-      ])
-      ->setDisplayOptions('display', [
-        'weight' => 0,
       ]);
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
@@ -60,8 +57,9 @@ class Event extends ContentEntityBase {
       ->setDisplayOptions('form', [
         'weight' => 10,
       ])
-      ->setDisplayOptions('display', [
-        'weight' => 10,
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'weight' => 0,
       ]);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
@@ -69,8 +67,9 @@ class Event extends ContentEntityBase {
       ->setDisplayOptions('form', [
         'weight' => 20,
       ])
-      ->setDisplayOptions('display', [
-        'weight' => 20,
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'weight' => 10,
       ]);
 
     return $fields;
