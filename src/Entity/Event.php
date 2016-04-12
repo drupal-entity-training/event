@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityBase;
  *
  * @ContentEntityType(
  *   id = "event",
+ *   label = @Translation("Event"),
  *   base_table = "event",
  *   entity_keys = {
  *     "id" = "id",
