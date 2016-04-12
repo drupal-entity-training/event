@@ -20,20 +20,12 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   },
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "form" = {
- *       "add" = "Drupal\Core\Entity\ContentEntityForm",
- *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
- *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
- *     },
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *   },
  *   links = {
  *     "canonical" = "/events/{event}",
- *     "add-form" = "/admin/content/events/add",
- *     "edit-form" = "/admin/content/events/manage/{event}/edit",
- *     "delete-form" = "/admin/content/events/manage/{event}/delete",
  *   },
  *   admin_permission = "administer events",
  * )
@@ -47,16 +39,10 @@ class Event extends ContentEntityBase {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['title'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Title'))
-      ->setDisplayOptions('form', [
-        'weight' => 0,
-      ]);
+      ->setLabel(t('Title'));
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
-      ->setDisplayOptions('form', [
-        'weight' => 10,
-      ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
         'weight' => 0,
@@ -64,9 +50,6 @@ class Event extends ContentEntityBase {
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
-      ->setDisplayOptions('form', [
-        'weight' => 20,
-      ])
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'weight' => 10,
