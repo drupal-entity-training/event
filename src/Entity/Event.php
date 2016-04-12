@@ -17,6 +17,11 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "id" = "id",
  *     "uuid" = "uuid",
  *   },
+ *   handlers = {
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *     },
+ *   },
  * )
  */
 class Event extends ContentEntityBase {
