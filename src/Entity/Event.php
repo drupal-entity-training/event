@@ -20,6 +20,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   },
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
  *       "add" = "Drupal\Core\Entity\ContentEntityForm",
  *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
@@ -27,6 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     },
  *     "route_provider" = {
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *       "html_collection" = "Drupal\event\Entity\CollectionHtmlRouteProvider",
  *     },
  *   },
  *   links = {
@@ -34,6 +36,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "add-form" = "/admin/content/events/add",
  *     "edit-form" = "/admin/content/events/manage/{event}/edit",
  *     "delete-form" = "/admin/content/events/manage/{event}/delete",
+ *     "collection" = "/admin/content/events",
  *   },
  *   admin_permission = "administer events",
  * )
