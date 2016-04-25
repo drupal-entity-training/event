@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Contains hook implementations for Event module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function event_theme($existing, $type, $theme, $path) {
+  return [
+    'event' => [
+      'render element' => 'elements',
+      'file' => 'event.theme.inc',
+    ],
+  ];
+}
