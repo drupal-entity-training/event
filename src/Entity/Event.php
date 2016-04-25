@@ -41,7 +41,52 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   admin_permission = "administer events",
  * )
  */
-class Event extends ContentEntityBase {
+class Event extends ContentEntityBase implements EventInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTitle() {
+    return $this->get('title')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setTitle($title) {
+    return $this->set('title', $title);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDate() {
+    return $this->get('date')->date;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDate(\DateTimeInterface $date) {
+    return $this->set('date', $date->format('c'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->get('description')->processed;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($text, $format) {
+    return $this->set('description', [
+      'value' => $text,
+      'format' => $format,
+    ]);
+  }
 
   /**
    * {@inheritdoc}
