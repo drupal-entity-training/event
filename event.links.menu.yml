@@ -1,3 +1,8 @@
+entity.event.collection:
+  title: 'Events'
+  route_name: entity.event.collection
+  parent: system.admin_content
+
 event.evaluate_test_code:
   title: 'Evaluate test code'
   route_name: event.evaluate_test_code
