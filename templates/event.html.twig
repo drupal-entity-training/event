@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an event.
+ *
+ * Available variables:
+ * - content: All event field items. Use {{ content }} to print them all, or
+ *   print a subset such as {{ content.date }}. Use
+ *   {{ content|without('date') }} to temporarily suppress the printing of a
+ *   given child element.
+ * - attributes: HTML attributes for the containing element.
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes }}>
+  {{ content }}
+</div>
