@@ -71,7 +71,7 @@ class TestController implements ContainerInjectionInterface {
       'title' => 'DrupalCon New Orleans',
       'date' => REQUEST_TIME,
       'description' => [
-        'value' => 'The North American DrupalCon in 2016 is happening in New Orleans and it is <strong>awesome</strong>!',
+        'value' => '<p>The North American DrupalCon in 2016 is happening in New Orleans and it is <strong>awesome</strong>!</p>',
         'format' => 'basic_html',
       ]
     ]); */
