@@ -1,25 +1,25 @@
 # Provide a route to place example code into.
-event.evaluate_test_code:
+event_devel.evaluate_test_code:
   path: '/evaluate-test-code'
   defaults:
     _title: 'Evaluate test code'
-    _controller: 'Drupal\event\Controller\TestController::evaluateTestCode'
-  # Grant anyone access to this route.
+    _controller: 'Drupal\event_devel\Controller\TestController::evaluateTestCode'
+  # Grant administrators access to this route.
   requirements:
-    _access: 'TRUE'
+    _permission: 'administer site configuration'
   # Make sure that the result of this route is never cached.
   options:
     no_cache: true
 
 # Provide a route to apply entity updates.
-event.update_entity_field_definitions:
+event_devel.update_entity_field_definitions:
   path: '/update-entity-field-definitions'
   defaults:
     _title: 'Update entity/field definitions'
-    _controller: 'Drupal\event\Controller\TestController::updateEntityFieldDefinitions'
-  # Grant anyone access to this route.
+    _controller: 'Drupal\event_devel\Controller\TestController::updateEntityFieldDefinitions'
+  # Grant administrators access to this route.
   requirements:
-    _access: 'TRUE'
+    _permission: 'administer site configuration'
   # Make sure that the result of this route is never cached.
   options:
     no_cache: true
