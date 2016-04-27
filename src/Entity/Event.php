@@ -47,7 +47,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getTitle() {
-    return $this->get('title')->value;
+    return $this->get('title')->value ?: '';
   }
 
   /**
@@ -61,7 +61,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDate() {
-    return $this->get('date')->date;
+    return $this->get('date')->date ?: new \DateTime();
   }
 
   /**
@@ -75,7 +75,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return $this->get('description')->processed;
+    return $this->get('description')->processed ?: '';
   }
 
   /**
@@ -102,6 +102,7 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 10,
       ])
