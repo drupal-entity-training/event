@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\event\Controller;
+namespace Drupal\event_devel\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
@@ -55,13 +55,13 @@ class TestController implements ContainerInjectionInterface {
    * This is exposed at the '/test' path on your site.
    *
    * If Drush is available you can also run arbitrary code in the context of a
-   * bootstrapped Drupal site with the "drupal php-eval" (or "drush ev")
-   * command.
+   * bootstrapped Drupal site with the "drush php-eval", "drush php-script" or
+   * "drush core-cli" commands.
    *
    * @return array
    *   A renderable array that contains instruction text for this controller.
    *
-   * @see event.routing.yml
+   * @see event_devel.routing.yml
    */
   public function evaluateTestCode() {
 
