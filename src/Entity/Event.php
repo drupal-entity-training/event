@@ -19,8 +19,11 @@ use Drupal\user\UserInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
+ *     "bundle" = "type",
  *     "label" = "title",
  *   },
+ *   bundle_entity_type = "event_type",
+ *   bundle_label = @Translation("Type"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
@@ -36,15 +39,30 @@ use Drupal\user\UserInterface;
  *   },
  *   links = {
  *     "canonical" = "/events/{event}",
- *     "add-form" = "/admin/content/events/add",
+ *     "add-form" = "/admin/content/events/add/{event_type}",
  *     "edit-form" = "/admin/content/events/manage/{event}/edit",
  *     "delete-form" = "/admin/content/events/manage/{event}/delete",
+ *     "add-page" = "/admin/content/events/add",
  *     "collection" = "/admin/content/events",
  *   },
  *   admin_permission = "administer events",
  * )
  */
 class Event extends ContentEntityBase implements EventInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getType() {
+    return $this->get('type')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setType(EventTypeInterface $type) {
+    return $this->set('type', $type);
+  }
 
   /**
    * {@inheritdoc}

@@ -1,0 +1,11 @@
+# Configuration schema for event types entities.
+event.type.*:
+  type: config_entity
+  label: 'Event type'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'

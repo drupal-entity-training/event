@@ -1,2 +1,5 @@
 administer events:
   title: 'Administer events'
+
+administer event types:
+  title: 'Administer event types'

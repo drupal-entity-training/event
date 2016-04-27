@@ -2,3 +2,8 @@ entity.event.collection:
   title: 'Events'
   route_name: entity.event.collection
   parent: system.admin_content
+
+entity.event_type.collection:
+  title: 'Event types'
+  route_name: entity.event_type.collection
+  parent: system.admin_structure

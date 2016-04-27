@@ -2,3 +2,8 @@ entity.event.add_form:
   title: 'Add event'
   route_name: entity.event.add_form
   appears_on: [entity.event.collection]
+
+entity.event_type.add_form:
+  title: 'Add event type'
+  route_name: entity.event_type.add_form
+  appears_on: [entity.event_type.collection]

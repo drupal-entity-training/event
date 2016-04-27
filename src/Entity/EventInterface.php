@@ -11,6 +11,23 @@ use Drupal\user\UserInterface;
 interface EventInterface extends ContentEntityInterface {
 
   /**
+   * Gets the type of the event.
+   *
+   * @return \Drupal\event\Entity\EventTypeInterface
+   */
+  public function getType();
+
+  /**
+   * Sets the type of the event.
+   *
+   * @param \Drupal\event\Entity\EventTypeInterface $type
+   *   The event type.
+   *
+   * @return $this
+   */
+  public function setType(EventTypeInterface $type);
+
+  /**
    * Gets the title of an event.
    *
    * @return string
