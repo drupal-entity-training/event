@@ -29,10 +29,12 @@ class Event extends ContentEntityBase {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['title'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Title'));
+      ->setLabel(t('Title'))
+      ->setRequired(TRUE);
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
-      ->setLabel(t('Date'));
+      ->setLabel(t('Date'))
+      ->setRequired(TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'));
