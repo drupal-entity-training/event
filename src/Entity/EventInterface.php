@@ -3,6 +3,7 @@
 namespace Drupal\event\Entity;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Provides an interface for events.
@@ -64,5 +65,33 @@ interface EventInterface extends ContentEntityInterface {
    * @return $this
    */
   public function setDescription($text, $format);
+
+  /**
+   * Gets the list of attendees for this event.
+   *
+   * @return \Drupal\user\UserInterface[]
+   *   The list of attendees for this event.
+   */
+  public function getAttendees();
+
+  /**
+   * Adds an attendee to the event.
+   *
+   * @param \Drupal\user\UserInterface $attendee
+   *   The attendee to add to the event.
+   *
+   * @return $this
+   */
+  public function addAttendee(UserInterface $attendee);
+
+  /**
+   * Removes an attendee from the event.
+   *
+   * @param \Drupal\user\UserInterface $attendee
+   *   The attendee to remove from the event.
+   *
+   * @return $this
+   */
+  public function removeAttendee(UserInterface $attendee);
 
 }

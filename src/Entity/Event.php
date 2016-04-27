@@ -5,7 +5,9 @@ namespace Drupal\event\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the event entity.
@@ -87,6 +89,45 @@ class Event extends ContentEntityBase implements EventInterface {
       'value' => $text,
       'format' => $format,
     ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAttendees() {
+    /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $attendees_item_list */
+    $attendees_item_list = $this->get('attendees');
+    return $attendees_item_list->referencedEntities();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addAttendee(UserInterface $attendee) {
+    // Check if the attendee is already registered.
+    $attendees_item_list = $this->get('attendees');
+    foreach ($attendees_item_list as $attendee_item) {
+      if ($attendee_item->target_id === $attendee->id()) {
+        return $this;
+      }
+    }
+
+    $attendees_item_list->appendItem($attendee);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeAttendee(UserInterface $attendee) {
+    $attendees_item_list = $this->get('attendees');
+    foreach ($attendees_item_list as $delta => $attendee_item) {
+      if ($attendee_item->target_id === $attendee->id()) {
+        $attendees_item_list->removeItem($delta);
+      }
+    }
+
+    return $this;
   }
 
   /**
