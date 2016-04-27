@@ -26,5 +26,4 @@ class EventTypeEditForm extends EventTypeFormBase {
     return $status;
   }
 
-
 }
