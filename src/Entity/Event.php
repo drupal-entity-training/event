@@ -5,6 +5,7 @@ namespace Drupal\event\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 
 /**
  * Defines the event entity.
@@ -79,6 +80,7 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
+      ->setSetting('datetime_type', DateTimeItem::DATETIME_TYPE_DATE)
       ->setRequired(TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
