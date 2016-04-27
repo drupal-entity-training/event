@@ -45,6 +45,7 @@ use Drupal\user\UserInterface;
  *     "add-page" = "/admin/content/events/add",
  *     "collection" = "/admin/content/events",
  *   },
+ *   field_ui_base_route = "entity.event_type.edit_form",
  *   admin_permission = "administer events",
  * )
  */
@@ -159,7 +160,9 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 0,
-      ]);
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
@@ -171,7 +174,9 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setDisplayOptions('view', [
         'label' => 'inline',
         'weight' => 0,
-      ]);
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
@@ -181,7 +186,9 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'weight' => 10,
-      ]);
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Attendees'))
@@ -193,13 +200,16 @@ class Event extends ContentEntityBase implements EventInterface {
       ])
       ->setDisplayOptions('view', [
         'weight' => 20,
-      ]);
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
       ->setDisplayOptions('form', [
         'weight' => 40,
-      ]);
+      ])
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }

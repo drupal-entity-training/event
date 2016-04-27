@@ -17,3 +17,8 @@ entity.event.delete_form:
   title: 'Delete'
   route_name: entity.event.delete_form
   base_route: entity.event.canonical
+
+entity.event_type.edit_form:
+  title: 'Edit'
+  route_name: entity.event_type.edit_form
+  base_route: entity.event_type.edit_form
