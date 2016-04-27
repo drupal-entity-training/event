@@ -4,7 +4,6 @@ namespace Drupal\event\Routing;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\EntityRouteProviderInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 

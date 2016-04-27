@@ -23,8 +23,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
- *       "add" = "Drupal\Core\Entity\ContentEntityForm",
- *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
+ *       "add" = "Drupal\event\Form\EventAddForm",
+ *       "edit" = "Drupal\event\Form\EventEditForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
@@ -48,7 +48,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getTitle() {
-    return $this->get('title')->value;
+    return $this->get('title')->value ?: '';
   }
 
   /**
@@ -62,7 +62,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDate() {
-    return $this->get('date')->date;
+    return $this->get('date')->date ?: new \DateTime();
   }
 
   /**
@@ -76,7 +76,7 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return $this->get('description')->processed;
+    return $this->get('description')->processed ?: '';
   }
 
   /**
@@ -97,12 +97,14 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 0,
       ]);
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 10,
       ])
