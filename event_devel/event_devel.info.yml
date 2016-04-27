@@ -1,0 +1,5 @@
+name: 'Event Development Helper'
+description: 'Provides pages to evaluate test code and apply entity/field definitions.'
+type: module
+core: 8.x
+package: Development

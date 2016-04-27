@@ -2,11 +2,3 @@ entity.event.collection:
   title: 'Events'
   route_name: entity.event.collection
   parent: system.admin_content
-
-event.evaluate_test_code:
-  title: 'Evaluate test code'
-  route_name: event.evaluate_test_code
-
-event.update_entity_field_definitions:
-  title: 'Update entity/field definitions'
-  route_name: event.update_entity_field_definitions
