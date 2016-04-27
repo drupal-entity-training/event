@@ -96,6 +96,7 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 0,
       ]);
