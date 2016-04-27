@@ -4,6 +4,7 @@ namespace Drupal\event\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
@@ -16,9 +17,11 @@ use Drupal\user\UserInterface;
  *   id = "event",
  *   label = @Translation("Event"),
  *   base_table = "event",
+ *   revision_table = "event_revision",
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
+ *     "revision" = "revision_id",
  *     "bundle" = "type",
  *     "label" = "title",
  *   },
@@ -50,7 +53,7 @@ use Drupal\user\UserInterface;
  *   admin_permission = "administer events",
  * )
  */
-class Event extends ContentEntityBase implements EventInterface {
+class Event extends RevisionableContentEntityBase implements EventInterface {
 
   /**
    * {@inheritdoc}
@@ -159,6 +162,7 @@ class Event extends ContentEntityBase implements EventInterface {
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
       ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 0,
       ])
@@ -169,6 +173,7 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setLabel(t('Date'))
       ->setSetting('datetime_type', DateTimeItem::DATETIME_TYPE_DATE)
       ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 10,
       ])
@@ -181,6 +186,7 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
+      ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 20,
       ])
@@ -195,6 +201,7 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setLabel(t('Attendees'))
       ->setSetting('target_type', 'user')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete_tags',
         'weight' => 30,
@@ -207,6 +214,7 @@ class Event extends ContentEntityBase implements EventInterface {
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
+      ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 40,
       ])
