@@ -28,7 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     },
  *     "route_provider" = {
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
- *       "html_collection" = "Drupal\event\Entity\CollectionHtmlRouteProvider",
+ *       "html_collection" = "Drupal\event\Routing\CollectionHtmlRouteProvider",
  *     },
  *   },
  *   links = {

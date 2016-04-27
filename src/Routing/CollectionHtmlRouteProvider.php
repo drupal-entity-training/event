@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\event\Entity;
+namespace Drupal\event\Routing;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\EntityRouteProviderInterface;
