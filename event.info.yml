@@ -5,4 +5,5 @@ core: 8.x
 package: Content
 dependencies:
   - datetime
+  - path
   - text

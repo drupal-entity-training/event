@@ -5,6 +5,7 @@ namespace Drupal\event\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Defines the event entity.
@@ -118,6 +119,24 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'weight' => 10,
+      ]);
+
+    $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Attendees'))
+      ->setSetting('target_type', 'user')
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete_tags',
+        'weight' => 30,
+      ])
+      ->setDisplayOptions('view', [
+        'weight' => 20,
+      ]);
+
+    $fields['path'] = BaseFieldDefinition::create('path')
+      ->setLabel(t('Path'))
+      ->setDisplayOptions('form', [
+        'weight' => 40,
       ]);
 
     return $fields;
