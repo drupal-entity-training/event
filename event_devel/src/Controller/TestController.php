@@ -2,6 +2,7 @@
 
 namespace Drupal\event_devel\Controller;
 
+use Drupal\Component\Utility\Random;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -66,85 +67,16 @@ class TestController implements ContainerInjectionInterface {
    */
   public function evaluateTestCode() {
 
-    // This creates a new event and saves it to the database:
-    /** $event = Event::create([
-      'title' => 'DrupalCon New Orleans',
-      'date' => REQUEST_TIME,
-      'description' => [
-        'value' => '<p>The North American DrupalCon in 2016 is happening in New Orleans and it is <strong>awesome</strong>!</p>',
-        'format' => 'basic_html',
-      ]
-    ]); */
-    // $event->save();
-    // drupal_set_message('A new event with the ID ' . $event->id() . ' has been saved.');
-
-    // This loads an event by its ID.
-    // $id = 1;
-    // $event = Event::load($id);
-
-    // Just there are generic id() and uuid() methods for all entities, there is
-    // a generic method for displaying an entities label. For this entity type
-    // we have decided that the 'title' field represents what is generically c
-    // considered the label.
-    // $label = $event->label();
-    // drupal_set_message('The label of the event with the ID ' . $id . ' is ' . $label . '.');
-
-    // This displays the title of the event loaded above in a message.
-    // There are multiple ways to retrieve a field value in Drupal 8:
-    // 1. This is the format that is most similar to Drupal 7.
-    // $title = $event->title->value;
-    // 2. This is arguably the most common format. It is used below for the
-    //    other fields.
-    // $title = $event->get('title')->value;
-    // 3. This is the most verbose method, but it best reveals the internal
-    //    object structure of entities.
-    // $title = $event->get('title')->get(0)->get('value')->getValue();
-    // Below is the same code again but with each step explained:
-    // The $event variable is the entity object itself.
-    // Content entities have a get() method to retrieve a field's values given
-    // the field name. Because some fields can have multiple values, for
-    // consistency this method returns a field item list instead of a field
-    // item.
-    /** @see \Drupal\Core\Entity\FieldableEntityInterface::get() */
-    // $field_item_list = $event->get('title');
-    // Retrieve a given field item from the field item list by its delta. For
-    // single-value fields the delta is always 0.
-    /** @see \Drupal\Core\TypedData\ListInterface::get() */
-    /** @var \Drupal\Core\Field\FieldItemInterface $field_item */
-    // $field_item = $field_item_list->get(0);
-    // Because some field types can have multiple properties (see the event
-    // description below for one example) we need to specify the property we
-    // want to fetch. For many field types that only have a single property such
-    // as strings (like in this case) or integers the name of the property is
-    // 'value' but this cannot be relied upon.
-    /** @see \Drupal\Core\TypedData\ComplexDataInterface::get() */
-    // $string = $field_item->get('value');
-    // Properties itself are not the raw values but objects themselves, so in
-    // order to get the actual string raw value we need to call the getValue()
-    // method.
-    /** @see \Drupal\Core\TypedData\TypedDataInterface::getValue() */
-    // $title = $string->getValue();
-    // drupal_set_message('The title of the event with the ID ' . $id . ' is ' . $title . '.');
-
-    // This displays the date of the event loaded above in a message.
-    // $date = $event->get('date')->value;
-    // drupal_set_message('The date of the event with the ID ' . $id . ' is ' . $date . '.');
-
-    // This displays the description of the event loaded above in a message.
-    // Text fields store two property values in the database:
-    // - value: The raw, unformatted text value
-    // - format: The ID of the text format used to format the text.
-    // Additionally, they expose a so-called "computed" property called
-    // 'processed' which contains the processed text after application of the
-    // text format.
-    // drupal_set_message('The description for event with the ID ' . $id . ' is:');
-    // drupal_set_message() hides duplicate messages by default but in this case
-    // it even hides messages which are not strictly equal as is proven by the
-    // output.
-    // $description = $event->get('description')->value;
-    // drupal_set_message($description, 'status', TRUE);
-    // $description = $event->get('description')->processed;
-    // drupal_set_message($description, 'status', TRUE);
+    // This creates a thousand random events. This allows testing the
+    // administrative event overview including the pager.
+    /** $random = new Random();
+    for ($i = 0; $i < 1000; ++$i) {
+      $event = Event::create();
+      $event->setTitle($random->string(25));
+      $event->get('date')->generateSampleItems();
+      $event->get('description')->generateSampleItems();
+      $event->save();
+    } */
 
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
