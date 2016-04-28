@@ -31,7 +31,6 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *       "html_collection" = "Drupal\event\Routing\CollectionHtmlRouteProvider",
  *     },
- *     "views_data" = "Drupal\views\EntityViewsData",
  *   },
  *   links = {
  *     "canonical" = "/events/{event}",
