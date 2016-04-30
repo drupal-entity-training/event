@@ -23,8 +23,8 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
- *       "add" = "Drupal\event\Form\EventAddForm",
- *       "edit" = "Drupal\event\Form\EventEditForm",
+ *       "add" = "Drupal\Core\Entity\ContentEntityForm",
+ *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
