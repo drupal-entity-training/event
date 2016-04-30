@@ -1,4 +1,0 @@
-entity.event.collection:
-  title: 'Events'
-  route_name: entity.event.collection
-  parent: system.admin_content
