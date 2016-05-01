@@ -3,6 +3,7 @@
 namespace Drupal\event\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -50,6 +51,8 @@ use Drupal\user\UserInterface;
  * )
  */
 class Event extends ContentEntityBase implements EventInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
@@ -159,6 +162,34 @@ class Event extends ContentEntityBase implements EventInterface {
   /**
    * {@inheritdoc}
    */
+  public function getOwner() {
+    return $this->get('owner')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwnerId() {
+    return $this->get('owner')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    return $this->set('uid', $uid);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    return $this->set('uid', $account->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -218,7 +249,29 @@ class Event extends ContentEntityBase implements EventInterface {
       ])
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['changed'] = BaseFieldDefinition::create('changed')
+      ->setLabel(t('Changed'));
+
+    $fields['owner'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Owner'))
+      ->setSetting('target_type', 'user')
+      ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
+
     return $fields;
+  }
+
+  /**
+   * Returns the default value for the owner field.
+   *
+   * It always returns a single value which is the current user's ID.
+   *
+   * @see \Drupal\event\Entity\Event::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getDefaultOwnerIds() {
+    return [\Drupal::currentUser()->id()];
   }
 
 }
