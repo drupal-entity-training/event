@@ -20,7 +20,7 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
  *     "label" = "title",
  *   },
  *   handlers = {
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\event\Entity\EventViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
  *       "add" = "Drupal\event\Form\EventAddForm",
