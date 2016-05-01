@@ -79,8 +79,8 @@ class TestController implements ContainerInjectionInterface {
     // drupal_set_message('A new event with the ID ' . $event->id() . ' has been saved.');
 
     // This loads an event by its ID.
-    // $id = 1;
-    // $event = Event::load($id);
+    $id = 1;
+    $event = Event::load($id);
 
     // This tests the various methods of the interface.
     // $title = $event->getTitle();
@@ -94,11 +94,15 @@ class TestController implements ContainerInjectionInterface {
     // drupal_set_message('The date of the event with the ID ' . $id . ' is now ' . $date . '.');
 
     // $description = $event->getDescription();
-    // drupal_set_message('The description of the event with the ID ' . $id . ' is ' . $description . '.');
-    /** $description = $event
-      ->setDescription('This is a youtube video: <iframe width="560" height="315" src="https://www.youtube.com/embed/Ch_hoYPPeGc" frameborder="0" allowfullscreen></iframe>', 'full_html')
-      ->getDescription(); */
-    // drupal_set_message('The description of the event with the ID ' . $id . ' is now ' . $description . '.');
+    // drupal_set_message('The description of the event with the ID ' . $id . ' is:');
+    // drupal_set_message($description);
+    // $malicious_html = '<iframe width="560" height="315" src="https://www.youtube.com/embed/Ch_hoYPPeGc" frameborder="0" allowfullscreen></iframe>';
+    // $description = $event->setDescription($malicious_html, 'full_html')->getDescription();
+    // drupal_set_message('The description of the event with the ID ' . $id . ' is now:');
+    // drupal_set_message($description);
+    // $description = $event->setDescription($malicious_html, 'plain_text')->getDescription();
+    // drupal_set_message('The description of the event with the ID ' . $id . ' is now:', 'status', TRUE);
+    // drupal_set_message($description, 'status', TRUE);
 
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
