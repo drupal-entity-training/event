@@ -3,12 +3,14 @@
 namespace Drupal\event\Entity;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * Provides an interface for events.
  */
-interface EventInterface extends ContentEntityInterface {
+interface EventInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
   /**
    * Gets the type of the event.
