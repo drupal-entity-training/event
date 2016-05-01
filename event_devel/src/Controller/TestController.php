@@ -78,6 +78,12 @@ class TestController implements ContainerInjectionInterface {
       $event->save();
     } */
 
+    // This deletes all events.
+    /** @var \Drupal\event\Entity\EventInterface $event */
+    /** foreach (Event::loadMultiple() as $event) {
+      $event->delete();
+    } */
+
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
 
