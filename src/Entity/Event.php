@@ -3,6 +3,7 @@
 namespace Drupal\event\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -28,7 +29,7 @@ use Drupal\user\UserInterface;
  *   bundle_entity_type = "event_type",
  *   bundle_label = @Translation("Type"),
  *   handlers = {
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\event\Entity\EventViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
  *       "add" = "Drupal\event\Form\EventAddForm",
@@ -39,7 +40,6 @@ use Drupal\user\UserInterface;
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *       "html_collection" = "Drupal\event\Routing\CollectionHtmlRouteProvider",
  *     },
- *     "views_data" = "Drupal\views\EntityViewsData",
  *   },
  *   links = {
  *     "canonical" = "/events/{event}",
@@ -54,6 +54,8 @@ use Drupal\user\UserInterface;
  * )
  */
 class Event extends RevisionableContentEntityBase implements EventInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
@@ -87,14 +89,21 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDate() {
-    return $this->get('date')->date ?: new \DateTime();
+    // The interface dictates that we return a datetime object in all cases, so
+    // in case one is not yet available we return one corresponding to the
+    // beginning of the Unix epoch so that it is probably clear to the consumer
+    // that something has gone wrong.
+    return $this->get('date')->date ?: new \DateTime('@0');
   }
 
   /**
    * {@inheritdoc}
    */
   public function setDate(\DateTimeInterface $date) {
-    return $this->set('date', $date->format('c'));
+    // We need to set the date in the specific format that is expected by Drupal
+    // date fields without time information.
+    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+    return $this;
   }
 
   /**
@@ -151,6 +160,34 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
     }
 
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwner() {
+    return $this->get('owner')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwnerId() {
+    return $this->get('owner')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    return $this->set('uid', $uid);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    return $this->set('uid', $account->id());
   }
 
   /**
@@ -220,7 +257,29 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ])
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['changed'] = BaseFieldDefinition::create('changed')
+      ->setLabel(t('Changed'));
+
+    $fields['owner'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Owner'))
+      ->setSetting('target_type', 'user')
+      ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
+
     return $fields;
+  }
+
+  /**
+   * Returns the default value for the owner field.
+   *
+   * It always returns a single value which is the current user's ID.
+   *
+   * @see \Drupal\event\Entity\Event::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getDefaultOwnerIds() {
+    return [\Drupal::currentUser()->id()];
   }
 
 }
