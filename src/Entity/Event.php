@@ -63,14 +63,21 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function getDate() {
-    return $this->get('date')->date ?: new \DateTime();
+    // The interface dictates that we return a datetime object in all cases, so
+    // in case one is not yet available we return one corresponding to the
+    // beginning of the Unix epoch so that it is probably clear to the consumer
+    // that something has gone wrong.
+    return $this->get('date')->date ?: new \DateTime('@0');
   }
 
   /**
    * {@inheritdoc}
    */
   public function setDate(\DateTimeInterface $date) {
-    return $this->set('date', $date->format('c'));
+    // We need to set the date in the specific format that is expected by Drupal
+    // date fields without time information.
+    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+    return $this;
   }
 
   /**
