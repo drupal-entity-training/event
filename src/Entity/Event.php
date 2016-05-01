@@ -48,7 +48,11 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function setDate(\DateTimeInterface $date) {
-    return $this->set('date', $date->format('c'));
+    // Drupal date fields only support a subset of the ISO-8601 standard without
+    // the timezone information so we need to strip the timezone offset, for
+    // example '+00:00' from the returned datetime string.
+    $this->set('date', substr($date->format('c'), 0, -5));
+    return $this;
   }
 
   /**
