@@ -23,6 +23,7 @@ use Drupal\user\UserInterface;
  *     "label" = "title",
  *   },
  *   handlers = {
+ *     "access" = "Drupal\event\Entity\EventAccessControlHandler",
  *     "view_builder" = "Drupal\event\Entity\EventViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {

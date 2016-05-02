@@ -39,7 +39,7 @@ class CollectionHtmlRouteProvider implements EntityRouteProviderInterface {
   protected function getCollectionRoute(EntityTypeInterface $entity_type) {
     // If the entity type does not provide an admin permission, there is no way
     // to control access, so we cannot provide a route in a sensible way.
-    if ($entity_type->hasLinkTemplate('collection') && $entity_type->hasListBuilderClass() && ($admin_permission = $entity_type->getAdminPermission())) {
+    if ($entity_type->hasLinkTemplate('collection') && $entity_type->hasListBuilderClass()) {
       $route = new Route($entity_type->getLinkTemplate('collection'));
       $route
         ->addDefaults([
@@ -49,8 +49,11 @@ class CollectionHtmlRouteProvider implements EntityRouteProviderInterface {
           // intended for use in a sentence, so is lowercase). This is the only
           // thing that we cannot provide generically.
           '_title' => 'Events',
-        ])
-        ->setRequirement('_permission', $admin_permission);
+        ]);
+
+      $permissions = ['administer events', 'create events', 'edit events', 'delete events'];
+      $route
+        ->setRequirement('_permission', implode('+', $permissions));
 
       return $route;
     }
