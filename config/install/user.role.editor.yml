@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - event
+id: editor
+label: Editor
+weight: -7
+is_admin: null
+permissions:
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access in-place editing'
+  - 'access toolbar'
+  - 'create events'
+  - 'delete events'
+  - 'edit events'
+  - 'view the administration theme'
