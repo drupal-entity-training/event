@@ -559,6 +559,15 @@ display:
     display_options:
       display_extenders: {  }
       path: events/%event/revisions
+      menu:
+        type: tab
+        title: Revisions
+        description: ''
+        expanded: false
+        parent: 'views_view:views.events.page_1'
+        weight: 0
+        context: '0'
+        menu_name: main
     cache_metadata:
       max-age: 0
       contexts:
