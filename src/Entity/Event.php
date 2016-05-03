@@ -26,6 +26,7 @@ use Drupal\user\UserInterface;
  *   bundle_entity_type = "event_type",
  *   bundle_label = @Translation("Type"),
  *   handlers = {
+ *     "access" = "Drupal\event\Entity\EventAccessControlHandler",
  *     "view_builder" = "Drupal\event\Entity\EventViewBuilder",
  *     "list_builder" = "Drupal\event\Entity\EventListBuilder",
  *     "form" = {
