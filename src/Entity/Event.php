@@ -39,7 +39,7 @@ use Drupal\user\UserInterface;
  *     },
  *     "route_provider" = {
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
- *       "html_collection" = "Drupal\event\Routing\CollectionHtmlRouteProvider",
+ *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
  *     },
  *     "views_data" = "Drupal\views\EntityViewsData",
  *   },
