@@ -18,11 +18,15 @@ use Drupal\user\UserInterface;
  *   id = "event",
  *   label = @Translation("Event"),
  *   base_table = "event",
+ *   data_table = "event_field_data",
  *   revision_table = "event_revision",
+ *   revision_data_table = "event_field_revision",
+ *   translatable = true,
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
  *     "revision" = "revision_id",
+ *     "langcode" = "langcode",
  *     "bundle" = "type",
  *     "label" = "title",
  *   },
@@ -35,6 +39,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "add" = "Drupal\event\Form\EventAddForm",
  *       "edit" = "Drupal\event\Form\EventEditForm",
+ *       "default" = "Drupal\event\Form\EventEditForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
@@ -206,6 +211,7 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ->setLabel(t('Title'))
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 0,
       ])
@@ -230,6 +236,7 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 20,
       ])
@@ -258,6 +265,7 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setDisplayOptions('form', [
         'weight' => 40,
       ])
@@ -265,7 +273,8 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setRevisionable(TRUE);
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE);
 
     $fields['owner'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))

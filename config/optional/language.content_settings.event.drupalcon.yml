@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - event.type.drupalcon
+  module:
+    - content_translation
+third_party_settings:
+  content_translation:
+    enabled: true
+id: event.drupalcon
+target_entity_type_id: event
+target_bundle: drupalcon
+default_langcode: site_default
+language_alterable: true
