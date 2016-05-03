@@ -8,4 +8,4 @@ dependencies:
 id: event
 label: 'Event comments'
 target_entity_type_id: event
-description: 'Allows commenting on events.'
+description: 'Allows commenting on events'
