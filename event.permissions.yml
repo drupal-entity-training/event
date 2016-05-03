@@ -6,10 +6,10 @@ edit events:
   title: 'Edit events'
 delete events:
   title: 'Delete events'
-view events:
-  title: 'View events'
 view event revisions:
   title: 'View event revisions'
+view events:
+  title: 'View events'
 
 administer event types:
   title: 'Administer event types'
