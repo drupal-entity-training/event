@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Contains install, uninstall, and update hooks functions for Event module.
+ */
+
+use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_install().
+ */
+function event_install() {
+  Role::load(User::ANONYMOUS_ROLE)->grantPermission('view events')->save();
+  Role::load(User::AUTHENTICATED_ROLE)->grantPermission('view events')->save();
+}

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - comment
+    - event
+id: event.field_comments
+field_name: field_comments
+entity_type: event
+type: comment
+settings:
+  comment_type: event_comments
+module: comment
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
