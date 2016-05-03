@@ -198,7 +198,9 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
     $fields = parent::baseFieldDefinitions($entity_type);
+    $fields['revision_user']->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
 
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))

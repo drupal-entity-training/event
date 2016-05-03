@@ -17,7 +17,7 @@ abstract class EventFormBase extends ContentEntityForm {
   public function getEntityFromRouteMatch(RouteMatchInterface $route_match, $entity_type_id) {
     /** @var \Drupal\event\Entity\EventInterface $event */
     $event = parent::getEntityFromRouteMatch($route_match, $entity_type_id);
-    $event->setRevisionLogMessage('');
+    $event->get('revision_log_message')->applyDefaultValue();
     return $event;
   }
 
@@ -30,6 +30,8 @@ abstract class EventFormBase extends ContentEntityForm {
     /** @var \Drupal\event\Entity\EventInterface $event */
     $event = $this->getEntity();
     $event->setNewRevision();
+    $event->get('revision_created')->applyDefaultValue();
+    $event->get('revision_user')->applyDefaultValue();
   }
 
   /**
