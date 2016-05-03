@@ -8,9 +8,9 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Provides a HTML collection route for entities.
+ * Provides a HTML collection route for events.
  */
-class CollectionHtmlRouteProvider implements EntityRouteProviderInterface {
+class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
 
   /**
    * {@inheritdoc}
