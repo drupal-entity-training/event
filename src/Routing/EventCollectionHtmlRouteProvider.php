@@ -8,9 +8,9 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Provides a HTML collection route for entities.
+ * Provides a HTML collection route for events.
  */
-class CollectionHtmlRouteProvider implements EntityRouteProviderInterface {
+class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
 
   /**
    * {@inheritdoc}
@@ -44,8 +44,8 @@ class CollectionHtmlRouteProvider implements EntityRouteProviderInterface {
       $route
         ->addDefaults([
           '_entity_list' => $entity_type->id(),
-          // There is currently know way for an entity type to specify it's
-          // plural label in an uppercase form (the 'plural_label' annotation is
+          // There is currently no way for an entity type to specify its plural
+          // label in an uppercase form (the 'plural_label' annotation is
           // intended for use in a sentence, so is lowercase). This is the only
           // thing that we cannot provide generically.
           '_title' => 'Events',
