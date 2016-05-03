@@ -37,8 +37,6 @@ class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
    *   The generated route, if available.
    */
   protected function getCollectionRoute(EntityTypeInterface $entity_type) {
-    // If the entity type does not provide an admin permission, there is no way
-    // to control access, so we cannot provide a route in a sensible way.
     if ($entity_type->hasLinkTemplate('collection') && $entity_type->hasListBuilderClass()) {
       $route = new Route($entity_type->getLinkTemplate('collection'));
       $route
