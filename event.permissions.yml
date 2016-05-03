@@ -8,6 +8,8 @@ delete events:
   title: 'Delete events'
 view events:
   title: 'View events'
+view event revisions:
+  title: 'View event revisions'
 
 administer event types:
   title: 'Administer event types'

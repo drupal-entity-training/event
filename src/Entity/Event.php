@@ -40,11 +40,13 @@ use Drupal\user\UserInterface;
  *     "route_provider" = {
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
+ *       "html_revision" = "Drupal\event\Routing\EventRevisionHtmlRouteProvider",
  *     },
  *     "views_data" = "Drupal\views\EntityViewsData",
  *   },
  *   links = {
  *     "canonical" = "/events/{event}",
+ *     "revision" = "/events/{event}/revisions/{event_revision}",
  *     "add-form" = "/admin/content/events/add/{event_type}",
  *     "edit-form" = "/admin/content/events/manage/{event}/edit",
  *     "delete-form" = "/admin/content/events/manage/{event}/delete",
