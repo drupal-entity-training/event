@@ -29,7 +29,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     },
  *     "route_provider" = {
  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
- *       "html_collection" = "Drupal\event\Routing\CollectionHtmlRouteProvider",
+ *       "html_collection" = "Drupal\event\Routing\EventTypeCollectionHtmlRouteProvider",
  *     },
  *   },
  *   links = {
