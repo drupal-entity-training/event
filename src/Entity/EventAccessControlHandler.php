@@ -5,6 +5,8 @@ namespace Drupal\event\Entity;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -43,6 +45,29 @@ class EventAccessControlHandler extends EntityAccessControlHandler {
     }
 
     return $access_result->orIf(parent::checkAccess($entity, $operation, $account));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+    switch ($field_definition->getName()) {
+      case 'revision_log_message':
+        if ($items) {
+          $entity = $items->getEntity();
+          $access_result = AccessResult::allowedIf(!$entity->isNew())
+            ->addCacheableDependency($entity);
+        }
+        else {
+          $access_result = AccessResult::allowed();
+        }
+        break;
+
+      default:
+        $access_result = AccessResult::allowed();
+
+    }
+    return $access_result;
   }
 
 }
