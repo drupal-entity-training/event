@@ -264,11 +264,13 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
-      ->setLabel(t('Changed'));
+      ->setLabel(t('Changed'))
+      ->setRevisionable(TRUE);
 
     $fields['owner'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
       ->setSetting('target_type', 'user')
+      ->setRevisionable(TRUE)
       ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
 
     return $fields;
