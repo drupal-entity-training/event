@@ -1,6 +1,10 @@
 langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  enforced:
+    module:
+      # @todo Remove this when https://www.drupal.org/node/2717673 lands.
+      - event
 id: event
 label: 'Event comments'
 target_entity_type_id: event
