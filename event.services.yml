@@ -1,0 +1,6 @@
+services:
+  serializer.normalizer.event_entity.json:
+    class: Drupal\event\Normalizer\EventNormalizer
+    arguments: ['@entity.manager']
+    tags:
+      - { name: normalizer, priority: 30 }
