@@ -18,5 +18,6 @@ permissions:
   - 'restful get entity:event'
   - 'restful patch entity:event'
   - 'restful post entity:event'
+  - 'view event revisions'
   - 'view the administration theme'
 
