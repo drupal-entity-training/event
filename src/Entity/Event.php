@@ -221,6 +221,7 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
       ->setSetting('datetime_type', DateTimeItem::DATETIME_TYPE_DATE)
+      ->addPropertyConstraints('value', ['FutureDate' => []])
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
