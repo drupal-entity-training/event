@@ -12,6 +12,21 @@ use Drupal\user\Entity\User;
  * Implements hook_install().
  */
 function event_install() {
-  Role::load(User::ANONYMOUS_ROLE)->grantPermission('view events')->save();
-  Role::load(User::AUTHENTICATED_ROLE)->grantPermission('view events')->save();
+  $permissions = [
+   'view events',
+   'restful get entity:event',
+  ];
+
+  /** @var \Drupal\user\RoleInterface[] $roles */
+  $roles = [
+    Role::load(User::ANONYMOUS_ROLE),
+    Role::load(User::AUTHENTICATED_ROLE)
+  ];
+
+  foreach ($roles as $role) {
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->save();
+  }
 }

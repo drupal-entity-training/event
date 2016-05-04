@@ -16,4 +16,8 @@ permissions:
   - 'create events'
   - 'delete events'
   - 'edit events'
+  - 'restful delete entity:event'
+  - 'restful get entity:event'
+  - 'restful patch entity:event'
+  - 'restful post entity:event'
   - 'view the administration theme'
