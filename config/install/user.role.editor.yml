@@ -16,4 +16,5 @@ permissions:
   - 'create events'
   - 'delete events'
   - 'edit events'
+  - 'view event revisions'
   - 'view the administration theme'

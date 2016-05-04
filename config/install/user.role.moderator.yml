@@ -14,5 +14,6 @@ permissions:
   - 'access in-place editing'
   - 'access toolbar'
   - 'edit events'
+  - 'view event revisions'
   - 'view the administration theme'
 
