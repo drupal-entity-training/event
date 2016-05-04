@@ -4,6 +4,7 @@ type: module
 core: 8.x
 package: Content
 dependencies:
+  - content_translation
   - datetime
   - path
   - text
