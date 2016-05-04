@@ -14,4 +14,11 @@ use Drupal\user\Entity\User;
 function event_install() {
   Role::load(User::ANONYMOUS_ROLE)->grantPermission('view events')->save();
   Role::load(User::AUTHENTICATED_ROLE)->grantPermission('view events')->save();
+
+  // Install content translation fields.
+  /** @var \Drupal\content_translation\ContentTranslationUpdatesManager $content_translation_updates_manager */
+  $entity_type_id = 'event';
+  $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+  $content_translation_updates_manager = \Drupal::service('content_translation.updates_manager');
+  $content_translation_updates_manager->updateDefinitions([$entity_type_id => $entity_type]);
 }
