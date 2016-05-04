@@ -30,3 +30,23 @@ function event_install() {
     $role->save();
   }
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function event_uninstall() {
+  $permissions = [
+    'restful delete entity:event',
+    'restful get entity:event',
+    'restful patch entity:event',
+    'restful post entity:event',
+  ];
+  // Revoke obsolete permissions from all roles.
+  /** @var \Drupal\user\RoleInterface $role */
+  foreach (Role::loadMultiple() as $role) {
+    foreach ($permissions as $permission) {
+      $role->revokePermission($permission);
+    }
+    $role->save();
+  }
+}
