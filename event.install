@@ -28,8 +28,8 @@ function event_install() {
       $role->grantPermission($permission);
     }
     $role->save();
-  }  
-  
+  }
+
   // Install content translation fields.
   /** @var \Drupal\content_translation\ContentTranslationUpdatesManager $content_translation_updates_manager */
   $entity_type_id = 'event';
@@ -37,19 +37,30 @@ function event_install() {
   $content_translation_updates_manager = \Drupal::service('content_translation.updates_manager');
   $content_translation_updates_manager->updateDefinitions([$entity_type_id => $entity_type]);
 
+  // Enable restful web services.
+  $rest_settings = \Drupal::configFactory()->getEditable('rest.settings');
+  $resources = $rest_settings->get('resources');
+  $resources['entity:event'] = [];
+  foreach (['DELETE', 'GET', 'PATCH', 'POST'] as $method) {
+    $rest_settings->set("resources.entity:event.$method", [
+      'supported_formats' => ['hal_json', 'json', 'xml'],
+      'supported_auth' => ['basic_auth', 'cookie'],
+    ]);
+  }
+  $rest_settings->save();
 }
 
 /**
  * Implements hook_uninstall().
  */
 function event_uninstall() {
+// Revoke obsolete permissions from all roles.
   $permissions = [
     'restful delete entity:event',
     'restful get entity:event',
     'restful patch entity:event',
     'restful post entity:event',
   ];
-  // Revoke obsolete permissions from all roles.
   /** @var \Drupal\user\RoleInterface $role */
   foreach (Role::loadMultiple() as $role) {
     foreach ($permissions as $permission) {
@@ -57,4 +68,8 @@ function event_uninstall() {
     }
     $role->save();
   }
+
+  // Remove obsolete restful web service configuration.
+  $rest_settings = \Drupal::configFactory()->getEditable('rest.settings');
+  $rest_settings->clear('resources.entity:event')->save();
 }

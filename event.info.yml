@@ -4,7 +4,10 @@ type: module
 core: 8.x
 package: Content
 dependencies:
+  - basic_auth
   - content_translation
   - datetime
+  - hal
   - path
+  - rest
   - text
