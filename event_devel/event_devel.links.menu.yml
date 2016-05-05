@@ -5,3 +5,7 @@ event_devel.evaluate_test_code:
 event_devel.update_entity_field_definitions:
   title: 'Update entity/field definitions'
   route_name: event_devel.update_entity_field_definitions
+
+event_devel.basic_auth_info:
+  title: 'HTTP Basic authentication information'
+  route_name: event_devel.basic_auth_info
