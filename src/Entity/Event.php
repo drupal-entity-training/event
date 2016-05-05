@@ -108,7 +108,7 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setLabel(t('Description'))
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'weight' => 10,
+        'weight' => 5,
       ]);
 
     return $fields;
