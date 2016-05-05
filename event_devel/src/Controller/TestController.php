@@ -5,7 +5,11 @@ namespace Drupal\event_devel\Controller;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+// Leave an unused use statements, so commented out code below works immediately
+// when uncommenting it.
+// @codingStandardsIgnoreStart
 use Drupal\event\Entity\Event;
+// @codingStandardsIgnoreEnd
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -67,14 +71,14 @@ class TestController implements ContainerInjectionInterface {
   public function evaluateTestCode() {
 
     // This creates a new event and saves it to the database:
-    /** $event = Event::create([
-      'title' => 'DrupalCon New Orleans',
-      'date' => REQUEST_TIME,
-      'description' => [
-        'value' => '<p>The North American DrupalCon in 2016 is happening in New Orleans and it is <strong>awesome</strong>!</p>',
-        'format' => 'basic_html',
-      ]
-    ]); */
+    // $event = Event::create([
+    //   'title' => 'DrupalCon New Orleans',
+    //   'date' => REQUEST_TIME,
+    //   'description' => [
+    //     'value' => '<p>The North American DrupalCon in 2016 is happening in New Orleans and it is <strong>awesome</strong>!</p>',
+    //     'format' => 'basic_html',
+    //   ]
+    // ]);
     // $event->save();
     // drupal_set_message('A new event with the ID ' . $event->id() . ' has been saved.');
 
