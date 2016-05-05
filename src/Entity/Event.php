@@ -183,14 +183,14 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function setOwnerId($uid) {
-    return $this->set('uid', $uid);
+    return $this->set('owner', $uid);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setOwner(UserInterface $account) {
-    return $this->set('uid', $account->id());
+    return $this->set('owner', $account->id());
   }
 
   /**
@@ -217,7 +217,7 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
-        'weight' => 10,
+        'weight' => 5,
       ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
@@ -230,11 +230,11 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ->setLabel(t('Description'))
       ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
-        'weight' => 20,
+        'weight' => 10,
       ])
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'weight' => 10,
+        'weight' => 5,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -246,21 +246,23 @@ class Event extends RevisionableContentEntityBase implements EventInterface {
       ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete_tags',
-        'weight' => 30,
+        'weight' => 15,
       ])
       ->setDisplayOptions('view', [
-        'weight' => 20,
+        'weight' => 10,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+      ]);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
       ->setRevisionable(TRUE)
       ->setDisplayOptions('form', [
-        'weight' => 40,
+        'weight' => 20,
       ])
       ->setDisplayConfigurable('form', TRUE);
+      ]);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
