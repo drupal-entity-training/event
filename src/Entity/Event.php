@@ -211,16 +211,16 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete_tags',
-        'weight' => 30,
+        'weight' => 15,
       ])
       ->setDisplayOptions('view', [
-        'weight' => 20,
+        'weight' => 10,
       ]);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
       ->setDisplayOptions('form', [
-        'weight' => 40,
+        'weight' => 20,
       ]);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
