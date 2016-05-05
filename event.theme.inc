@@ -20,4 +20,3 @@ function template_preprocess_event(&$variables) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 }
-
