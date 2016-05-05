@@ -114,7 +114,7 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setSetting('datetime_type', DateTimeItem::DATETIME_TYPE_DATE)
       ->setRequired(TRUE)
       ->setDisplayOptions('form', [
-        'weight' => 10,
+        'weight' => 5,
       ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
@@ -124,11 +124,11 @@ class Event extends ContentEntityBase implements EventInterface {
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
       ->setDisplayOptions('form', [
-        'weight' => 20,
+        'weight' => 10,
       ])
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'weight' => 10,
+        'weight' => 5,
       ]);
 
     return $fields;
