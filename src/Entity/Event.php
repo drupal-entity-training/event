@@ -160,14 +160,14 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function setOwnerId($uid) {
-    return $this->set('uid', $uid);
+    return $this->set('owner', $uid);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setOwner(UserInterface $account) {
-    return $this->set('uid', $account->id());
+    return $this->set('owner', $account->id());
   }
 
   /**
