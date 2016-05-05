@@ -58,4 +58,3 @@ class EventType extends ConfigEntityBase {
   protected $label;
 
 }
-
