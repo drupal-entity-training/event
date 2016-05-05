@@ -243,7 +243,6 @@ class Event extends ContentEntityBase implements EventInterface {
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-      ]);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
@@ -251,7 +250,6 @@ class Event extends ContentEntityBase implements EventInterface {
         'weight' => 20,
       ])
       ->setDisplayConfigurable('form', TRUE);
-      ]);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'));
