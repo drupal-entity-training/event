@@ -23,3 +23,16 @@ event_devel.update_entity_field_definitions:
   # Make sure that the result of this route is never cached.
   options:
     no_cache: true
+
+# Provide a form that generates HTTP Basic authentication information.
+event_devel.basic_auth_info:
+  path: '/basic-auth-info'
+  defaults:
+    _title: 'HTTP Basic authentication information'
+    _form: 'Drupal\event_devel\Form\BasicAuthInfoForm'
+  # Grant administrators access to this route.
+  requirements:
+    _permission: 'administer site configuration'
+  # Make sure that the result of this route is never cached.
+  options:
+    no_cache: true
