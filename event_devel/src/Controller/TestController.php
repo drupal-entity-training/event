@@ -2,12 +2,14 @@
 
 namespace Drupal\event_devel\Controller;
 
+// Leave unused use statements, so commented out code below works immediately
+// when uncommenting it.
+// @codingStandardsIgnoreStart
 use Drupal\Component\Utility\Random;
+// @codingStandardsIgnoreEnd
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-// Leave an unused use statements, so commented out code below works immediately
-// when uncommenting it.
 // @codingStandardsIgnoreStart
 use Drupal\event\Entity\Event;
 // @codingStandardsIgnoreEnd
@@ -73,20 +75,20 @@ class TestController implements ContainerInjectionInterface {
 
     // This creates a thousand random events. This allows testing the
     // administrative event overview including the pager.
-    /** $random = new Random();
-    for ($i = 0; $i < 1000; ++$i) {
-      $event = Event::create();
-      $event->setTitle($random->string(25));
-      $event->get('date')->generateSampleItems();
-      $event->get('description')->generateSampleItems();
-      $event->save();
-    } */
+    // $random = new Random();
+    // for ($i = 0; $i < 1000; ++$i) {
+    //   $event = Event::create();
+    //   $event->setTitle($random->string(25));
+    //   $event->get('date')->generateSampleItems();
+    //   $event->get('description')->generateSampleItems();
+    //   $event->save();
+    // }
 
     // This deletes all events.
     /** @var \Drupal\event\Entity\EventInterface $event */
-    /** foreach (Event::loadMultiple() as $event) {
-      $event->delete();
-    } */
+    // foreach (Event::loadMultiple() as $event) {
+    //   $event->delete();
+    // }
 
     return ['#markup' => 'Any code placed in \\' . __METHOD__ . '() is executed on this page.'];
   }
