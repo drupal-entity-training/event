@@ -179,14 +179,14 @@ class Event extends ContentEntityBase implements EventInterface {
    * {@inheritdoc}
    */
   public function setOwnerId($uid) {
-    return $this->set('uid', $uid);
+    return $this->set('owner', $uid);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setOwner(UserInterface $account) {
-    return $this->set('uid', $account->id());
+    return $this->set('owner', $account->id());
   }
 
   /**
@@ -209,7 +209,7 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setSetting('datetime_type', DateTimeItem::DATETIME_TYPE_DATE)
       ->setRequired(TRUE)
       ->setDisplayOptions('form', [
-        'weight' => 10,
+        'weight' => 5,
       ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
@@ -221,11 +221,11 @@ class Event extends ContentEntityBase implements EventInterface {
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
       ->setDisplayOptions('form', [
-        'weight' => 20,
+        'weight' => 10,
       ])
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'weight' => 10,
+        'weight' => 5,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -236,20 +236,22 @@ class Event extends ContentEntityBase implements EventInterface {
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete_tags',
-        'weight' => 30,
+        'weight' => 15,
       ])
       ->setDisplayOptions('view', [
-        'weight' => 20,
+        'weight' => 10,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+      ]);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('Path'))
       ->setDisplayOptions('form', [
-        'weight' => 40,
+        'weight' => 20,
       ])
       ->setDisplayConfigurable('form', TRUE);
+      ]);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'));
