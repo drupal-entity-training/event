@@ -16,7 +16,7 @@ given here, although it is functionally equivalent.
   * Some directories have special meaning
   * Drupal looks in `Entity` for entity types.
 
-* Create `src/Entity/Event.php` file and add the following code:
+* Create `src/Entity/Event.php` file and add the following:
 
   ```php
   class Event {}
@@ -76,7 +76,7 @@ given here, although it is functionally equivalent.
 
 ## `01-minimal-entity-type` → `02-base-field-definitions`
 
-* Add the following snippets to `src/Entity/Event.php`:
+* Add the following to `src/Entity/Event.php`:
   ```php
   use Drupal\Core\Entity\EntityTypeInterface;
 
@@ -97,11 +97,9 @@ given here, although it is functionally equivalent.
   ```
   * cmp. `new BaseFieldDefinition('string');`
   * Field type discoverability:
-    * Visit api.drupal.org
-    * Navigate to "FieldType" annotation class
+    * Navigate to "FieldType" annotation class on api.drupal.org
     * Click on list of annotated classes
-    * Pick appropriate class
-    * Find plugin ID
+    * Pick appropriate class and find plugin ID
 
   ```php
   ->setLabel(t('Title'))
@@ -138,7 +136,7 @@ given here, although it is functionally equivalent.
 
 
 ## `02-base-field-definitions` → `03-interface`
-* Add the following snippets to `src/Entity/Event.php`:
+* Add the following to `src/Entity/Event.php`:
 
   ```
   public function getTitle() {
@@ -196,3 +194,60 @@ given here, although it is functionally equivalent.
   * Load an event set title, date, and description using the methods and save
 
 
+## `03-interface` → `04-view-builder`
+
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  *   handlers = {
+  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+  *   },
+  * )
+  ```
+
+  ```php
+  *     "route_provider" = {
+  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+  *     },
+
+  *   links = {
+  *     "canonical" = "/events/{event}"
+  *   },
+  ```
+
+* Rebuild caches
+* Access `/event/{event}`
+  * Access control is not defined yet
+
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  *   admin_permission = "administer events",
+  ```
+
+* Rebuild caches
+* Access `/event/{event}`
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  ->setDisplayOptions('view', [
+    'label' => 'inline',
+    'type' => 'datetime_default',
+    'settings' => [
+      'format_type' => 'html_date',
+    ],
+    'weight' => 0,
+  ])
+
+  ->setDisplayOptions('view', [
+    'label' => 'hidden',
+    'weight' => 5,
+  ])
+  ```
+  * cmp. _Manage display_ table
+  * Formatter discoverability:
+    * Navigate to "FieldFormatter" annotation class on api.drupal.org
+    * Click on list of annotated classes
+    * Pick appropriate class and find plugin ID
+  * Formatter settings discoverability:
+    * View `defaultSettings` method on formatter class
