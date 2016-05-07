@@ -9,8 +9,8 @@ an _Event_ entity type.
 The different branches in this repository showcase the process of creating a
 custom entity type step by step.
 
-* `00-empty-module`: Only this file and the basic module info file
-  (`event.info.yml`) to register this module is provided.
+* `00-empty-module`: Only the basic module info file to register this module is
+  provided.
 
 * `01-minimal-entity-type`: Provides a minimal _Event_ entity type with the least
   amount of code possible while still providing full CRUD support.

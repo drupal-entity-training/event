@@ -1,0 +1,198 @@
+# Notes
+
+The process of creating the _Event_ entity type is documented below in the steps
+that it takes to get from one branch to the next with notes for each step. Note
+that the actual code in the branches is more not identical to the code snippets
+given here, although it is functionally equivalent.
+
+## `00-empty-module` → `01-minimal-entity-type`
+
+* Create `src` directory
+  * `src` for all object-oriented code
+  * `.module` (and other files) outside, like in Drupal 7
+
+* Create `src/Entity` directory
+  * Subdirectories in `src` for organization
+  * Some directories have special meaning
+  * Drupal looks in `Entity` for entity types.
+
+* Create `src/Entity/Event.php` file and add the following code:
+
+  ```php
+  class Event {}
+  ```
+  * File name corresponds to class name
+
+  ```php
+  namespace Drupal\event\Entity;
+  ```
+  * Namespace corresponds to directory structure
+  * PSR-4
+  * PSR-0
+
+  ```php
+  extends ContentEntityBase
+  ```
+  * Base classes as a tool for code reuse
+
+  ```php
+  use Drupal\Core\Entity\ContentEntityBase;
+  ```
+  * Corresponds to namespace
+
+  ```php
+  * @ContentEntityType(
+  *   id = "event",
+  * )
+  ```
+  * Annotations as a way to provide metadata for code
+  * cmp. @param/@return/...
+  * Doctrine
+
+  ```php
+  *   label = @Translation("Event"),
+  ```
+  * Translation in annotations
+  * Nested annotations
+
+  ```php
+  *   base_table = "event",
+  *   entity_keys = {
+  *     "id" = "id",
+  *     "uuid" = "uuid",
+  *   },
+  ```
+  * Top-level keys are not quoted, but keys in mappings are quoted
+
+* Update entity/field definitions
+  * `{event}` table created
+  * `id` and `uuid` columns
+
+* Try out event CRUD
+  * Create and save an event
+  * Load an event by ID and print ID and UUID
+  * Delete an event
+
+
+## `01-minimal-entity-type` → `02-base-field-definitions`
+
+* Add the following snippets to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Entity\EntityTypeInterface;
+
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = parent::baseFieldDefinitions($entity_type);
+
+    return $fields;
+  }
+  ```
+  * Interfaces as contracts to define behavior
+  * Overriding base implementation allows specialization while still having code reuse
+  * Static functions
+
+  ```php
+  use Drupal\Core\Field\BaseFieldDefinition;
+
+  $fields['title'] = BaseFieldDefinition::create('string');
+  ```
+  * cmp. `new BaseFieldDefinition('string');`
+  * Field type discoverability:
+    * Visit api.drupal.org
+    * Navigate to "FieldType" annotation class
+    * Click on list of annotated classes
+    * Pick appropriate class
+    * Find plugin ID
+
+  ```php
+  ->setLabel(t('Title'))
+  ```
+  * cmp. definition object ↔ info array
+  * `t()` generally discouraged, but unavoidable in static functions
+
+  ```php
+  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+
+  $fields['date'] = BaseFieldDefinition::create('datetime')
+    ->setLabel(t('Date'))
+    ->setSetting('datetime_type' => DateTimeItem::DATETIME_TYPE_DATE);
+  $fields['description'] = BaseFieldDefinition::create('text_long')
+    ->setLabel(t('Description'));
+  ```
+  * Setting discoverability:
+    * View `defaultStorageSettings` or `defaultFieldSettings` method on field item class
+  * Fields can have multiple properties
+  * Property discoverability
+    * View `propertyDefinitions` method on field item class
+
+  ```php
+  *     "label" = "title",
+  ```
+
+  ```php
+  ->setRequired(TRUE)
+  ```
+
+* Apply entity updates
+  * `title`, `date`, `description__value`, `description__format` columns
+  * Load an event set title, date, and description and save
+
+
+## `02-base-field-definitions` → `03-interface`
+* Add the following snippets to `src/Entity/Event.php`:
+
+  ```
+  public function getTitle() {
+    return $this->get('title')->value;
+  }
+
+  public function setTitle($title) {
+    $this->set('title', $title);
+  }
+
+  public function getDate() {
+    return $this->get('date')->date;
+  }
+
+  public function setDate(\DateTimeInterface $date) {
+    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+  }
+  ```
+  * getter and setter methods allow formulating semantic APIs
+
+  ```php
+  public function getDescription() {
+    return $this->get('description')->processed;
+  }
+
+  public function setDescription($description, $format) {
+    $this->set('description', [
+      'value' => $description,
+      'format' => $format,
+    ]);
+  }
+  ```
+  * Text and text format must always passed along together for security
+
+* Create `src/Event/EventInterface.php` with the following code:
+  ```php
+  namespace Drupal\event\Entity;
+
+  interface EventInterface {
+    public function getTitle();
+
+    public function setTitle($title);
+
+    public function getDate();
+
+    public function setDate(\DateTimeInterface $date);
+
+    public function getDescription();
+
+    public function setDescription($description, $format);
+  }
+  ```
+
+* Test the new API
+  * Load an event set title, date, and description using the methods and save
+
+
