@@ -454,3 +454,38 @@ Branch: `07-views-data` → `08-admin-links`
   ```
 
 * Rebuild caches
+* Visit `/admin/content/events`
+
+* Add a `event.links.action.yml` with the following:
+  ```ỳaml
+  entity.event.collection:
+    title: 'Add'
+    route_name: entity.event.add_form
+    appears_on: [entity.event.collection]
+  ```
+
+* Rebuild caches
+* Visit `/admin/content/events`
+
+* Add the following to `event.links.task.yml`:
+  ```yaml
+  entity.event.canonical:
+    title: 'View'
+    route_name: entity.event.canonical
+    base_route: entity.event.canonical
+  entity.event.edit_form:
+    title: 'Edit'
+    route_name: entity.event.edit_form
+    base_route: entity.event.canonical
+  entity.event.delete_form:
+    title: 'Delete'
+    route_name: entity.event.delete_form
+    base_route: entity.event.canonical
+  ```
+
+* Rebuild caches
+* Visit `/events/{event}`
+
+<!-- TODO: Add contextual links and form redirects -->
+
+
