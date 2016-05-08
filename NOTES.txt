@@ -5,7 +5,8 @@ that it takes to get from one branch to the next with notes for each step. Note
 that the actual code in the branches is more not identical to the code snippets
 given here, although it is functionally equivalent.
 
-## `00-empty-module` → `01-minimal-entity-type`
+## Minimal entity type
+Branch: `00-empty-module` → `01-minimal-entity-type`
 
 * Create `src` directory
   * `src` for all object-oriented code
@@ -74,7 +75,8 @@ given here, although it is functionally equivalent.
   * Delete an event
 
 
-## `01-minimal-entity-type` → `02-base-field-definitions`
+## Base field definitions
+Branch: `01-minimal-entity-type` → `02-base-field-definitions`
 
 * Add the following to `src/Entity/Event.php`:
   ```php
@@ -135,7 +137,8 @@ given here, although it is functionally equivalent.
   * Load an event set title, date, and description and save
 
 
-## `02-base-field-definitions` → `03-interface`
+## Interface
+Branch: `02-base-field-definitions` → `03-interface`
 * Add the following to `src/Entity/Event.php`:
 
   ```
@@ -190,11 +193,17 @@ given here, although it is functionally equivalent.
   }
   ```
 
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  implements EventInterface
+  ```
+
 * Test the new API
   * Load an event set title, date, and description using the methods and save
 
 
-## `03-interface` → `04-view-builder`
+## View builder
+Branch: `03-interface` → `04-view-builder`
 
 * Add the following to `src/Entity/Event.php`:
 
@@ -251,3 +260,110 @@ given here, although it is functionally equivalent.
     * Pick appropriate class and find plugin ID
   * Formatter settings discoverability:
     * View `defaultSettings` method on formatter class
+
+* Visit _Recent log messages_ page
+  * Warning due to missing `event` theme hook
+
+* Add a `event.module` with the following:
+  ```php
+  function event_theme($existing, $type, $theme, $path) {
+    return [
+      'event' => [
+        'render element' => 'elements',
+        'file' => 'event.theme.inc',
+      ],
+    ];
+  }
+  ```
+* Add a `event.theme.inc` with the following:
+  ```php
+  use Drupal\Core\Render\Element;
+
+  function template_preprocess_event(&$variables) {
+    foreach (Element::children($variables['elements']) as $key) {
+      $variables['content'][$key] = $variables['elements'][$key];
+    }
+  }
+  ```
+
+* Add a `templates` directory
+* Add a `templates/event.html.twig` with the following:
+  ```twig
+  ```
+
+## Forms
+Branch: `04-view-builder` → `05-forms`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "form" = {
+  *       "add" = "Drupal\Core\Entity\ContentEntityForm",
+  *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
+  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+  *     },
+  ```
+
+  ```php
+   *     "add-form" = "/admin/content/events/add",
+   *     "edit-form" = "/admin/content/events/manage/{event}",
+   *     "delete-form" = "/admin/content/events/manage/{event}/delete",
+  ```
+
+  ```php
+  ->setDisplayOptions('form', ['weight' => 0])
+
+  ->setDisplayOptions('form', ['weight' => 5])
+
+  ->setDisplayOptions('form', ['weight' => 10])
+  ```
+
+## List builder
+Branch: `05-forms` → `06-list-builder`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+  ```
+
+  ```php
+  *     "collection" = "/admin/content/events",
+  ```
+  * Collection routes are not (yet) automatically generated
+
+* Add a `src/Routing` directory
+* Add a `src/Routing/CollectionHtmlRouteProvider` with the following:
+
+  ```php
+  namespace Drupal\event\Routing;
+
+  use Drupal\Core\Entity\EntityTypeInterface;
+  use Drupal\Core\Entity\Routing\EntityRouteProviderInterface;
+  use Symfony\Component\Routing\RouteCollection;
+  use Symfony\Component\Routing\Route;
+
+  class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
+
+    public function getRoutes(EntityTypeInterface $entity_type) {
+      $routes = new RouteCollection();
+      if ($entity_type->hasListBuilderClass() && $entity_type->hasLinkTemplate('collection') && $entity_type->getAdminPermission()) {
+        $entity_type_id = $entity_type->id();
+
+        $route = new Route($entity_type->getLinkTemplate('collection'));
+        $route
+          ->setDefault('_entity_list', $entity_type_id)
+          ->setDefault('_title', 'Events')
+          ->setRequirement('_permission', $entity_type->getAdminPermission());
+
+        $routes->add("entity.$entity_type_id.collection", $route);
+      }
+      return $routes;
+    }
+
+  }
+  ```
+
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
+  ```
