@@ -18,7 +18,6 @@ Branch: `00-empty-module` → `01-minimal-entity-type`
   * Drupal looks in `Entity` for entity types.
 
 * Create `src/Entity/Event.php` file and add the following:
-
   ```php
   class Event {}
   ```
@@ -140,7 +139,6 @@ Branch: `01-minimal-entity-type` → `02-base-field-definitions`
 ## Interface
 Branch: `02-base-field-definitions` → `03-interface`
 * Add the following to `src/Entity/Event.php`:
-
   ```
   public function getTitle() {
     return $this->get('title')->value;
@@ -178,7 +176,10 @@ Branch: `02-base-field-definitions` → `03-interface`
   ```php
   namespace Drupal\event\Entity;
 
-  interface EventInterface {
+  use Drupal\Core\Entity\ContentEntityInterface;
+
+  interface EventInterface extends ContentEntityInterface {
+
     public function getTitle();
 
     public function setTitle($title);
@@ -190,6 +191,7 @@ Branch: `02-base-field-definitions` → `03-interface`
     public function getDescription();
 
     public function setDescription($description, $format);
+
   }
   ```
 
@@ -206,7 +208,6 @@ Branch: `02-base-field-definitions` → `03-interface`
 Branch: `03-interface` → `04-view-builder`
 
 * Add the following to `src/Entity/Event.php`:
-
   ```php
   *   handlers = {
   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -225,7 +226,7 @@ Branch: `03-interface` → `04-view-builder`
   ```
 
 * Rebuild caches
-* Access `/event/{event}`
+* Visit `/event/{event}`
   * Access control is not defined yet
 
 * Add the following to `src/Entity/Event.php`:
@@ -235,7 +236,7 @@ Branch: `03-interface` → `04-view-builder`
   ```
 
 * Rebuild caches
-* Access `/event/{event}`
+* Visit `/event/{event}`
 * Add the following to `src/Entity/Event.php`:
 
   ```php
@@ -289,7 +290,14 @@ Branch: `03-interface` → `04-view-builder`
 * Add a `templates` directory
 * Add a `templates/event.html.twig` with the following:
   ```twig
+  <div{{ attributes }}>
+    {{ content }}
+  </div>
   ```
+
+* Visit `/event/{event}`
+* Visit _Recent log messages_ page
+
 
 ## Forms
 Branch: `04-view-builder` → `05-forms`
@@ -309,6 +317,8 @@ Branch: `04-view-builder` → `05-forms`
    *     "delete-form" = "/admin/content/events/manage/{event}/delete",
   ```
 
+* Visit `/admin/content/events/add`
+
   ```php
   ->setDisplayOptions('form', ['weight' => 0])
 
@@ -316,6 +326,11 @@ Branch: `04-view-builder` → `05-forms`
 
   ->setDisplayOptions('form', ['weight' => 10])
   ```
+
+* Rebuild caches
+* Visit `/admin/content/events/add`
+* Visit `/admin/content/events/manage/{event}/`
+* Visit `/admin/content/events/manage/{event}/delete`
 
 ## List builder
 Branch: `05-forms` → `06-list-builder`
@@ -367,3 +382,75 @@ Branch: `05-forms` → `06-list-builder`
   ```php
   *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
   ```
+
+* Rebuild caches
+
+* Visit `/admin/content/events`
+
+* Add a `src/Entity/EventListBuilder` with the following:
+  ```php
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Entity\EntityInterface;
+  use Drupal\Core\Entity\EntityListBuilder;
+
+  class EventListBuilder extends EntityListBuilder {
+
+    public function buildHeader() {
+      $header = [];
+      $header['title'] = $this->t('Title');
+      $header['date'] = $this->t('Date');
+      return $header + parent::buildHeader();
+    }
+
+    public function buildRow(EntityInterface $entity) {
+      /** @var \Drupal\event\Entity\EventInterface $event */
+      $row = [];
+      $row['title'] = $event->toLink();
+      $row['date'] = $event->getDate()->format(DATETIME_DATE_STORAGE_FORMAT);
+      return $row + parent::buildRow($entity);
+    }
+
+  }
+  ```
+  * Instead of hardcoding the format the `date.formatter` service should be
+    injected
+
+* Replace the list builder in `src/Entity/Event.php` with `Drupal\event\Entity\EventListBuilder`
+* Rebuild caches
+* Visit `/admin/content/events`
+
+## Views data
+Branch: `06-list-builder` → `07-views-data`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "views_data" = "Drupal\views\EntityViewsData",
+  ```
+
+* Add a _Event_ view to replace the list builder
+
+## Administration links
+Branch: `07-views-data` → `08-admin-links`
+
+* Add a `event.links.menu.yml` with the following:
+  ```yaml
+  entity.event.collection:
+    title: 'Events'
+    route_name: entity.event.collection
+    parent: system.admin_content
+  ```
+  * Routes are separate from menu links
+  * `hook_menu()` in D7 → multiple `event.links.*.yml` files
+
+* Rebuild caches
+
+* Add a `event.links.task.yml` with the following:
+  ```yaml
+  entity.event.collection:
+    title: 'Events'
+    route_name: entity.event.collection
+    base_route: system.admin_content
+  ```
+
+* Rebuild caches
