@@ -382,6 +382,7 @@ Branch: `05-forms` → `06-list-builder`
 
   }
   ```
+<!-- TODO: Mention routing.yml (they made me do it) -->
 
 * Add the following to `src/Entity/Event.php`:
 
@@ -433,6 +434,7 @@ Branch: `06-list-builder` → `07-views-data`
   ```php
   *     "views_data" = "Drupal\views\EntityViewsData",
   ```
+<!-- TODO: Mention views data sucks -->
 
 * Add a _Event_ view to replace the list builder
 
@@ -561,3 +563,84 @@ Branch: `08-admin-links` → `09-access`
 * Test permissions
   * `create events`, `edit events`, or `delete events` do not grant
     access to `/admin/content/events`
+
+## Additional fields
+Branch: `09-access` → `10-additional-fields`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+  $fields['path'] = BaseFieldDefinition::create('path')
+    ->setLabel(t('Path'))
+    ->setDisplayOptions('form', ['weight' => 15]);
+
+  $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Attendees'))
+    ->setSetting('target_type', 'user')
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setDisplayOptions('form', ['weight' => 20]);
+  ```
+
+* Update entity/field definitions
+  * `{event__attendees}` table created
+  * `deleted`, `langcode`, `bundle`, `revision_id` not optional currently
+
+<!-- TODO: Add methods for managing attendees -->
+
+* Add the following to `src/Entity/EventInterface.php`:
+  ```php
+  use Drupal\Core\Entity\EntityChangedInterface;
+  use Drupal\user\EntityOwnerInterface;
+
+  , EntityChangedInterface, EntityOwnerInterface
+  ```
+  * Changed tracking allows edit-locking
+  * Owners are used in entity reference, comment statistics, ...
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Entity\EntityChangedTrait;
+
+  use EntityChangedTrait;
+
+  public function getOwner() {
+    $this->get('owner')->entity;
+  }
+  public function setOwner(UserInterface $account) {
+    $this->set('owner', $account->id());
+  }
+  public function getOwnerId() {
+    $this->get('owner')->target_id;
+  }
+  public function setOwnerId($uid) {
+    $this->set('owner', $uid);
+  }
+
+  $fields['changed'] = BaseFieldDefinition::create('changed')
+    ->setLabel(t('Changed'));
+  $fields['owner'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Owner'))
+    ->setSetting('target_type', 'user')
+    ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
+
+    public static function getDefaultOwnerIds() {
+      return [\Drupal::currentUser()->id()];
+    }
+  ```
+
+<!-- TODO: Add status field -->
+
+* Update entity/field definitions
+  * `changed` and `owner` columns created
+
+<!--
+## Configuration entities
+Branch: `10-additional-fields` → `11-bundles`
+
+* Create a `src/Entity/EventType.php` with the following:
+  ```php
+  ```
+-->
+<!-- TODO: Config Translation ->
+<!-- TODO: Switch Translation & Revisions ->
