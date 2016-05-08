@@ -229,6 +229,12 @@ Branch: `03-interface` → `04-view-builder`
 * Visit `/event/{event}`
   * Access control is not defined yet
 
+* Add a `event.permissions.yml` with the following:
+  ```yaml
+  administer events:
+    title: 'Administer events'
+  ```
+
 * Add the following to `src/Entity/Event.php`:
 
   ```php
@@ -488,4 +494,70 @@ Branch: `07-views-data` → `08-admin-links`
 
 <!-- TODO: Add contextual links and form redirects -->
 
+## Access control
+Branch: `08-admin-links` → `09-access`
 
+* Add the following to `event.permissions.yml`:
+  ```yaml
+  create events:
+    title: 'Create events'
+  delete events:
+    title: 'Delete events'
+  edit events:
+    title: 'Edit events'
+  view events:
+    title: 'View events'
+  ```
+
+* Add a `src/Access` directory
+
+* Add a `src/Access/EventAccessControlHandler.php` with the following:
+  ```php
+  namespace Drupal\event\Access;
+
+  use Drupal\Core\Access\AccessResult;
+  use Drupal\Core\Entity\EntityAccessControlHandler;
+  use Drupal\Core\Entity\EntityInterface;
+  use Drupal\Core\Session\AccountInterface;
+
+  class EventAccessControlHandler extends EntityAccessControlHandler {
+
+    protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+      $access_result = AccessResult::allowedIfHasPermission($account, 'create events');
+      return $access_result->orIf(parent::checkCreateAccess($account, $context, $entity_bundle));
+    }
+
+    protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+      switch ($operation) {
+        case "view":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'view events');
+          break;
+
+        case "update":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'edit events');
+          break;
+
+        case "delete":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'delete events');
+          break;
+
+        default:
+          $access_result = AccessResult::neutral();
+          break;
+      }
+      return $access_result->orIf(parent::checkAccess($entity, $operation, $account));
+    }
+
+  }
+  ```
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "access" = "Drupal\event\Access\EventAccessControlHandler",
+  ```
+
+* Rebuild caches
+
+* Test permissions
+  * `create events`, `edit events`, or `delete events` do not grant
+    access to `/admin/content/events`
