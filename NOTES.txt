@@ -70,8 +70,10 @@ Branch: `00-empty-module` → `01-minimal-entity-type`
 
 * Try out event CRUD
   * Create and save an event
+    * Row in `{event}` table
   * Load an event by ID and print ID and UUID
   * Delete an event
+      * Row in `{event}` table gone
 
 
 ## Base field definitions
@@ -634,13 +636,44 @@ Branch: `09-access` → `10-additional-fields`
 * Update entity/field definitions
   * `changed` and `owner` columns created
 
-<!--
 ## Configuration entities
 Branch: `10-additional-fields` → `11-bundles`
 
 * Create a `src/Entity/EventType.php` with the following:
   ```php
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Config\Entity\ConfigEntityBase;
+
+  /**
+   * @ConfigEntityType(
+   *   id = "event_type",
+   *   label = @Translation("Event type"),
+   *   config_prefix = "type",
+   *   config_export = {
+   *     "id",
+   *     "label",
+   *   }
+   * )
+   */
+  class EventType extends ConfigEntityBase{
+
+    protected $id;
+
+    protected $label;
+
+  }
   ```
--->
+
+* Update entity/field definitions
+  * No schema change
+
+* Try out event type CRUD
+  * Create and save an event type
+    * Row in `{config}` table
+  * Load an event type by ID and print label
+  * Delete an event type
+    * Row in `{config}` table gone
+
 <!-- TODO: Config Translation ->
 <!-- TODO: Switch Translation & Revisions ->
