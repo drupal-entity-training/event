@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Event by drupal-entity-training</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Event</h1>
+      <h2 class="project-tagline">Event</h2>
+      <a href="https://github.com/drupal-entity-training/event" class="btn">View on GitHub</a>
+      <a href="https://github.com/drupal-entity-training/event/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/drupal-entity-training/event/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notes</h1>
+
+<p>The process of creating the <em>Event</em> entity type is documented below in the steps
+that it takes to get from one branch to the next with notes for each step. Note
+that the actual code in the branches is more not identical to the code snippets
+given here, although it is functionally equivalent.</p>
+
+<h2>
+<a id="minimal-entity-type" class="anchor" href="#minimal-entity-type" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Minimal entity type</h2>
+
+<p>Branch: <code>00-empty-module</code> → <code>01-minimal-entity-type</code></p>
+
+<ul>
+<li>
+<p>Create <code>src</code> directory</p>
+
+<ul>
+<li>
+<code>src</code> for all object-oriented code</li>
+<li>
+<code>.module</code> (and other files) outside, like in Drupal 7</li>
+</ul>
+</li>
+<li>
+<p>Create <code>src/Entity</code> directory</p>
+
+<ul>
+<li>Subdirectories in <code>src</code> for organization</li>
+<li>Some directories have special meaning</li>
+<li>Drupal looks in <code>Entity</code> for entity types.</li>
+</ul>
+</li>
+<li>
+<p>Create <code>src/Entity/Event.php</code> file and add the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">Event</span> {}</span></pre></div>
+
+<ul>
+<li>File name corresponds to class name</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Entity</span>;</span></pre></div>
+
+<ul>
+<li>Namespace corresponds to directory structure</li>
+<li>PSR-4</li>
+<li>PSR-0</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">extends</span> <span class="pl-c1">ContentEntityBase</span></span></pre></div>
+
+<ul>
+<li>Base classes as a tool for code reuse</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\ContentEntityBase</span>;</span></pre></div>
+
+<ul>
+<li>Corresponds to namespace</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span> <span class="pl-k">@</span>ContentEntityType(</span>
+<span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">id</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>event<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span> )</span></pre></div>
+
+<ul>
+<li>Annotations as a way to provide metadata for code</li>
+<li>cmp. @param/@return/...</li>
+<li>Doctrine</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">label</span> <span class="pl-k">=</span> <span class="pl-k">@</span>Translation(<span class="pl-s"><span class="pl-pds">"</span>Event<span class="pl-pds">"</span></span>),</span></pre></div>
+
+<ul>
+<li>Translation in annotations</li>
+<li>Nested annotations</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">base_table</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>event<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">entity_keys</span> <span class="pl-k">=</span> {</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>uuid<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>uuid<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>   },</span></pre></div>
+
+<ul>
+<li>Top-level keys are not quoted, but keys in mappings are quoted</li>
+</ul>
+</li>
+<li>
+<p>Update entity/field definitions</p>
+
+<ul>
+<li>
+<code>{event}</code> table created</li>
+<li>
+<code>id</code> and <code>uuid</code> columns</li>
+</ul>
+</li>
+<li>
+<p>Try out event CRUD</p>
+
+<ul>
+<li>Create and save an event
+
+<ul>
+<li>Row in <code>{event}</code> table</li>
+</ul>
+</li>
+<li>Load an event by ID and print ID and UUID</li>
+<li>Delete an event
+
+<ul>
+<li>Row in <code>{event}</code> table gone</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="base-field-definitions" class="anchor" href="#base-field-definitions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Base field definitions</h2>
+
+<p>Branch: <code>01-minimal-entity-type</code> → <code>02-base-field-definitions</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityTypeInterface</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span> <span class="pl-en">baseFieldDefinitions</span>(<span class="pl-c1">EntityTypeInterface</span> <span class="pl-smi">$entity_type</span>) {</span>
+<span class="pl-s1">  <span class="pl-smi">$fields</span> <span class="pl-k">=</span> <span class="pl-k">parent</span><span class="pl-k">::</span>baseFieldDefinitions(<span class="pl-smi">$entity_type</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">return</span> <span class="pl-smi">$fields</span>;</span>
+<span class="pl-s1">}</span></pre></div>
+
+<ul>
+<li>Interfaces as contracts to define behavior</li>
+<li>Overriding base implementation allows specialization while still having code reuse</li>
+<li>Static functions</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Field\BaseFieldDefinition</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>title<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>string<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<ul>
+<li>cmp. <code>new BaseFieldDefinition('string');</code>
+</li>
+<li>Field type discoverability:
+
+<ul>
+<li>Navigate to "FieldType" annotation class on api.drupal.org</li>
+<li>Click on list of annotated classes</li>
+<li>Pick appropriate class and find plugin ID</li>
+</ul>
+</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Title<span class="pl-pds">'</span></span>))</span></pre></div>
+
+<ul>
+<li>cmp. definition object ↔ info array</li>
+<li>
+<code>t()</code> generally discouraged, but unavoidable in static functions</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\datetime\Plugin\Field\FieldType\DateTimeItem</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>date<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>datetime<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Date<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setSetting(<span class="pl-s"><span class="pl-pds">'</span>datetime_type<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">DateTimeItem</span><span class="pl-k">::</span><span class="pl-c1">DATETIME_TYPE_DATE</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>description<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>text_long<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Description<span class="pl-pds">'</span></span>));</span></pre></div>
+
+<ul>
+<li>Setting discoverability:
+
+<ul>
+<li>View <code>defaultStorageSettings</code> or <code>defaultFieldSettings</code> method on field item class</li>
+</ul>
+</li>
+<li>Fields can have multiple properties</li>
+<li>Property discoverability
+
+<ul>
+<li>View <code>propertyDefinitions</code> method on field item class</li>
+</ul>
+</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>label<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>title<span class="pl-pds">"</span></span>,</span></pre></div>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">-&gt;</span>setRequired(<span class="pl-c1">TRUE</span>)</span></pre></div>
+</li>
+<li>
+<p>Apply entity updates</p>
+
+<ul>
+<li>
+<code>title</code>, <code>date</code>, <code>description__value</code>, <code>description__format</code> columns</li>
+<li>Load an event set title, date, and description and save</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="interface" class="anchor" href="#interface" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Interface</h2>
+
+<p>Branch: <code>02-base-field-definitions</code> → <code>03-interface</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<pre><code>public function getTitle() {
+  return $this-&gt;get('title')-&gt;value;
+}
+
+public function setTitle($title) {
+  $this-&gt;set('title', $title);
+}
+
+public function getDate() {
+  return $this-&gt;get('date')-&gt;date;
+}
+
+public function setDate(\DateTimeInterface $date) {
+  $this-&gt;set('date', $date-&gt;format(DATETIME_DATE_STORAGE_FORMAT));
+}
+</code></pre>
+
+<ul>
+<li>getter and setter methods allow formulating semantic APIs</li>
+</ul>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getDescription</span>() {</span>
+<span class="pl-s1">  <span class="pl-k">return</span> <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>description<span class="pl-pds">'</span></span>)<span class="pl-k">-&gt;</span><span class="pl-smi">processed</span>;</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setDescription</span>(<span class="pl-smi">$description</span>, <span class="pl-smi">$format</span>) {</span>
+<span class="pl-s1">  <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>set(<span class="pl-s"><span class="pl-pds">'</span>description<span class="pl-pds">'</span></span>, [</span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>value<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$description</span>,</span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>format<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$format</span>,</span>
+<span class="pl-s1">  ]);</span>
+<span class="pl-s1">}</span></pre></div>
+
+<ul>
+<li>Text and text format must always passed along together for security</li>
+</ul>
+</li>
+<li>
+<p>Create <code>src/Event/EventInterface.php</code> with the following code:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Entity</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\ContentEntityInterface</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">interface</span> <span class="pl-en">EventInterface</span> <span class="pl-k">extends</span> <span class="pl-e">ContentEntityInterface</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getTitle</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setTitle</span>(<span class="pl-smi">$title</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getDate</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setDate</span>(<span class="pl-c1">\DateTimeInterface</span> <span class="pl-smi">$date</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getDescription</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setDescription</span>(<span class="pl-smi">$description</span>, <span class="pl-smi">$format</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span></pre></div>
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">implements</span> <span class="pl-c1">EventInterface</span></span></pre></div>
+</li>
+<li>
+<p>Test the new API</p>
+
+<ul>
+<li>Load an event set title, date, and description using the methods and save</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="view-builder" class="anchor" href="#view-builder" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>View builder</h2>
+
+<p>Branch: <code>03-interface</code> → <code>04-view-builder</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">handlers</span> <span class="pl-k">=</span> {</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>view_builder<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\EntityViewBuilder<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>   },</span>
+<span class="pl-s1"><span class="pl-k">*</span> )</span></pre></div>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>route_provider<span class="pl-pds">"</span></span> <span class="pl-k">=</span> {</span>
+<span class="pl-s1"><span class="pl-k">*</span>       <span class="pl-s"><span class="pl-pds">"</span>html_default<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>     },</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">links</span> <span class="pl-k">=</span> {</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>canonical<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/events/{event}<span class="pl-pds">"</span></span></span>
+<span class="pl-s1"><span class="pl-k">*</span>   },</span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>
+<p>Visit <code>/event/{event}</code></p>
+
+<ul>
+<li>Access control is not defined yet</li>
+</ul>
+</li>
+<li>
+<p>Add a <code>event.permissions.yml</code> with the following:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">administer events:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Administer events<span class="pl-pds">'</span></span></span></pre></div>
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>   <span class="pl-c1">admin_permission</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>administer events<span class="pl-pds">"</span></span>,</span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>Visit <code>/event/{event}</code>
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>view<span class="pl-pds">'</span></span>, [</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>label<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>inline<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>type<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>datetime_default<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>settings<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>format_type<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>html_date<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">  ],</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">0</span>,</span>
+<span class="pl-s1">])</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>view<span class="pl-pds">'</span></span>, [</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>label<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>hidden<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">  <span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">5</span>,</span>
+<span class="pl-s1">])</span></pre></div>
+
+<ul>
+<li>cmp. <em>Manage display</em> table</li>
+<li>Formatter discoverability:
+
+<ul>
+<li>Navigate to "FieldFormatter" annotation class on api.drupal.org</li>
+<li>Click on list of annotated classes</li>
+<li>Pick appropriate class and find plugin ID</li>
+</ul>
+</li>
+<li>Formatter settings discoverability:
+
+<ul>
+<li>View <code>defaultSettings</code> method on formatter class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Visit <em>Recent log messages</em> page</p>
+
+<ul>
+<li>Warning due to missing <code>event</code> theme hook</li>
+</ul>
+</li>
+<li>
+<p>Add a <code>event.module</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">function</span> <span class="pl-en">event_theme</span>(<span class="pl-smi">$existing</span>, <span class="pl-smi">$type</span>, <span class="pl-smi">$theme</span>, <span class="pl-smi">$path</span>) {</span>
+<span class="pl-s1">  <span class="pl-k">return</span> [</span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>event<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
+<span class="pl-s1">      <span class="pl-s"><span class="pl-pds">'</span>render element<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>elements<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">      <span class="pl-s"><span class="pl-pds">'</span>file<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>event.theme.inc<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">    ],</span>
+<span class="pl-s1">  ];</span>
+<span class="pl-s1">}</span></pre></div>
+</li>
+<li>
+<p>Add a <code>event.theme.inc</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Render\Element</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">function</span> <span class="pl-en">template_preprocess_event</span>(<span class="pl-k">&amp;</span><span class="pl-smi">$variables</span>) {</span>
+<span class="pl-s1">  <span class="pl-k">foreach</span> (<span class="pl-c1">Element</span><span class="pl-k">::</span>children(<span class="pl-smi">$variables</span>[<span class="pl-s"><span class="pl-pds">'</span>elements<span class="pl-pds">'</span></span>]) <span class="pl-k">as</span> <span class="pl-smi">$key</span>) {</span>
+<span class="pl-s1">    <span class="pl-smi">$variables</span>[<span class="pl-s"><span class="pl-pds">'</span>content<span class="pl-pds">'</span></span>][<span class="pl-smi">$key</span>] <span class="pl-k">=</span> <span class="pl-smi">$variables</span>[<span class="pl-s"><span class="pl-pds">'</span>elements<span class="pl-pds">'</span></span>][<span class="pl-smi">$key</span>];</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1">}</span></pre></div>
+</li>
+<li><p>Add a <code>templates</code> directory</p></li>
+<li>
+<p>Add a <code>templates/event.html.twig</code> with the following:</p>
+
+<div class="highlight highlight-text-html-twig"><pre>&lt;<span class="pl-ent">div</span>{{ <span class="pl-smi">attributes</span> }}&gt;
+  {{ <span class="pl-smi">content</span> }}
+&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
+</li>
+<li><p>Visit <code>/event/{event}</code></p></li>
+<li>Visit <em>Recent log messages</em> page</li>
+</ul>
+
+<h2>
+<a id="forms" class="anchor" href="#forms" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Forms</h2>
+
+<p>Branch: <code>04-view-builder</code> → <code>05-forms</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>form<span class="pl-pds">"</span></span> <span class="pl-k">=</span> {</span>
+<span class="pl-s1"><span class="pl-k">*</span>       <span class="pl-s"><span class="pl-pds">"</span>add<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\ContentEntityForm<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>       <span class="pl-s"><span class="pl-pds">"</span>edit<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\ContentEntityForm<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>       <span class="pl-s"><span class="pl-pds">"</span>delete<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\ContentEntityDeleteForm<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>     },</span></pre></div>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>add-form<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/admin/content/events/add<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>edit-form<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/admin/content/events/manage/{event}<span class="pl-pds">"</span></span>,</span>
+<span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>delete-form<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/admin/content/events/manage/{event}/delete<span class="pl-pds">"</span></span>,</span></pre></div>
+</li>
+<li>
+<p>Visit <code>/admin/content/events/add</code></p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>form<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">0</span>])</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>form<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">5</span>])</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>form<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">10</span>])</span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>Visit <code>/admin/content/events/add</code>
+</li>
+<li>Visit <code>/admin/content/events/manage/{event}/</code>
+</li>
+<li>Visit <code>/admin/content/events/manage/{event}/delete</code>
+</li>
+</ul>
+
+<h2>
+<a id="list-builder" class="anchor" href="#list-builder" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>List builder</h2>
+
+<p>Branch: <code>05-forms</code> → <code>06-list-builder</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>list_builder<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\Core\Entity\EntityListBuilder<span class="pl-pds">"</span></span>,</span></pre></div>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>collection<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/admin/content/events<span class="pl-pds">"</span></span>,</span></pre></div>
+
+<ul>
+<li>Collection routes are not (yet) automatically generated</li>
+</ul>
+</li>
+<li><p>Add a <code>src/Routing</code> directory</p></li>
+<li>
+<p>Add a <code>src/Routing/CollectionHtmlRouteProvider</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Routing</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityTypeInterface</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\Routing\EntityRouteProviderInterface</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Symfony\Component\Routing\RouteCollection</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Symfony\Component\Routing\Route</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">EventCollectionHtmlRouteProvider</span> <span class="pl-k">implements</span> <span class="pl-e">EntityRouteProviderInterface</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getRoutes</span>(<span class="pl-c1">EntityTypeInterface</span> <span class="pl-smi">$entity_type</span>) {</span>
+<span class="pl-s1">    <span class="pl-smi">$routes</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">RouteCollection</span>();</span>
+<span class="pl-s1">    <span class="pl-k">if</span> (<span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>hasListBuilderClass() <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>hasLinkTemplate(<span class="pl-s"><span class="pl-pds">'</span>collection<span class="pl-pds">'</span></span>) <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>getAdminPermission()) {</span>
+<span class="pl-s1">      <span class="pl-smi">$entity_type_id</span> <span class="pl-k">=</span> <span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>id();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">      <span class="pl-smi">$route</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Route</span>(<span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>getLinkTemplate(<span class="pl-s"><span class="pl-pds">'</span>collection<span class="pl-pds">'</span></span>));</span>
+<span class="pl-s1">      <span class="pl-smi">$route</span></span>
+<span class="pl-s1">        <span class="pl-k">-&gt;</span>setDefault(<span class="pl-s"><span class="pl-pds">'</span>_entity_list<span class="pl-pds">'</span></span>, <span class="pl-smi">$entity_type_id</span>)</span>
+<span class="pl-s1">        <span class="pl-k">-&gt;</span>setDefault(<span class="pl-s"><span class="pl-pds">'</span>_title<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Events<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">        <span class="pl-k">-&gt;</span>setRequirement(<span class="pl-s"><span class="pl-pds">'</span>_permission<span class="pl-pds">'</span></span>, <span class="pl-smi">$entity_type</span><span class="pl-k">-&gt;</span>getAdminPermission());</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">      <span class="pl-smi">$routes</span><span class="pl-k">-&gt;</span>add(<span class="pl-s"><span class="pl-pds">"</span>entity.<span class="pl-smi">$entity_type_id</span>.collection<span class="pl-pds">"</span></span>, <span class="pl-smi">$route</span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$routes</span>;</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span></pre></div>
+
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>       <span class="pl-s"><span class="pl-pds">"</span>html_collection<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal<span class="pl-cce">\e</span>vent\Routing\EventCollectionHtmlRouteProvider<span class="pl-pds">"</span></span>,</span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li><p>Visit <code>/admin/content/events</code></p></li>
+<li>
+<p>Add a <code>src/Entity/EventListBuilder</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Entity</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityInterface</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityListBuilder</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">EventListBuilder</span> <span class="pl-k">extends</span> <span class="pl-e">EntityListBuilder</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">buildHeader</span>() {</span>
+<span class="pl-s1">    <span class="pl-smi">$header</span> <span class="pl-k">=</span> [];</span>
+<span class="pl-s1">    <span class="pl-smi">$header</span>[<span class="pl-s"><span class="pl-pds">'</span>title<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>t(<span class="pl-s"><span class="pl-pds">'</span>Title<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">    <span class="pl-smi">$header</span>[<span class="pl-s"><span class="pl-pds">'</span>date<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>t(<span class="pl-s"><span class="pl-pds">'</span>Date<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$header</span> <span class="pl-k">+</span> <span class="pl-k">parent</span><span class="pl-k">::</span>buildHeader();</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">buildRow</span>(<span class="pl-c1">EntityInterface</span> <span class="pl-smi">$entity</span>) {</span>
+<span class="pl-s1">    <span class="pl-c">/** @var \Drupal\event\Entity\EventInterface $event */</span></span>
+<span class="pl-s1">    <span class="pl-smi">$row</span> <span class="pl-k">=</span> [];</span>
+<span class="pl-s1">    <span class="pl-smi">$row</span>[<span class="pl-s"><span class="pl-pds">'</span>title<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$event</span><span class="pl-k">-&gt;</span>toLink();</span>
+<span class="pl-s1">    <span class="pl-smi">$row</span>[<span class="pl-s"><span class="pl-pds">'</span>date<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$event</span><span class="pl-k">-&gt;</span>getDate()<span class="pl-k">-&gt;</span>format(<span class="pl-c1">DATETIME_DATE_STORAGE_FORMAT</span>);</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$row</span> <span class="pl-k">+</span> <span class="pl-k">parent</span><span class="pl-k">::</span>buildRow(<span class="pl-smi">$entity</span>);</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span></pre></div>
+
+<ul>
+<li>Instead of hardcoding the format the <code>date.formatter</code> service should be
+injected</li>
+</ul>
+</li>
+<li><p>Replace the list builder in <code>src/Entity/Event.php</code> with <code>Drupal\event\Entity\EventListBuilder</code></p></li>
+<li>Rebuild caches</li>
+<li>Visit <code>/admin/content/events</code>
+</li>
+</ul>
+
+<h2>
+<a id="views-data" class="anchor" href="#views-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Views data</h2>
+
+<p>Branch: <code>06-list-builder</code> → <code>07-views-data</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>views_data<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal\views\EntityViewsData<span class="pl-pds">"</span></span>,</span></pre></div>
+
+</li>
+<li><p>Add a <em>Event</em> view to replace the list builder</p></li>
+</ul>
+
+<h2>
+<a id="administration-links" class="anchor" href="#administration-links" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Administration links</h2>
+
+<p>Branch: <code>07-views-data</code> → <code>08-admin-links</code></p>
+
+<ul>
+<li>
+<p>Add a <code>event.links.menu.yml</code> with the following:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">entity.event.collection:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Events<span class="pl-pds">'</span></span></span>
+  <span class="pl-s"><span class="pl-ent">route_name:</span> <span class="pl-s">entity.event.collection</span></span>
+  <span class="pl-s"><span class="pl-ent">parent:</span> <span class="pl-s">system.admin_content</span></span></pre></div>
+
+<ul>
+<li>Routes are separate from menu links</li>
+<li>
+<code>hook_menu()</code> in D7 → multiple <code>event.links.*.yml</code> files</li>
+</ul>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>
+<p>Add a <code>event.links.task.yml</code> with the following:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">entity.event.collection:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Events<span class="pl-pds">'</span></span></span>
+  <span class="pl-s"><span class="pl-ent">route_name:</span> <span class="pl-s">entity.event.collection</span></span>
+  <span class="pl-s"><span class="pl-ent">base_route:</span> <span class="pl-s">system.admin_content</span></span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li><p>Visit <code>/admin/content/events</code></p></li>
+<li>
+<p>Add a <code>event.links.action.yml</code> with the following:</p>
+
+<pre lang="ỳaml"><code>entity.event.collection:
+  title: 'Add'
+  route_name: entity.event.add_form
+  appears_on: [entity.event.collection]
+</code></pre>
+</li>
+<li><p>Rebuild caches</p></li>
+<li><p>Visit <code>/admin/content/events</code></p></li>
+<li>
+<p>Add the following to <code>event.links.task.yml</code>:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">entity.event.canonical:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>View<span class="pl-pds">'</span></span></span>
+  <span class="pl-s"><span class="pl-ent">route_name:</span> <span class="pl-s">entity.event.canonical</span></span>
+  <span class="pl-s"><span class="pl-ent">base_route:</span> <span class="pl-s">entity.event.canonical</span></span>
+<span class="pl-s"><span class="pl-ent">entity.event.edit_form:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Edit<span class="pl-pds">'</span></span></span>
+  <span class="pl-s"><span class="pl-ent">route_name:</span> <span class="pl-s">entity.event.edit_form</span></span>
+  <span class="pl-s"><span class="pl-ent">base_route:</span> <span class="pl-s">entity.event.canonical</span></span>
+<span class="pl-s"><span class="pl-ent">entity.event.delete_form:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Delete<span class="pl-pds">'</span></span></span>
+  <span class="pl-s"><span class="pl-ent">route_name:</span> <span class="pl-s">entity.event.delete_form</span></span>
+  <span class="pl-s"><span class="pl-ent">base_route:</span> <span class="pl-s">entity.event.canonical</span></span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>Visit <code>/events/{event}</code>
+</li>
+</ul>
+
+
+
+<h2>
+<a id="access-control" class="anchor" href="#access-control" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Access control</h2>
+
+<p>Branch: <code>08-admin-links</code> → <code>09-access</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>event.permissions.yml</code>:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">create events:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Create events<span class="pl-pds">'</span></span></span>
+<span class="pl-s"><span class="pl-ent">delete events:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Delete events<span class="pl-pds">'</span></span></span>
+<span class="pl-s"><span class="pl-ent">edit events:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>Edit events<span class="pl-pds">'</span></span></span>
+<span class="pl-s"><span class="pl-ent">view events:</span></span>
+  <span class="pl-s"><span class="pl-ent">title:</span> <span class="pl-s"><span class="pl-pds">'</span>View events<span class="pl-pds">'</span></span></span></pre></div>
+</li>
+<li><p>Add a <code>src/Access</code> directory</p></li>
+<li>
+<p>Add a <code>src/Access/EventAccessControlHandler.php</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Access</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Access\AccessResult</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityAccessControlHandler</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityInterface</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Session\AccountInterface</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">EventAccessControlHandler</span> <span class="pl-k">extends</span> <span class="pl-e">EntityAccessControlHandler</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">protected</span> <span class="pl-k">function</span> <span class="pl-en">checkCreateAccess</span>(<span class="pl-c1">AccountInterface</span> <span class="pl-smi">$account</span>, <span class="pl-k">array</span> <span class="pl-smi">$context</span>, <span class="pl-smi">$entity_bundle</span> <span class="pl-k">=</span> <span class="pl-c1">NULL</span>) {</span>
+<span class="pl-s1">    <span class="pl-smi">$access_result</span> <span class="pl-k">=</span> <span class="pl-c1">AccessResult</span><span class="pl-k">::</span>allowedIfHasPermission(<span class="pl-smi">$account</span>, <span class="pl-s"><span class="pl-pds">'</span>create events<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$access_result</span><span class="pl-k">-&gt;</span>orIf(<span class="pl-k">parent</span><span class="pl-k">::</span>checkCreateAccess(<span class="pl-smi">$account</span>, <span class="pl-smi">$context</span>, <span class="pl-smi">$entity_bundle</span>));</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">protected</span> <span class="pl-k">function</span> <span class="pl-en">checkAccess</span>(<span class="pl-c1">EntityInterface</span> <span class="pl-smi">$entity</span>, <span class="pl-smi">$operation</span>, <span class="pl-c1">AccountInterface</span> <span class="pl-smi">$account</span>) {</span>
+<span class="pl-s1">    <span class="pl-k">switch</span> (<span class="pl-smi">$operation</span>) {</span>
+<span class="pl-s1">      <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">"</span>view<span class="pl-pds">"</span></span>:</span>
+<span class="pl-s1">        <span class="pl-smi">$access_result</span> <span class="pl-k">=</span> <span class="pl-c1">AccessResult</span><span class="pl-k">::</span>allowedIfHasPermission(<span class="pl-smi">$account</span>, <span class="pl-s"><span class="pl-pds">'</span>view events<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">        <span class="pl-k">break</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">      <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">"</span>update<span class="pl-pds">"</span></span>:</span>
+<span class="pl-s1">        <span class="pl-smi">$access_result</span> <span class="pl-k">=</span> <span class="pl-c1">AccessResult</span><span class="pl-k">::</span>allowedIfHasPermission(<span class="pl-smi">$account</span>, <span class="pl-s"><span class="pl-pds">'</span>edit events<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">        <span class="pl-k">break</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">      <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">"</span>delete<span class="pl-pds">"</span></span>:</span>
+<span class="pl-s1">        <span class="pl-smi">$access_result</span> <span class="pl-k">=</span> <span class="pl-c1">AccessResult</span><span class="pl-k">::</span>allowedIfHasPermission(<span class="pl-smi">$account</span>, <span class="pl-s"><span class="pl-pds">'</span>delete events<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">        <span class="pl-k">break</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">      <span class="pl-k">default</span>:</span>
+<span class="pl-s1">        <span class="pl-smi">$access_result</span> <span class="pl-k">=</span> <span class="pl-c1">AccessResult</span><span class="pl-k">::</span>neutral();</span>
+<span class="pl-s1">        <span class="pl-k">break</span>;</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$access_result</span><span class="pl-k">-&gt;</span>orIf(<span class="pl-k">parent</span><span class="pl-k">::</span>checkAccess(<span class="pl-smi">$entity</span>, <span class="pl-smi">$operation</span>, <span class="pl-smi">$account</span>));</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span></pre></div>
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">*</span>     <span class="pl-s"><span class="pl-pds">"</span>access<span class="pl-pds">"</span></span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Drupal<span class="pl-cce">\e</span>vent\Access\EventAccessControlHandler<span class="pl-pds">"</span></span>,</span></pre></div>
+</li>
+<li><p>Rebuild caches</p></li>
+<li>
+<p>Test permissions</p>
+
+<ul>
+<li>
+<code>create events</code>, <code>edit events</code>, or <code>delete events</code> do not grant
+access to <code>/admin/content/events</code>
+</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="additional-fields" class="anchor" href="#additional-fields" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Additional fields</h2>
+
+<p>Branch: <code>09-access</code> → <code>10-additional-fields</code></p>
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Field\FieldStorageDefinitionInterface</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>path<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>path<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Path<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>form<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">15</span>]);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>attendees<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>entity_reference<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Attendees<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setSetting(<span class="pl-s"><span class="pl-pds">'</span>target_type<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setCardinality(<span class="pl-c1">FieldStorageDefinitionInterface</span><span class="pl-k">::</span><span class="pl-c1">CARDINALITY_UNLIMITED</span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setDisplayOptions(<span class="pl-s"><span class="pl-pds">'</span>form<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>weight<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">20</span>]);</span></pre></div>
+</li>
+<li>
+<p>Update entity/field definitions</p>
+
+<ul>
+<li>
+<code>{event__attendees}</code> table created</li>
+<li>
+<code>deleted</code>, <code>langcode</code>, <code>bundle</code>, <code>revision_id</code> not optional currently</li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul>
+<li>
+<p>Add the following to <code>src/Entity/EventInterface.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityChangedInterface</span>;</span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\user\EntityOwnerInterface</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">, <span class="pl-c1">EntityChangedInterface</span>, <span class="pl-c1">EntityOwnerInterface</span></span></pre></div>
+
+<ul>
+<li>Changed tracking allows edit-locking</li>
+<li>Owners are used in entity reference, comment statistics, ...</li>
+</ul>
+</li>
+<li>
+<p>Add the following to <code>src/Entity/Event.php</code>:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Entity\EntityChangedTrait</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">EntityChangedTrait</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getOwner</span>() {</span>
+<span class="pl-s1">  <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>owner<span class="pl-pds">'</span></span>)<span class="pl-k">-&gt;</span><span class="pl-smi">entity</span>;</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setOwner</span>(<span class="pl-c1">UserInterface</span> <span class="pl-smi">$account</span>) {</span>
+<span class="pl-s1">  <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>set(<span class="pl-s"><span class="pl-pds">'</span>owner<span class="pl-pds">'</span></span>, <span class="pl-smi">$account</span><span class="pl-k">-&gt;</span>id());</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">getOwnerId</span>() {</span>
+<span class="pl-s1">  <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>owner<span class="pl-pds">'</span></span>)<span class="pl-k">-&gt;</span><span class="pl-smi">target_id</span>;</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setOwnerId</span>(<span class="pl-smi">$uid</span>) {</span>
+<span class="pl-s1">  <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>set(<span class="pl-s"><span class="pl-pds">'</span>owner<span class="pl-pds">'</span></span>, <span class="pl-smi">$uid</span>);</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>changed<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>changed<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Changed<span class="pl-pds">'</span></span>));</span>
+<span class="pl-s1"><span class="pl-smi">$fields</span>[<span class="pl-s"><span class="pl-pds">'</span>owner<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-c1">BaseFieldDefinition</span><span class="pl-k">::</span>create(<span class="pl-s"><span class="pl-pds">'</span>entity_reference<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setLabel(t(<span class="pl-s"><span class="pl-pds">'</span>Owner<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setSetting(<span class="pl-s"><span class="pl-pds">'</span>target_type<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">  <span class="pl-k">-&gt;</span>setDefaultValueCallback(<span class="pl-k">static</span><span class="pl-k">::</span><span class="pl-c1">class</span> <span class="pl-k">.</span> <span class="pl-s"><span class="pl-pds">'</span>::getDefaultOwnerIds<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span> <span class="pl-en">getDefaultOwnerIds</span>() {</span>
+<span class="pl-s1">    <span class="pl-k">return</span> [<span class="pl-c1">\</span><span class="pl-c1">Drupal</span><span class="pl-k">::</span>currentUser()<span class="pl-k">-&gt;</span>id()];</span>
+<span class="pl-s1">  }</span></pre></div>
+</li>
+</ul>
+
+
+
+<ul>
+<li>Update entity/field definitions
+
+<ul>
+<li>
+<code>changed</code> and <code>owner</code> columns created</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="configuration-entities" class="anchor" href="#configuration-entities" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration entities</h2>
+
+<p>Branch: <code>10-additional-fields</code> → <code>11-bundles</code></p>
+
+<ul>
+<li>
+<p>Create a <code>src/Entity/EventType.php</code> with the following:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Drupal\event\Entity</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">Drupal\Core\Config\Entity\ConfigEntityBase</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">/**</span></span>
+<span class="pl-s1"><span class="pl-c">* @ConfigEntityType(</span></span>
+<span class="pl-s1"><span class="pl-c">*   id = "event_type",</span></span>
+<span class="pl-s1"><span class="pl-c">*   label = @Translation("Event type"),</span></span>
+<span class="pl-s1"><span class="pl-c">*   config_prefix = "type",</span></span>
+<span class="pl-s1"><span class="pl-c">*   config_export = {</span></span>
+<span class="pl-s1"><span class="pl-c">*     "id",</span></span>
+<span class="pl-s1"><span class="pl-c">*     "label",</span></span>
+<span class="pl-s1"><span class="pl-c">*   }</span></span>
+<span class="pl-s1"><span class="pl-c">* )</span></span>
+<span class="pl-s1"><span class="pl-c">*/</span></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">EventType</span> <span class="pl-k">extends</span> <span class="pl-e">ConfigEntityBase</span>{</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">protected</span> <span class="pl-smi">$id</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">protected</span> <span class="pl-smi">$label</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span></pre></div>
+</li>
+<li>
+<p>Update entity/field definitions</p>
+
+<ul>
+<li>No schema change</li>
+</ul>
+</li>
+<li>
+<p>Try out event type CRUD</p>
+
+<ul>
+<li>Create and save an event type
+
+<ul>
+<li>Row in <code>{config}</code> table</li>
+</ul>
+</li>
+<li>Load an event type by ID and print label</li>
+<li>Delete an event type
+
+<ul>
+<li>Row in <code>{config}</code> table gone</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<p>&lt;!-- TODO: Config Translation -&gt;
+&lt;!-- TODO: Switch Translation &amp; Revisions -&gt;</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/drupal-entity-training/event">Event</a> is maintained by <a href="https://github.com/drupal-entity-training">drupal-entity-training</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
