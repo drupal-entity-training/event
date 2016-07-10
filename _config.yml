@@ -1,7 +1,7 @@
 # Setup
 title:        Event
 tagline:      A Drupal 8 example module showcasing the Entity API
-baseurl:      ""
+baseurl:      "/event"
 
 # About/contact
 author:
