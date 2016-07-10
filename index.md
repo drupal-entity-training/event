@@ -1,0 +1,684 @@
+---
+name: Event
+tagline: Event
+---
+
+# Notes
+
+The process of creating the _Event_ entity type is documented below in the steps
+that it takes to get from one branch to the next with notes for each step. Note
+that the actual code in the branches is more not identical to the code snippets
+given here, although it is functionally equivalent.
+
+## Minimal entity type
+Branch: `00-empty-module` → `01-minimal-entity-type`
+
+* Create `src` directory
+  * `src` for all object-oriented code
+  * `.module` (and other files) outside, like in Drupal 7
+
+* Create `src/Entity` directory
+  * Subdirectories in `src` for organization
+  * Some directories have special meaning
+  * Drupal looks in `Entity` for entity types.
+
+* Create `src/Entity/Event.php` file and add the following:
+  ```php
+  class Event {}
+  ```
+  * File name corresponds to class name
+
+  ```php
+  namespace Drupal\event\Entity;
+  ```
+  * Namespace corresponds to directory structure
+  * PSR-4
+  * PSR-0
+
+  ```php
+  extends ContentEntityBase
+  ```
+  * Base classes as a tool for code reuse
+
+  ```php
+  use Drupal\Core\Entity\ContentEntityBase;
+  ```
+  * Corresponds to namespace
+
+  ```php
+  * @ContentEntityType(
+  *   id = "event",
+  * )
+  ```
+  * Annotations as a way to provide metadata for code
+  * cmp. @param/@return/...
+  * Doctrine
+
+  ```php
+  *   label = @Translation("Event"),
+  ```
+  * Translation in annotations
+  * Nested annotations
+
+  ```php
+  *   base_table = "event",
+  *   entity_keys = {
+  *     "id" = "id",
+  *     "uuid" = "uuid",
+  *   },
+  ```
+  * Top-level keys are not quoted, but keys in mappings are quoted
+
+* Update entity/field definitions
+  * `{event}` table created
+  * `id` and `uuid` columns
+
+* Try out event CRUD
+  * Create and save an event
+    * Row in `{event}` table
+  * Load an event by ID and print ID and UUID
+  * Delete an event
+      * Row in `{event}` table gone
+
+
+## Base field definitions
+Branch: `01-minimal-entity-type` → `02-base-field-definitions`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Entity\EntityTypeInterface;
+
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = parent::baseFieldDefinitions($entity_type);
+
+    return $fields;
+  }
+  ```
+  * Interfaces as contracts to define behavior
+  * Overriding base implementation allows specialization while still having code reuse
+  * Static functions
+
+  ```php
+  use Drupal\Core\Field\BaseFieldDefinition;
+
+  $fields['title'] = BaseFieldDefinition::create('string');
+  ```
+  * cmp. `new BaseFieldDefinition('string');`
+  * Field type discoverability:
+    * Navigate to "FieldType" annotation class on api.drupal.org
+    * Click on list of annotated classes
+    * Pick appropriate class and find plugin ID
+
+  ```php
+  ->setLabel(t('Title'))
+  ```
+  * cmp. definition object ↔ info array
+  * `t()` generally discouraged, but unavoidable in static functions
+
+  ```php
+  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+
+  $fields['date'] = BaseFieldDefinition::create('datetime')
+    ->setLabel(t('Date'))
+    ->setSetting('datetime_type' => DateTimeItem::DATETIME_TYPE_DATE);
+  $fields['description'] = BaseFieldDefinition::create('text_long')
+    ->setLabel(t('Description'));
+  ```
+  * Setting discoverability:
+    * View `defaultStorageSettings` or `defaultFieldSettings` method on field item class
+  * Fields can have multiple properties
+  * Property discoverability
+    * View `propertyDefinitions` method on field item class
+
+  ```php
+  *     "label" = "title",
+  ```
+
+  ```php
+  ->setRequired(TRUE)
+  ```
+
+* Apply entity updates
+  * `title`, `date`, `description__value`, `description__format` columns
+  * Load an event set title, date, and description and save
+
+
+## Interface
+Branch: `02-base-field-definitions` → `03-interface`
+* Add the following to `src/Entity/Event.php`:
+  ```
+  public function getTitle() {
+    return $this->get('title')->value;
+  }
+
+  public function setTitle($title) {
+    $this->set('title', $title);
+  }
+
+  public function getDate() {
+    return $this->get('date')->date;
+  }
+
+  public function setDate(\DateTimeInterface $date) {
+    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+  }
+  ```
+  * getter and setter methods allow formulating semantic APIs
+
+  ```php
+  public function getDescription() {
+    return $this->get('description')->processed;
+  }
+
+  public function setDescription($description, $format) {
+    $this->set('description', [
+      'value' => $description,
+      'format' => $format,
+    ]);
+  }
+  ```
+  * Text and text format must always passed along together for security
+
+* Create `src/Event/EventInterface.php` with the following code:
+  ```php
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Entity\ContentEntityInterface;
+
+  interface EventInterface extends ContentEntityInterface {
+
+    public function getTitle();
+
+    public function setTitle($title);
+
+    public function getDate();
+
+    public function setDate(\DateTimeInterface $date);
+
+    public function getDescription();
+
+    public function setDescription($description, $format);
+
+  }
+  ```
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  implements EventInterface
+  ```
+
+* Test the new API
+  * Load an event set title, date, and description using the methods and save
+
+
+## View builder
+Branch: `03-interface` → `04-view-builder`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *   handlers = {
+  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+  *   },
+  * )
+  ```
+
+  ```php
+  *     "route_provider" = {
+  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+  *     },
+
+  *   links = {
+  *     "canonical" = "/events/{event}"
+  *   },
+  ```
+
+* Rebuild caches
+* Visit `/event/{event}`
+  * Access control is not defined yet
+
+* Add a `event.permissions.yml` with the following:
+  ```yaml
+  administer events:
+    title: 'Administer events'
+  ```
+
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  *   admin_permission = "administer events",
+  ```
+
+* Rebuild caches
+* Visit `/event/{event}`
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  ->setDisplayOptions('view', [
+    'label' => 'inline',
+    'type' => 'datetime_default',
+    'settings' => [
+      'format_type' => 'html_date',
+    ],
+    'weight' => 0,
+  ])
+
+  ->setDisplayOptions('view', [
+    'label' => 'hidden',
+    'weight' => 5,
+  ])
+  ```
+  * cmp. _Manage display_ table
+  * Formatter discoverability:
+    * Navigate to "FieldFormatter" annotation class on api.drupal.org
+    * Click on list of annotated classes
+    * Pick appropriate class and find plugin ID
+  * Formatter settings discoverability:
+    * View `defaultSettings` method on formatter class
+
+* Visit _Recent log messages_ page
+  * Warning due to missing `event` theme hook
+
+* Add a `event.module` with the following:
+  ```php
+  function event_theme($existing, $type, $theme, $path) {
+    return [
+      'event' => [
+        'render element' => 'elements',
+        'file' => 'event.theme.inc',
+      ],
+    ];
+  }
+  ```
+* Add a `event.theme.inc` with the following:
+  ```php
+  use Drupal\Core\Render\Element;
+
+  function template_preprocess_event(&$variables) {
+    foreach (Element::children($variables['elements']) as $key) {
+      $variables['content'][$key] = $variables['elements'][$key];
+    }
+  }
+  ```
+
+* Add a `templates` directory
+* Add a `templates/event.html.twig` with the following:
+  ```twig
+  <div{{ attributes }}>
+    {{ content }}
+  </div>
+  ```
+
+* Visit `/event/{event}`
+* Visit _Recent log messages_ page
+
+
+## Forms
+Branch: `04-view-builder` → `05-forms`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "form" = {
+  *       "add" = "Drupal\Core\Entity\ContentEntityForm",
+  *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
+  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+  *     },
+  ```
+
+  ```php
+   *     "add-form" = "/admin/content/events/add",
+   *     "edit-form" = "/admin/content/events/manage/{event}",
+   *     "delete-form" = "/admin/content/events/manage/{event}/delete",
+  ```
+
+* Visit `/admin/content/events/add`
+
+  ```php
+  ->setDisplayOptions('form', ['weight' => 0])
+
+  ->setDisplayOptions('form', ['weight' => 5])
+
+  ->setDisplayOptions('form', ['weight' => 10])
+  ```
+
+* Rebuild caches
+* Visit `/admin/content/events/add`
+* Visit `/admin/content/events/manage/{event}/`
+* Visit `/admin/content/events/manage/{event}/delete`
+
+## List builder
+Branch: `05-forms` → `06-list-builder`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+  ```
+
+  ```php
+  *     "collection" = "/admin/content/events",
+  ```
+  * Collection routes are not (yet) automatically generated
+
+* Add a `src/Routing` directory
+* Add a `src/Routing/CollectionHtmlRouteProvider` with the following:
+
+  ```php
+  namespace Drupal\event\Routing;
+
+  use Drupal\Core\Entity\EntityTypeInterface;
+  use Drupal\Core\Entity\Routing\EntityRouteProviderInterface;
+  use Symfony\Component\Routing\RouteCollection;
+  use Symfony\Component\Routing\Route;
+
+  class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
+
+    public function getRoutes(EntityTypeInterface $entity_type) {
+      $routes = new RouteCollection();
+      if ($entity_type->hasListBuilderClass() && $entity_type->hasLinkTemplate('collection') && $entity_type->getAdminPermission()) {
+        $entity_type_id = $entity_type->id();
+
+        $route = new Route($entity_type->getLinkTemplate('collection'));
+        $route
+          ->setDefault('_entity_list', $entity_type_id)
+          ->setDefault('_title', 'Events')
+          ->setRequirement('_permission', $entity_type->getAdminPermission());
+
+        $routes->add("entity.$entity_type_id.collection", $route);
+      }
+      return $routes;
+    }
+
+  }
+  ```
+<!-- TODO: Mention routing.yml (they made me do it) -->
+
+* Add the following to `src/Entity/Event.php`:
+
+  ```php
+  *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
+  ```
+
+* Rebuild caches
+
+* Visit `/admin/content/events`
+
+* Add a `src/Entity/EventListBuilder` with the following:
+  ```php
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Entity\EntityInterface;
+  use Drupal\Core\Entity\EntityListBuilder;
+
+  class EventListBuilder extends EntityListBuilder {
+
+    public function buildHeader() {
+      $header = [];
+      $header['title'] = $this->t('Title');
+      $header['date'] = $this->t('Date');
+      return $header + parent::buildHeader();
+    }
+
+    public function buildRow(EntityInterface $entity) {
+      /** @var \Drupal\event\Entity\EventInterface $event */
+      $row = [];
+      $row['title'] = $event->toLink();
+      $row['date'] = $event->getDate()->format(DATETIME_DATE_STORAGE_FORMAT);
+      return $row + parent::buildRow($entity);
+    }
+
+  }
+  ```
+  * Instead of hardcoding the format the `date.formatter` service should be
+    injected
+
+* Replace the list builder in `src/Entity/Event.php` with `Drupal\event\Entity\EventListBuilder`
+* Rebuild caches
+* Visit `/admin/content/events`
+
+## Views data
+Branch: `06-list-builder` → `07-views-data`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "views_data" = "Drupal\views\EntityViewsData",
+  ```
+<!-- TODO: Mention views data sucks -->
+
+* Add a _Event_ view to replace the list builder
+
+## Administration links
+Branch: `07-views-data` → `08-admin-links`
+
+* Add a `event.links.menu.yml` with the following:
+  ```yaml
+  entity.event.collection:
+    title: 'Events'
+    route_name: entity.event.collection
+    parent: system.admin_content
+  ```
+  * Routes are separate from menu links
+  * `hook_menu()` in D7 → multiple `event.links.*.yml` files
+
+* Rebuild caches
+
+* Add a `event.links.task.yml` with the following:
+  ```yaml
+  entity.event.collection:
+    title: 'Events'
+    route_name: entity.event.collection
+    base_route: system.admin_content
+  ```
+
+* Rebuild caches
+* Visit `/admin/content/events`
+
+* Add a `event.links.action.yml` with the following:
+  ```ỳaml
+  entity.event.collection:
+    title: 'Add'
+    route_name: entity.event.add_form
+    appears_on: [entity.event.collection]
+  ```
+
+* Rebuild caches
+* Visit `/admin/content/events`
+
+* Add the following to `event.links.task.yml`:
+  ```yaml
+  entity.event.canonical:
+    title: 'View'
+    route_name: entity.event.canonical
+    base_route: entity.event.canonical
+  entity.event.edit_form:
+    title: 'Edit'
+    route_name: entity.event.edit_form
+    base_route: entity.event.canonical
+  entity.event.delete_form:
+    title: 'Delete'
+    route_name: entity.event.delete_form
+    base_route: entity.event.canonical
+  ```
+
+* Rebuild caches
+* Visit `/events/{event}`
+
+<!-- TODO: Add contextual links and form redirects -->
+
+## Access control
+Branch: `08-admin-links` → `09-access`
+
+* Add the following to `event.permissions.yml`:
+  ```yaml
+  create events:
+    title: 'Create events'
+  delete events:
+    title: 'Delete events'
+  edit events:
+    title: 'Edit events'
+  view events:
+    title: 'View events'
+  ```
+
+* Add a `src/Access` directory
+
+* Add a `src/Access/EventAccessControlHandler.php` with the following:
+  ```php
+  namespace Drupal\event\Access;
+
+  use Drupal\Core\Access\AccessResult;
+  use Drupal\Core\Entity\EntityAccessControlHandler;
+  use Drupal\Core\Entity\EntityInterface;
+  use Drupal\Core\Session\AccountInterface;
+
+  class EventAccessControlHandler extends EntityAccessControlHandler {
+
+    protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+      $access_result = AccessResult::allowedIfHasPermission($account, 'create events');
+      return $access_result->orIf(parent::checkCreateAccess($account, $context, $entity_bundle));
+    }
+
+    protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+      switch ($operation) {
+        case "view":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'view events');
+          break;
+
+        case "update":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'edit events');
+          break;
+
+        case "delete":
+          $access_result = AccessResult::allowedIfHasPermission($account, 'delete events');
+          break;
+
+        default:
+          $access_result = AccessResult::neutral();
+          break;
+      }
+      return $access_result->orIf(parent::checkAccess($entity, $operation, $account));
+    }
+
+  }
+  ```
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  *     "access" = "Drupal\event\Access\EventAccessControlHandler",
+  ```
+
+* Rebuild caches
+
+* Test permissions
+  * `create events`, `edit events`, or `delete events` do not grant
+    access to `/admin/content/events`
+
+## Additional fields
+Branch: `09-access` → `10-additional-fields`
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+  $fields['path'] = BaseFieldDefinition::create('path')
+    ->setLabel(t('Path'))
+    ->setDisplayOptions('form', ['weight' => 15]);
+
+  $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Attendees'))
+    ->setSetting('target_type', 'user')
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setDisplayOptions('form', ['weight' => 20]);
+  ```
+
+* Update entity/field definitions
+  * `{event__attendees}` table created
+  * `deleted`, `langcode`, `bundle`, `revision_id` not optional currently
+
+<!-- TODO: Add methods for managing attendees -->
+
+* Add the following to `src/Entity/EventInterface.php`:
+  ```php
+  use Drupal\Core\Entity\EntityChangedInterface;
+  use Drupal\user\EntityOwnerInterface;
+
+  , EntityChangedInterface, EntityOwnerInterface
+  ```
+  * Changed tracking allows edit-locking
+  * Owners are used in entity reference, comment statistics, ...
+
+* Add the following to `src/Entity/Event.php`:
+  ```php
+  use Drupal\Core\Entity\EntityChangedTrait;
+
+  use EntityChangedTrait;
+
+  public function getOwner() {
+    $this->get('owner')->entity;
+  }
+  public function setOwner(UserInterface $account) {
+    $this->set('owner', $account->id());
+  }
+  public function getOwnerId() {
+    $this->get('owner')->target_id;
+  }
+  public function setOwnerId($uid) {
+    $this->set('owner', $uid);
+  }
+
+  $fields['changed'] = BaseFieldDefinition::create('changed')
+    ->setLabel(t('Changed'));
+  $fields['owner'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Owner'))
+    ->setSetting('target_type', 'user')
+    ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
+
+    public static function getDefaultOwnerIds() {
+      return [\Drupal::currentUser()->id()];
+    }
+  ```
+
+<!-- TODO: Add status field -->
+
+* Update entity/field definitions
+  * `changed` and `owner` columns created
+
+## Configuration entities
+Branch: `10-additional-fields` → `11-bundles`
+
+* Create a `src/Entity/EventType.php` with the following:
+  ```php
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Config\Entity\ConfigEntityBase;
+
+  /**
+   * @ConfigEntityType(
+   *   id = "event_type",
+   *   label = @Translation("Event type"),
+   *   config_prefix = "type",
+   *   config_export = {
+   *     "id",
+   *     "label",
+   *   }
+   * )
+   */
+  class EventType extends ConfigEntityBase{
+
+    protected $id;
+
+    protected $label;
+
+  }
+  ```
+
+* Update entity/field definitions
+  * No schema change
+
+* Try out event type CRUD
+  * Create and save an event type
+    * Row in `{config}` table
+  * Load an event type by ID and print label
+  * Delete an event type
+    * Row in `{config}` table gone
+
+<!-- TODO: Config Translation ->
+<!-- TODO: Switch Translation & Revisions ->
