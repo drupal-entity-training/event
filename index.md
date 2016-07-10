@@ -18,13 +18,18 @@ Branch: `00-empty-module` → `01-minimal-entity-type`
   file (or other files) outside of the `src` directory.
 
 * Create `src/Entity` directory
-  * Some directories have special meaning
-  * Drupal looks in `Entity` for entity types.
 
-* Create `src/Entity/Event.php` file and add the following:
+  As modules often contain many classes, they can be placed into arbitrary
+  subdirectories for organizational purposes. Certain directory names have a
+  special meaning in Drupal and are required for certain things. In particular,
+  Drupal looks in `Entity` for entity types.
+
+* Create a `src/Entity/Event.php` file with the following:
+
   ```php
   class Event {}
   ```
+
   * File name corresponds to class name
 
   ```php
