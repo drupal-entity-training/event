@@ -3,22 +3,21 @@ layout: default
 title: {{ site.name }}
 ---
 
-# Notes
-
-The process of creating the _Event_ entity type is documented below in the steps
-that it takes to get from one branch to the next with notes for each step. Note
-that the actual code in the branches is more not identical to the code snippets
-given here, although it is functionally equivalent.
+This documents the process of creating a custom entity type in Drupal 8 using
+the example of an  _Event_ entity type. The starting point is an empty module.
+The state at the end of any given step can be seen in the corresponding branch
+in the [repository](https://github.com/drupal-entity-training/event).
 
 ## Minimal entity type
 Branch: `00-empty-module` → `01-minimal-entity-type`
 
-* Create `src` directory
-  * `src` for all object-oriented code
-  * `.module` (and other files) outside, like in Drupal 7
+* Create a `src` directory
+
+  In Drupal 8 the `src` directory contains all object-oriented code (classes,
+  interfaces, traits). Procedural code (functions) is placed in the `.module`
+  file (or other files) outside of the `src` directory.
 
 * Create `src/Entity` directory
-  * Subdirectories in `src` for organization
   * Some directories have special meaning
   * Drupal looks in `Entity` for entity types.
 
