@@ -1,21 +1,6 @@
 ---
-# Setup
-title:        Event
-tagline:      A Drupal 8 example module showcasing the Entity API
-baseurl:      ""
-paginate:     1
-
-# About/contact
-author:
-  name:       Drupal Entity Training Team
-  url:        https://github.com/drupal-entity-training
-
-# Gems
-gems:
-  - jekyll-paginate
-
-#Others
-markdown: kramdown
+layout: default
+title: {{ site.name }}
 ---
 
 # Notes
