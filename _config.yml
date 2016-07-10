@@ -1,6 +1,6 @@
 # Setup
-title:        Creating a custom entity type
-tagline:      A step-by-step walkthrough of creating a Drupal 8 module with a custom _Event_ entity type
+title:        Guide to creating a custom entity type in Drupal 8
+tagline:      A step-by-step walkthrough of creating a Drupal 8 module with a custom <em>Event</em> entity type
 baseurl:      "/event"
 
 # About/contact
