@@ -1,6 +1,6 @@
 # Setup
-title:        Event
-tagline:      A Drupal 8 example module showcasing the Entity API
+title:        Creating a custom entity type
+tagline:      A step-by-step walkthrough of creating a Drupal 8 module with a custom _Event_ entity type
 baseurl:      "/event"
 
 # About/contact
