@@ -3,10 +3,17 @@ layout: default
 title: {{ site.name }}
 ---
 
-This documents the process of creating a custom entity type in Drupal 8 using
-the example of an  _Event_ entity type. The starting point is an empty module.
-The state at the end of any given step can be seen in the corresponding branch
-in the [repository](https://github.com/drupal-entity-training/event).
+This guide documents the process of creating a custom entity type in Drupal 8
+using the example of an  _Event_ entity type.
+
+You can reach this guide at [https://git.io/d8entity]().
+
+The starting point is an empty module named `event`. The state at the end of any
+given step can be seen in the corresponding branch in the
+[repository](https://github.com/drupal-entity-training/event).
+
+Having [Drush](http://docs.drush.org/en/master/) available is required to follow
+along.
 
 ## Minimal entity type
 Branch: `00-empty-module` → `01-minimal-entity-type`
@@ -17,7 +24,7 @@ Branch: `00-empty-module` → `01-minimal-entity-type`
   interfaces, traits). Procedural code (functions) is placed in the `.module`
   file (or other files) outside of the `src` directory.
 
-* Create `src/Entity` directory
+* Create a `src/Entity` directory
 
   As modules often contain many classes, they can be placed into arbitrary
   subdirectories for organizational purposes. Certain directory names have a
@@ -27,61 +34,111 @@ Branch: `00-empty-module` → `01-minimal-entity-type`
 * Create a `src/Entity/Event.php` file with the following:
 
   ```php
-  class Event {}
-  ```
-
-  * File name corresponds to class name
-
-  ```php
   namespace Drupal\event\Entity;
-  ```
-  * Namespace corresponds to directory structure
-  * PSR-4
-  * PSR-0
 
-  ```php
-  extends ContentEntityBase
-  ```
-  * Base classes as a tool for code reuse
-
-  ```php
   use Drupal\Core\Entity\ContentEntityBase;
+
+  class Event extends ContentEntityBase {}
   ```
-  * Corresponds to namespace
+
+  Each part of this code block is explained below:
+
+  * Class declaration:
+
+    ```php
+    class Event {}
+    ```
+
+    The file name must correspond to class name (including capitalization).
+
+  * Namespace:
+
+    ```php
+    namespace Drupal\event\Entity;
+    ```
+
+    Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
+    used simultaneously without risking naming conflicts. Namespaces can have
+    multiple parts. All classes in Drupal core and modules have `Drupal` as the
+    top-level namespace. The second part of module classes must be the module
+    name. Further sub-namespaces correspond to directory structure within the
+    `src` directory of the module.
+
+  * Inheritance:
+
+    ```php
+    extends ContentEntityBase
+    ```
+
+    Base classes as a tool for code reuse.
+
+  * Import:
+
+    ```php
+    use Drupal\Core\Entity\ContentEntityBase;
+    ```
+
+    Corresponds to namespace.
+
+* Add the following comment block to the `Event` class:
 
   ```php
   * @ContentEntityType(
   *   id = "event",
-  * )
-  ```
-  * Annotations as a way to provide metadata for code
-  * cmp. @param/@return/...
-  * Doctrine
-
-  ```php
   *   label = @Translation("Event"),
-  ```
-  * Translation in annotations
-  * Nested annotations
-
-  ```php
   *   base_table = "event",
   *   entity_keys = {
   *     "id" = "id",
   *     "uuid" = "uuid",
   *   },
+  * )
   ```
-  * Top-level keys are not quoted, but keys in mappings are quoted
 
-* Update entity/field definitions
+  Each part of this code block is explained below:
+
+
+  * Annotations as a way to provide metadata for code
+
+    cmp. @param/@return/...
+
+
+  * Label:
+
+    ```php
+    *   label = @Translation("Event"),
+    ```
+
+    Translation in annotations
+    Nested annotations
+
+  * Storage information:
+
+    ```php
+    *   base_table = "event",
+    *   entity_keys = {
+    *     "id" = "id",
+    *     "uuid" = "uuid",
+    *   },
+    ```
+
+    Top-level keys are not quoted, but keys in mappings are quoted
+
+* Run `drush entity-updates`
+
   * `{event}` table created
+
   * `id` and `uuid` columns
 
 * Try out event CRUD
+
   * Create and save an event
+
     * Row in `{event}` table
+
   * Load an event by ID and print ID and UUID
+
   * Delete an event
+
       * Row in `{event}` table gone
 
 
