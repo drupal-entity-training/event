@@ -6,141 +6,226 @@ title: {{ site.name }}
 This guide documents the process of creating a custom entity type in Drupal 8
 using the example of an  _Event_ entity type.
 
-You can reach this guide at [https://git.io/d8entity]().
+You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
 The starting point is an empty module named `event`. The state at the end of any
 given step can be seen in the corresponding branch in the
-[repository](https://github.com/drupal-entity-training/event).
+[repository][repository].
 
-Having [Drush](http://docs.drush.org/en/master/) available is required to follow
-along.
+Having [Drush][drush] available is required to follow along. When Drush commands
+are to be run, run them from within the Drupal installation. When PHP code is to
+executed, this can be done by running `drush core-cli` (preferred) or by
+creating a `test.php` script and then running `drush php-script test.php`.
 
-## Minimal entity type
-Branch: `00-empty-module` → `01-minimal-entity-type`
+### Using entities for data storage
 
-* Create a `src` directory
+1. Create an entity class
 
-  In Drupal 8 the `src` directory contains all object-oriented code (classes,
-  interfaces, traits). Procedural code (functions) is placed in the `.module`
-  file (or other files) outside of the `src` directory.
+   * Create a `src` directory
 
-* Create a `src/Entity` directory
+     In Drupal 8 the `src` directory contains all object-oriented code (classes,
+     interfaces, traits). Procedural code (functions) is placed in the `.module`
+     file (or other files) outside of the `src` directory.
 
-  As modules often contain many classes, they can be placed into arbitrary
-  subdirectories for organizational purposes. Certain directory names have a
-  special meaning in Drupal and are required for certain things. In particular,
-  Drupal looks in `Entity` for entity types.
+   * Create a `src/Entity` directory
 
-* Create a `src/Entity/Event.php` file with the following:
+     As modules often contain many classes, they can be placed into arbitrary
+     subdirectories for organizational purposes. Certain directory names have a
+     special meaning in Drupal and are required for certain things. In
+     particular, Drupal looks in `Entity` for entity types.
 
-  ```php
-  namespace Drupal\event\Entity;
+   * Create a `src/Entity/Event.php` file with the following:
 
-  use Drupal\Core\Entity\ContentEntityBase;
+     ```php
+     namespace Drupal\event\Entity;
 
-  class Event extends ContentEntityBase {}
-  ```
+     use Drupal\Core\Entity\ContentEntityBase;
 
-  Each part of this code block is explained below:
+     class Event extends ContentEntityBase {
 
-  * Class declaration:
+     }
+     ```
 
-    ```php
-    class Event {}
-    ```
+     Each part of this code block is explained below:
 
-    The file name must correspond to class name (including capitalization).
+     * Class declaration:
 
-  * Namespace:
+       ```php
+       class Event {
 
-    ```php
-    namespace Drupal\event\Entity;
-    ```
+       }
+       ```
 
-    Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
-    used simultaneously without risking naming conflicts. Namespaces can have
-    multiple parts. All classes in Drupal core and modules have `Drupal` as the
-    top-level namespace. The second part of module classes must be the module
-    name. Further sub-namespaces correspond to directory structure within the
-    `src` directory of the module.
+       The file name must correspond to class name (including capitalization).
 
-  * Inheritance:
+     * Namespace:
 
-    ```php
-    extends ContentEntityBase
-    ```
+       ```php
+       namespace Drupal\event\Entity;
+       ```
 
-    Base classes as a tool for code reuse.
+       Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
+       used simultaneously without risking naming conflicts. Namespaces can have
+       multiple parts. All classes in Drupal core and modules have `Drupal` as the
+       top-level namespace. The second part of module classes must be the module
+       name. Further sub-namespaces correspond to directory structure within the
+       `src` directory of the module.
 
-  * Import:
+     * Base class:
 
-    ```php
-    use Drupal\Core\Entity\ContentEntityBase;
-    ```
+       ```php
+       extends ContentEntityBase
+       ```
 
-    Corresponds to namespace.
+       Base classes can be used to implement functionality that is generic and
+       useful for many classes. Classes inherit all functionality from their base
+       class and only need to provide functionality specific to them. This avoids
+       code duplication.
 
-* Add the following comment block to the `Event` class:
+     * Import:
 
-  ```php
-  * @ContentEntityType(
-  *   id = "event",
-  *   label = @Translation("Event"),
-  *   base_table = "event",
-  *   entity_keys = {
-  *     "id" = "id",
-  *     "uuid" = "uuid",
-  *   },
-  * )
-  ```
+       ```php
+       use Drupal\Core\Entity\ContentEntityBase;
+       ```
 
-  Each part of this code block is explained below:
+       In the same way we declare a namespace for the `Event` class the
+       `ContentEntityBase` class also belongs to a namespace. Thus, in order to use
+       it below, we need to import the class using the full namespace.
 
+     See [Drupal API: Object-oriented programming conventions][api-oop] for more
+     information.
 
-  * Annotations as a way to provide metadata for code
+2. Add an annotation to the class
 
-    cmp. @param/@return/...
+   Add the following comment block to the `Event` class:
 
-
-  * Label:
-
-    ```php
+   ```php
+   /**
+    * @ContentEntityType(
+    *   id = "event",
     *   label = @Translation("Event"),
-    ```
-
-    Translation in annotations
-    Nested annotations
-
-  * Storage information:
-
-    ```php
+    *   label_singular = @Translation("event"),
+    *   label_plural = @Translation("events"),
+    *   label_count = @PluralTranslation(
+    *     singular = "@count event",
+    *     plural = "@count events",
+    *   ),
     *   base_table = "event",
     *   entity_keys = {
     *     "id" = "id",
     *     "uuid" = "uuid",
     *   },
-    ```
+    * )
+    */
+   ```
 
-    Top-level keys are not quoted, but keys in mappings are quoted
+   This part of a comment block of a class is called an _annotation_. Annotations
+   are a way to provide metadata about code. Even though it is part of a comment
+   block, the annotation is required for the entity type to function.
 
-* Run `drush entity-updates`
+   Each part of this code block is explained below:
 
-  * `{event}` table created
+   * ID:
 
-  * `id` and `uuid` columns
+     ```php
+     id = "event",
+     ```
 
-* Try out event CRUD
+     This is the ID of the entity type that is needed whenever interacting with
+     a specific entity type in code.
 
-  * Create and save an event
+   * Labels:
 
-    * Row in `{event}` table
+     ```php
+     *   label = @Translation("Event"),
+     *   label_singular = @Translation("event"),
+     *   label_plural = @Translation("events"),
+     *   label_count = @PluralTranslation(
+     *     singular = "@count event",
+     *     plural = "@count events",
+     *   ),
+     ```
 
-  * Load an event by ID and print ID and UUID
+     Because the label of this entity type might be used in a sentence and when
+     referencing multiple entities we need to provide different labels for the
+     different possible usages.
 
-  * Delete an event
+     To make the values we provide in the annotation translatable we need to
+     wrap them in `@Translation` or `@PluralTranslation` which are themselves
+     annotations. Note that the keys in the `@PluralTranslation` annotation are
+     not quoted.
 
-      * Row in `{event}` table gone
+   * Storage information:
 
+     ```php
+     *   base_table = "event",
+     *   entity_keys = {
+     *     "id" = "id",
+     *     "uuid" = "uuid",
+     *   },
+     ```
+
+     We need to specify the name of the database table we want the event data to
+     be stored. (This is called _base_ table, as there can be multiple tables
+     that store entity information, as will be seen below.)
+
+     Entities are required to have an ID which they can be loaded by. We need to
+     specify what the ID field will be called for our entity. This will also
+     determine the name of the database column that will hold the entity IDs.
+     Similarly entity types can (and are encouraged to) provide a UUID field.
+     Again, we can specify the name of the UUID field.
+
+     Note that top-level keys of the annotation are not quoted, but keys in
+     mappings (such as the `entity_keys` declaration) _are_ quoted.
+
+     See [Drupal API: Annotations][api-annotations] for more information.
+
+3. Install the _Event_ entity type
+
+   * Run `drush entity-updates`
+
+     Note that the `{event}` table has been created in the database with `id`
+     and `uuid` columns.
+
+   * Create and save an event
+
+     Run the following PHP code:
+
+     ```
+     use Drupal\event\Entity\Event;
+
+     $event = Event::create();
+     $event->save();
+     ```
+
+     Note that there is a new row in the `{event}` table with an ID and a UUID.
+
+   * Load an event fetch its ID and UUID
+
+     Run the following PHP code:
+
+     ```
+     use Drupal\event\Entity\Event;
+
+     $event = Event::load(1);
+     $event->id();
+     $event->uuid();
+     ```
+
+     Note that the returned values match the values in the database.
+
+   * Delete the event
+
+     Run the following PHP code:
+
+     ```
+     use Drupal\event\Entity\Event;
+
+     $event = Event::load(1);
+     $event->delete();
+     ```
+
+     Note that the row in the `{event}` table is gone.
 
 ## Base field definitions
 Branch: `01-minimal-entity-type` → `02-base-field-definitions`
@@ -743,3 +828,9 @@ Branch: `10-additional-fields` → `11-bundles`
 
 <!-- TODO: Config Translation ->
 <!-- TODO: Switch Translation & Revisions ->
+
+[guide-short-url]: https://git.io/d8entity
+[repository]: https://github.com/drupal-entity-training/event
+[drush]: http://docs.drush.org/en/master
+[api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
+[api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
