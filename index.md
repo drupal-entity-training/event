@@ -21,6 +21,11 @@ creating a `test.php` script and then running `drush php-script test.php`.
 
 1. Create an entity class
 
+   _Classes_ allow categorizing objects as being of a certain type. Event
+   entities, that will be created below, will be _instances_ of the entity
+   class. In terms of code organization, classes can be used to group related
+   functionality.
+
    * Create a `src` directory
 
      In Drupal 8 the `src` directory contains all object-oriented code (classes,
@@ -97,6 +102,10 @@ creating a `test.php` script and then running `drush php-script test.php`.
 
 2. Add an annotation to the class
 
+   _Annotations_ are a way to provide metadata about code. Because the annotation
+   is placed right next to the code itself, this makes classes truely
+   self-contained as both functionality and metadata are in the same file.
+
    Add the following comment block to the `Event` class:
 
    ```php
@@ -119,9 +128,8 @@ creating a `test.php` script and then running `drush php-script test.php`.
     */
    ```
 
-   This part of a comment block of a class is called an _annotation_. Annotations
-   are a way to provide metadata about code. Even though it is part of a comment
-   block, the annotation is required for the entity type to function.
+   Even though the annotation is part of a comment block, it is required for the
+   entity type to function.
 
    Each part of this code block is explained below:
 
@@ -200,6 +208,14 @@ creating a `test.php` script and then running `drush php-script test.php`.
 
      Note that there is a new row in the `{event}` table with an ID and a UUID.
 
+     The `Event` class inherits the `create` and `save` methods from
+     `ContentEntityBase` so they can be called without being present in the
+     `Event` class itself.
+
+     `create` is a _static_ method so it is called by using the class name and
+     the `::` syntax. `save` is not a static method so it is used with an
+     instance of the class and the `->` syntax.
+
    * Load an event fetch its ID and UUID
 
      Run the following PHP code:
@@ -227,25 +243,49 @@ creating a `test.php` script and then running `drush php-script test.php`.
 
      Note that the row in the `{event}` table is gone.
 
-## Base field definitions
-Branch: `01-minimal-entity-type` → `02-base-field-definitions`
+3. Add field definitions
 
-* Add the following to `src/Entity/Event.php`:
+   Fields are the pieces of data that make up an entity. The ID and UUID that
+   were saved as part of the event above are examples of field values. To be
+   able to store actual event data in our entities, we need to declare
+   additional fields.
+
+   * Add the following to `src/Entity/Event.php`:
+
+     ```php
+     use Drupal\Core\Entity\EntityTypeInterface;
+     use Drupal\Core\Field\BaseFieldDefinition;
+
+     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+       $fields = parent::baseFieldDefinitions($entity_type);
+
+       $fields['title'] = BaseFieldDefinition::create('string')
+         ->setLabel(t('Title'));
+       $fields['date'] = BaseFieldDefinition::create('datetime')
+         ->setLabel(t('Date'));
+       $fields['description'] = BaseFieldDefinition::create('text_long')
+         ->setLabel(t('Description'));
+
+       return $fields;
+     }
+     ```
+
+     Some parts of the code block are explained below:
+
+     * Type hint:
+
+       ```php
+       EntityTypeInterface $entity_type
+       ```
+
+       _Interfaces_ are contracts that specify the methods a class must have in
+       order to fulfill it.
+
+       The interface name in front of the `$entity_type` parameter is a _type
+       hint_. It dictates what type of object must be passed. Type hinting an
+       interface allows any class that _implements_ the interface to be passed.
+
   ```php
-  use Drupal\Core\Entity\EntityTypeInterface;
-
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = parent::baseFieldDefinitions($entity_type);
-
-    return $fields;
-  }
-  ```
-  * Interfaces as contracts to define behavior
-  * Overriding base implementation allows specialization while still having code reuse
-  * Static functions
-
-  ```php
-  use Drupal\Core\Field\BaseFieldDefinition;
 
   $fields['title'] = BaseFieldDefinition::create('string');
   ```
@@ -258,8 +298,6 @@ Branch: `01-minimal-entity-type` → `02-base-field-definitions`
   ```php
   ->setLabel(t('Title'))
   ```
-  * cmp. definition object ↔ info array
-  * `t()` generally discouraged, but unavoidable in static functions
 
   ```php
   use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
