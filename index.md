@@ -243,14 +243,14 @@ creating a `test.php` script and then running `drush php-script test.php`.
 
      Note that the row in the `{event}` table is gone.
 
-3. Add field definitions
+4. Add field definitions
 
    Fields are the pieces of data that make up an entity. The ID and UUID that
    were saved as part of the event above are examples of field values. To be
    able to store actual event data in our entities, we need to declare
    additional fields.
 
-   * Add the following to `src/Entity/Event.php`:
+   * Add the following method to `src/Entity/Event.php`:
 
      ```php
      use Drupal\Core\Entity\EntityTypeInterface;
@@ -260,9 +260,11 @@ creating a `test.php` script and then running `drush php-script test.php`.
        $fields = parent::baseFieldDefinitions($entity_type);
 
        $fields['title'] = BaseFieldDefinition::create('string')
-         ->setLabel(t('Title'));
+         ->setLabel(t('Title'))
+         ->setRequired(TRUE);
        $fields['date'] = BaseFieldDefinition::create('datetime')
-         ->setLabel(t('Date'));
+         ->setLabel(t('Date'))
+         ->setRequired(TRUE);
        $fields['description'] = BaseFieldDefinition::create('text_long')
          ->setLabel(t('Description'));
 
@@ -285,117 +287,204 @@ creating a `test.php` script and then running `drush php-script test.php`.
        hint_. It dictates what type of object must be passed. Type hinting an
        interface allows any class that _implements_ the interface to be passed.
 
-  ```php
+     * Field definition:
 
-  $fields['title'] = BaseFieldDefinition::create('string');
-  ```
-  * cmp. `new BaseFieldDefinition('string');`
-  * Field type discoverability:
-    * Navigate to "FieldType" annotation class on api.drupal.org
-    * Click on list of annotated classes
-    * Pick appropriate class and find plugin ID
+       ```php
+       BaseFieldDefinition::create('string');
+       ```
 
-  ```php
-  ->setLabel(t('Title'))
-  ```
+       _Field definitions_ are objects that hold metadata about a field. They
+       are created by passing the field type ID into the static `create` method.
+       Unfortunately there is no list of IDs of available field types, but
+       [Drupal API: List of classes annotated with FieldType][api-field-types]
+       lists all field type classes in core. The ID of a given field type can be
+       found in its class documentation or by inspecting the `@FieldType`
+       annotation.
 
-  ```php
-  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+     * Chaining:
 
-  $fields['date'] = BaseFieldDefinition::create('datetime')
-    ->setLabel(t('Date'))
-    ->setSetting('datetime_type' => DateTimeItem::DATETIME_TYPE_DATE);
-  $fields['description'] = BaseFieldDefinition::create('text_long')
-    ->setLabel(t('Description'));
-  ```
-  * Setting discoverability:
-    * View `defaultStorageSettings` or `defaultFieldSettings` method on field item class
-  * Fields can have multiple properties
-  * Property discoverability
-    * View `propertyDefinitions` method on field item class
+       ```php
+       ->setLabel(t('Title'))
+       ->setRequired(TRUE)
+       ```
 
-  ```php
-  *     "label" = "title",
-  ```
+       Many set methods return the object they were called on to allow
+       _chaining_ multiple set methods after another. The setting up of the
+       `title` field definition above is functionally equivalent to the
+       following code block which avoids chaining:
 
-  ```php
-  ->setRequired(TRUE)
-  ```
+       ```
+       $fields['title'] = BaseFieldDefinition::create('string');
+       $fields['title']->setLabel(t('Title'));
+       $fields['title']->setRequired(TRUE);
+       ```
 
-* Apply entity updates
-  * `title`, `date`, `description__value`, `description__format` columns
-  * Load an event set title, date, and description and save
+   * Add the following to the `entity_keys` part of the annotation in
+     `src/Entity/Event.php`:
+
+     ```php
+     *     "label" = "title",
+     ```
+
+     Declaring a `label` key makes the (inherited) `label` method on the `Event`
+     class work and also allows autocompletion of events by their title.
+
+5. Install the new fields
+
+   * Run `drush entity-updates`
+
+     Note that `title`, `date`, `description__value` and `description__format`
+     columns have been created in the `{event}` table.
+
+     Although most field types consist of a single `value` _property_, text
+     fields, for example, have an additional `format` property. Therefore
+     two database columns are required for text fields.
+
+   * Create and save an event
+
+     Run the following PHP code:
+
+     ```
+     use Drupal\event\Entity\Event;
+
+     $event = Event::create([
+       'title' => 'Drupal User Group',
+       'date' => (new \DateTime())->format(DATETIME_DATE_STORAGE_FORMAT),
+       'description' => [
+         'value' => '<p>The monthly meeting of Drupalists is happening today!</p>',
+         'format' => 'basic_html',
+       ],
+     ]);
+     $event->save();
+     ```
+
+     Note that there is a new row in the `{event}` table with the proper field
+     values.
+
+   * Load an event fetch its field values.
+
+     Run the following PHP code:
+
+     ```php
+     use Drupal\event\Entity\Event;
+
+     $event = Event::load(2);
+
+     $event->get('title')->value;
+
+     $event->get('date')->value;
+     $event->get('date')->date;
+
+     $event->get('description')->value;
+     $event->get('description')->format;
+     $event->get('description')->processed;
+     ```
+
+     Note that the returned values match the values in the database.
+
+     In addition to the stored properties field types can also declare
+     _computed_ properties, such as the `date` property of a datetime field or
+     the `processed` property of text fields.
+
+   * Update an event's field values and save them.
+
+     Run the following PHP code:
+
+     ```php
+     use Drupal\event\Entity\Event;
+
+     $event = Event::load(2);
+
+     $event
+       ->set('title', 'DrupalCon')
+       ->set('date', (new \DateTime('yesterday'))->format(DATETIME_DATE_STORAGE_FORMAT))
+       ->set('description', [
+         'value' => '<p>DrupalCon is a great place to meet international Drupal superstars.</p>',
+         'format' => 'restricted_html',
+       ])
+       ->save();
+     ```
+
+     Note that the values in the database have been updated accordingly.
 
 
-## Interface
-Branch: `02-base-field-definitions` → `03-interface`
-* Add the following to `src/Entity/Event.php`:
-  ```
-  public function getTitle() {
-    return $this->get('title')->value;
-  }
+6. Add field methods and an interface
 
-  public function setTitle($title) {
-    $this->set('title', $title);
-  }
+   * Add the following methods to `src/Entity/Event.php`:
 
-  public function getDate() {
-    return $this->get('date')->date;
-  }
+     ```php
+     public function getTitle() {
+       return $this->get('title')->value;
+     }
 
-  public function setDate(\DateTimeInterface $date) {
-    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
-  }
-  ```
-  * getter and setter methods allow formulating semantic APIs
+     public function setTitle($title) {
+       $this->set('title', $title);
+     }
 
-  ```php
-  public function getDescription() {
-    return $this->get('description')->processed;
-  }
+     public function getDate() {
+       return $this->get('date')->date;
+     }
 
-  public function setDescription($description, $format) {
-    $this->set('description', [
-      'value' => $description,
-      'format' => $format,
-    ]);
-  }
-  ```
-  * Text and text format must always passed along together for security
+     public function setDate(\DateTimeInterface $date) {
+       $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+     }
 
-* Create `src/Event/EventInterface.php` with the following code:
-  ```php
-  namespace Drupal\event\Entity;
+     public function getDescription() {
+       return $this->get('description')->processed;
+     }
 
-  use Drupal\Core\Entity\ContentEntityInterface;
+     public function setDescription($description, $format) {
+       $this->set('description', [
+         'value' => $description,
+         'format' => $format,
+       ]);
+     }
+     ```
 
-  interface EventInterface extends ContentEntityInterface {
+     Field methods not only provide autocompletion, but also allow designing richer
+     APIs than the bare field types provide. The `setDate` method, for example,
+     hides the internal storage format of datetime values from anyone working with
+     events. Similarly the `setDescription` method requires setting the descrtption
+     and the text format simultaneously for security.
 
-    public function getTitle();
+  * Create a `src/Event/EventInterface.php` with the following code:
 
-    public function setTitle($title);
+    ```php
+    namespace Drupal\event\Entity;
 
-    public function getDate();
+    use Drupal\Core\Entity\ContentEntityInterface;
 
-    public function setDate(\DateTimeInterface $date);
+    interface EventInterface extends ContentEntityInterface {
 
-    public function getDescription();
+      public function getTitle();
 
-    public function setDescription($description, $format);
+      public function setTitle($title);
 
-  }
-  ```
+      public function getDate();
 
-* Add the following to `src/Entity/Event.php`:
-  ```php
-  implements EventInterface
-  ```
+      public function setDate(\DateTimeInterface $date);
 
-* Test the new API
-  * Load an event set title, date, and description using the methods and save
+      public function getDescription();
 
+      public function setDescription($description, $format);
 
-## View builder
+    }
+    ```
+
+  * Add the following to the class declaration in `src/Entity/Event.php`:
+
+    ```php
+    implements EventInterface
+    ```
+
+  * Test the new API
+
+    Load an event set title, date, and description using the methods and save
+
+### Providing a user interface for entities
+
+6. Add a view builder
+
 Branch: `03-interface` → `04-view-builder`
 
 * Add the following to `src/Entity/Event.php`:
@@ -872,3 +961,5 @@ Branch: `10-additional-fields` → `11-bundles`
 [drush]: http://docs.drush.org/en/master
 [api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
 [api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
+[api-field-types]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldType.php/class/annotations/FieldType/8.2.x
+
