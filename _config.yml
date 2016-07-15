@@ -8,9 +8,5 @@ author:
   name:       The Drupal Entity Training Team
   url:        https://github.com/drupal-entity-training
 
-# Gems
-gems:
-  - jekyll-paginate
-
-#Others
 markdown: kramdown
+highlighter: rouge
