@@ -537,27 +537,38 @@ constructing a renderable array from an entity object. Futhermore, a route is
 needed that utilizes the view builder to output the entity's fields on a given
 path. All of this can be automated by amending the entity annotation.
 
-* Add the following to `src/Entity/Event.php`:
+* Add the following to the annotation in `src/Entity/Event.php`:
+
   ```php
   *   handlers = {
   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
-  *   },
-  * )
-  ```
-
-A _view builder_ is responsible for constructing a render array from an entity
-object for outputting on the site.
-
-
-  ```php
   *     "route_provider" = {
   *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
   *     },
-
+  *   },
   *   links = {
   *     "canonical" = "/events/{event}"
   *   },
   ```
+
+  Parts of this code block are explained below:
+
+  * Entity handlers:
+
+    ```
+    handlers
+    ```
+
+    Entity _handlers_ are objects that take over certain tasks related to
+    entities. Each entity type can declare which handler it wants to use for which
+    task. In many cases - as can be seen above - Drupal core provides generic
+    handlers that can be used as is. In other cases or when more advanced
+    functionality is required, custom handlers can be used instead.
+
+  * Route providers:
+
+  * Links:
+
 
 * Rebuild caches
 * Visit `/event/{event}`
