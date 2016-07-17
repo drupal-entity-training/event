@@ -53,7 +53,7 @@ functionality.
 
 * Create a `src/Entity/Event.php` file with the following:
 
-  ``` php?start_inline=1
+  ```php?start_inline=1
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\ContentEntityBase;
@@ -67,9 +67,7 @@ functionality.
 
   * Class declaration:
 
-    ``` php
-    <?php
-
+    ```php
     class Event {
 
     }
@@ -158,7 +156,7 @@ Each part of this code block is explained below:
 
 * Labels:
 
-  ```php
+  ```php?start_inline=1
   *   label = @Translation("Event"),
   *   label_singular = @Translation("event"),
   *   label_plural = @Translation("events"),
@@ -272,7 +270,7 @@ additional fields.
 
 * Add the following method to `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   use Drupal\Core\Entity\EntityTypeInterface;
   use Drupal\Core\Field\BaseFieldDefinition;
 
