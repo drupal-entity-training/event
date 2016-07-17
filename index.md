@@ -370,7 +370,7 @@ update it automatically.
 
   $event = Event::create([
     'title' => 'Drupal User Group',
-    'date' => (new \DateTime())->format(DATETIME_DATE_STORAGE_FORMAT),
+    'date' => (new \DateTime())->format(DATETIME_DATETIME_STORAGE_FORMAT),
     'description' => [
       'value' => '<p>The monthly meeting of Drupalists is happening today!</p>',
       'format' => 'basic_html',
@@ -418,7 +418,7 @@ update it automatically.
 
   $event
     ->set('title', 'DrupalCon')
-    ->set('date', (new \DateTime('yesterday'))->format(DATETIME_DATE_STORAGE_FORMAT))
+    ->set('date', (new \DateTime('yesterday'))->format(DATETIME_DATETIME_STORAGE_FORMAT))
     ->set('description', [
       'value' => '<p>DrupalCon is a great place to meet international Drupal superstars.</p>',
       'format' => 'restricted_html',
@@ -451,7 +451,7 @@ interface
   }
 
   public function setDate(\DateTimeInterface $date) {
-    $this->set('date', $date->format(DATETIME_DATE_STORAGE_FORMAT));
+    $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
   }
 
   public function getDescription() {
@@ -813,7 +813,7 @@ Branch: `05-forms` → `06-list-builder`
       /** @var \Drupal\event\Entity\EventInterface $event */
       $row = [];
       $row['title'] = $event->toLink();
-      $row['date'] = $event->getDate()->format(DATETIME_DATE_STORAGE_FORMAT);
+      $row['date'] = $event->getDate()->format(DATETIME_DATETIME_STORAGE_FORMAT);
       return $row + parent::buildRow($entity);
     }
 
