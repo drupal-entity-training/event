@@ -68,6 +68,8 @@ functionality.
   * Class declaration:
 
     ``` php
+    <?php
+
     class Event {
 
     }
