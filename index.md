@@ -67,7 +67,7 @@ functionality.
 
   * Class declaration:
 
-    ```php
+    ```php?start_inline=1
     class Event {
 
     }
@@ -77,7 +77,7 @@ functionality.
 
   * Namespace:
 
-    ```php
+    ```php?start_inline=1
     namespace Drupal\event\Entity;
     ```
 
@@ -90,7 +90,7 @@ functionality.
 
   * Base class:
 
-    ```php
+    ```php?start_inline=1
     extends ContentEntityBase
     ```
 
@@ -101,7 +101,7 @@ functionality.
 
   * Import:
 
-    ```php
+    ```php?start_inline=1
     use Drupal\Core\Entity\ContentEntityBase;
     ```
 
@@ -120,7 +120,7 @@ as both functionality and metadata are in the same file.
 
 Add the following comment block to the `Event` class:
 
-```php
+```php?start_inline=1
 /**
  * @ContentEntityType(
  *   id = "event",
@@ -147,8 +147,8 @@ Each part of this code block is explained below:
 
 * ID:
 
-  ```php
-  id = "event",
+  ```php?start_inline=1
+  *   id = "event",
   ```
 
   This is the ID of the entity type that is needed whenever interacting with
@@ -179,7 +179,7 @@ Each part of this code block is explained below:
 
 * Storage information:
 
-  ```php
+  ```php?start_inline=1
   *   base_table = "event",
   *   entity_keys = {
   *     "id" = "id",
@@ -217,7 +217,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```
+  ```?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::create();
@@ -238,7 +238,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```
+  ```?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
@@ -252,7 +252,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```
+  ```?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
@@ -294,7 +294,7 @@ additional fields.
 
   * Type hint:
 
-    ```php
+    ```php?start_inline=1
     EntityTypeInterface $entity_type
     ```
 
@@ -307,7 +307,7 @@ additional fields.
 
   * Field definition:
 
-    ```php
+    ```php?start_inline=1
     BaseFieldDefinition::create('string');
     ```
 
@@ -321,7 +321,7 @@ additional fields.
 
   * Chaining:
 
-    ```php
+    ```php?start_inline=1
     ->setLabel(t('Title'))
     ->setRequired(TRUE)
     ```
@@ -331,7 +331,7 @@ additional fields.
     `title` field definition above is functionally equivalent to the
     following code block which avoids chaining:
 
-    ```
+    ```?start_inline=1
     $fields['title'] = BaseFieldDefinition::create('string');
     $fields['title']->setLabel(t('Title'));
     $fields['title']->setRequired(TRUE);
@@ -340,7 +340,7 @@ additional fields.
 * Add the following to the `entity_keys` part of the annotation in
   `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   *     "label" = "title",
   ```
 
@@ -365,7 +365,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```
+  ```?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::create([
@@ -386,7 +386,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```php
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -411,7 +411,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```php
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -437,7 +437,7 @@ interface
 
 * Add the following methods to `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   public function getTitle() {
     return $this->get('title')->value;
   }
@@ -474,7 +474,7 @@ interface
 
 * Create a `src/Event/EventInterface.php` with the following code:
 
-  ```php
+  ```php?start_inline=1
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\ContentEntityInterface;
@@ -498,7 +498,7 @@ interface
 
 * Add the following to the class declaration in `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   implements EventInterface
   ```
 
@@ -506,7 +506,7 @@ interface
 
   Run the following PHP code:
 
-  ```php
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -539,7 +539,7 @@ path. All of this can be automated by amending the entity annotation.
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   *   handlers = {
   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
   *     "route_provider" = {
@@ -555,7 +555,7 @@ path. All of this can be automated by amending the entity annotation.
 
   * Entity handlers:
 
-    ```
+    ```?start_inline=1
     handlers
     ```
 
@@ -597,7 +597,7 @@ with an enhanced entity access control handler will be added below.
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   *   admin_permission = "administer events",
   ```
 
@@ -621,7 +621,7 @@ displayed unless explicitly configured to.
 * Add the following to the `baseFieldDefinitions()` method of
   `src/Entity/Event.php`:
 
-  ```php
+  ```php?start_inline=1
   // Add this to the end of the $fields['date'] block and remove the trailing
   // comma above.
   ->setDisplayOptions('view', [
@@ -645,18 +645,18 @@ displayed unless explicitly configured to.
 
   * Display mode:
 
-    ``` php
+    ```php?start_inline=1
     ->setDisplayOptions('view'
-    ```
-
-  * Label display:
-
-    ``` php
-    'label' => 'inline',
     ```
 
     Display options can be set for two different display _modes_: `view` and
     `form`. Form display options will be set below.
+
+  * Label display:
+
+    ```php?start_inline=1
+    'label' => 'inline',
+    ```
 
   * cmp. _Manage display_ table
   * Formatter discoverability:
@@ -670,7 +670,7 @@ displayed unless explicitly configured to.
   * Warning due to missing `event` theme hook
 
 * Add a `event.module` with the following:
-  ```php
+  ```php?start_inline=1
   function event_theme($existing, $type, $theme, $path) {
     return [
       'event' => [
