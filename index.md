@@ -8,9 +8,9 @@ using the example of an  _Event_ entity type.
 
 You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
-The starting point is an empty module named `event`. The state at the end of any
-given step can be seen in the corresponding branch in the
-[repository][repository].
+The starting point is a stock Drupal 8.2 core _Standard_ installation with an
+empty module named `event`. The state at the end of any given step can be seen
+in the corresponding branch in the [repository][repository].
 
 Having [Drush][drush] available is required to follow along. When Drush commands
 are to be run, run them from within the Drupal installation. When PHP code is to
@@ -53,7 +53,7 @@ functionality.
 
 * Create a `src/Entity/Event.php` file with the following:
 
-  ```php
+  ``` php?start_inline=1
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\ContentEntityBase;
@@ -67,7 +67,7 @@ functionality.
 
   * Class declaration:
 
-    ```php
+    ``` php
     class Event {
 
     }
@@ -547,7 +547,7 @@ path. All of this can be automated by amending the entity annotation.
   *     },
   *   },
   *   links = {
-  *     "canonical" = "/events/{event}"
+  *     "canonical" = "/event/{event}"
   *   },
   ```
 
@@ -569,28 +569,61 @@ path. All of this can be automated by amending the entity annotation.
 
   * Links:
 
-
 * Rebuild caches
-* Visit `/event/{event}`
-  * Access control is not defined yet
+
+  Run `drush cache-rebuild`
+
+* Verify the route has been generated
+
+  Visit `/event/2`
+
+  Note that an _Access denied_ page is shown. This means a route exists at this
+  path (otherwise a _Not found_ page would be shown). However, access has not
+  been defined, so that - even for the administrative user - the page will not
+  be shown.
+
+#### Add an administrative permission
+
+An administrative permission is used by the default entity access control
+handler for all operations as a fallback. More granular permissions together
+with an enhanced entity access control handler will be added below.
 
 * Add a `event.permissions.yml` with the following:
+
   ```yaml
   administer events:
     title: 'Administer events'
   ```
 
-* Add the following to `src/Entity/Event.php`:
+* Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php
   *   admin_permission = "administer events",
   ```
 
 * Rebuild caches
-* Visit `/event/{event}`
-* Add the following to `src/Entity/Event.php`:
+
+  Run `drush cache-rebuild`
+
+* Verify that access is granted
+
+  Visit `/event/2`
+
+  Note that an empty page is shown (and no longer an _Access denied_ page).
+  However, no field values are shown.
+
+#### Configure fields for display
+
+Which fields to display when rendering the entity, as well as how to display
+them, can be configured as part of the field definitions. Fields are not
+displayed unless explicitly configured to.
+
+* Add the following to the `baseFieldDefinitions()` method of
+  `src/Entity/Event.php`:
 
   ```php
+  // Add this to the end of the $fields['date'] block and remove the trailing
+  // comma above.
   ->setDisplayOptions('view', [
     'label' => 'inline',
     'type' => 'datetime_default',
@@ -598,13 +631,33 @@ path. All of this can be automated by amending the entity annotation.
       'format_type' => 'html_date',
     ],
     'weight' => 0,
-  ])
+  ]);
 
+  // Add this to the end of the $fields['description'] block and remove the
+  // trailing comma above.
   ->setDisplayOptions('view', [
     'label' => 'hidden',
     'weight' => 5,
-  ])
+  ]);
   ```
+
+  Parts of this code block are explained below:
+
+  * Display mode:
+
+    ``` php
+    ->setDisplayOptions('view'
+    ```
+
+  * Label display:
+
+    ``` php
+    'label' => 'inline',
+    ```
+
+    Display options can be set for two different display _modes_: `view` and
+    `form`. Form display options will be set below.
+
   * cmp. _Manage display_ table
   * Formatter discoverability:
     * Navigate to "FieldFormatter" annotation class on api.drupal.org
@@ -628,6 +681,7 @@ path. All of this can be automated by amending the entity annotation.
   }
   ```
 * Add a `event.theme.inc` with the following:
+
   ```php
   use Drupal\Core\Render\Element;
 
