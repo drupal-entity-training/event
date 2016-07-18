@@ -217,7 +217,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```?start_inline=1
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::create();
@@ -238,7 +238,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```?start_inline=1
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
@@ -252,7 +252,7 @@ this needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```?start_inline=1
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
@@ -331,7 +331,7 @@ additional fields.
     `title` field definition above is functionally equivalent to the
     following code block which avoids chaining:
 
-    ```?start_inline=1
+    ```php?start_inline=1
     $fields['title'] = BaseFieldDefinition::create('string');
     $fields['title']->setLabel(t('Title'));
     $fields['title']->setRequired(TRUE);
@@ -365,7 +365,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```?start_inline=1
+  ```php?start_inline=1
   use Drupal\event\Entity\Event;
 
   $event = Event::create([
@@ -555,7 +555,7 @@ path. All of this can be automated by amending the entity annotation.
 
   * Entity handlers:
 
-    ```?start_inline=1
+    ```php?start_inline=1
     handlers
     ```
 
@@ -618,12 +618,10 @@ Which fields to display when rendering the entity, as well as how to display
 them, can be configured as part of the field definitions. Fields are not
 displayed unless explicitly configured to.
 
-* Add the following to the `baseFieldDefinitions()` method of
-  `src/Entity/Event.php`:
+* Add the following to the `$fields['date']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the semicolon:
 
   ```php?start_inline=1
-  // Add this to the end of the $fields['date'] block and remove the trailing
-  // comma above.
   ->setDisplayOptions('view', [
     'label' => 'inline',
     'type' => 'datetime_default',
@@ -631,15 +629,20 @@ displayed unless explicitly configured to.
       'format_type' => 'html_date',
     ],
     'weight' => 0,
-  ]);
+  ])
+  ```
 
-  // Add this to the end of the $fields['description'] block and remove the
-  // trailing comma above.
+  Add the following to the `$fields['description']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the semicolon:
+
+  ```php?start_inline=1
   ->setDisplayOptions('view', [
     'label' => 'hidden',
     'weight' => 5,
-  ]);
+  ])
   ```
+
+  <!-- @todo: Explain why the title field is not displayed -->
 
   Parts of this code block are explained below:
 
@@ -656,6 +659,16 @@ displayed unless explicitly configured to.
 
     ```php?start_inline=1
     'label' => 'inline',
+    ```
+
+    The field label can be configured to be displayed above the field value (the
+    default), inline in front of the field value or hidden altogether. The
+    respective values of the `label` setting are `above`, `inline` and `hidden`.
+
+  * Formatter:
+
+    ```php?start_inline=1
+    'type' => 'datetime_default',
     ```
 
   * cmp. _Manage display_ table
