@@ -24,10 +24,14 @@ creating a `test.php` script and then running `drush php-script test.php`.
    2. [Add an annotation to the class](#add-an-annotation-to-the-class)
    3. [Install the entity type](#install-the-entity-type)
    4. [Add field definitions](#add-field-definitions)
-   5. [Add field methods](#add-field-methods)
+   5. [Install the new fields](#install-the-new-fields)
+   6. [Add field methods](#add-field-methods)
 
 2. [Providing a user interface for entities](#providing-a-user-interface-for-entities)
    1. [Add a view page](#add-a-view-page)
+   2. [Add an administrative permission](#add-an-administrative-permission)
+   3. [Configure fields for display](#configure-fields-for-display)
+   4. [Add a theme function](#add-a-theme-function)
 
 ### Using entities for data storage
 
@@ -53,7 +57,9 @@ functionality.
 
 * Create a `src/Entity/Event.php` file with the following:
 
-  ```php?start_inline=1
+  ```php
+  <?php
+
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\ContentEntityBase;
@@ -313,7 +319,7 @@ additional fields.
 
     _Field definitions_ are objects that hold metadata about a field. They
     are created by passing the field type ID into the static `create` method.
-    Unfortunately there is no list of IDs of available field types, but
+    There is no list of IDs of available field types, but
     [Drupal API: List of classes annotated with FieldType][api-field-types]
     lists all field type classes in core. The ID of a given field type can be
     found in its class documentation or by inspecting the `@FieldType`
@@ -347,7 +353,7 @@ additional fields.
   Declaring a `label` key makes the (inherited) `label()` method on the `Event`
   class work and also allows autocompletion of events by their title.
 
-5. Install the new fields
+#### Install the new fields
 
 Drupal notices changes to the entity type that affect the database schema and can
 update it automatically.
@@ -474,7 +480,9 @@ interface
 
 * Create a `src/Event/EventInterface.php` with the following code:
 
-  ```php?start_inline=1
+  ```php
+  <?php
+
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\ContentEntityInterface;
@@ -543,7 +551,7 @@ path. All of this can be automated by amending the entity annotation.
   *   handlers = {
   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
   *     "route_provider" = {
-  *       "html_default" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+  *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
   *     },
   *   },
   *   links = {
@@ -567,7 +575,34 @@ path. All of this can be automated by amending the entity annotation.
 
   * Route providers:
 
+    ```php?start_inline=1
+    *     "route_provider" = {
+    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+    *     },
+    ```
+
+    Instead of declaring routes belonging to entities in a `*.routing.yml` file
+    like other routes, they can be provided by a handler, as well. This has the
+    benefit of being able to re-use the same route provider for multiple entity
+    types, as is proven by the usage of the generic route provider provided by
+    core.
+
   * Links:
+
+    ```php?start_inline?1
+    *   links = {
+    *     "canonical" = "/event/{event}"
+    *   },
+    ```
+
+    Entity links denote at which paths on the website we can see an entity (or
+    multiple entities) of the given type. They are used by the default route
+    provider to set the path of the generated route. The usage of `canonical`
+    (instead of `view`, for example) stems from the specification of link
+    relations in the web by the IANA.
+
+    See [Wikipedia: Link relation][wikipedia-link-relation] and
+    [IANA: Link relations][iana-link-relations] for more information.
 
 * Rebuild caches
 
@@ -624,7 +659,6 @@ displayed unless explicitly configured to.
   ```php?start_inline=1
   ->setDisplayOptions('view', [
     'label' => 'inline',
-    'type' => 'datetime_default',
     'settings' => [
       'format_type' => 'html_date',
     ],
@@ -638,7 +672,7 @@ displayed unless explicitly configured to.
   ```php?start_inline=1
   ->setDisplayOptions('view', [
     'label' => 'hidden',
-    'weight' => 5,
+    'weight' => 10,
   ])
   ```
 
@@ -665,48 +699,67 @@ displayed unless explicitly configured to.
     default), inline in front of the field value or hidden altogether. The
     respective values of the `label` setting are `above`, `inline` and `hidden`.
 
-  * Formatter:
+  * Formatter settings:
 
     ```php?start_inline=1
-    'type' => 'datetime_default',
+    'settings' => [
+      'format_type' => 'html_date',
+    ],
     ```
 
-  * cmp. _Manage display_ table
-  * Formatter discoverability:
-    * Navigate to "FieldFormatter" annotation class on api.drupal.org
-    * Click on list of annotated classes
-    * Pick appropriate class and find plugin ID
-  * Formatter settings discoverability:
-    * View `defaultSettings` method on formatter class
+    Each field is displayed using a _formatter_. The field type declares a
+    default formatter which is used unless a different formatter is chosen by
+    specifying a `type` key in the display options. Some formatters have
+    settings which can be configured through the `settings` key in the display
+    options. There is no list of IDs of available field types, but
+    [Drupal API: List of classes annotated with FieldFormatter][api-field-formatters]
+    lists all field formatter classes (for all field types) in core. The ID of a
+    given field formatter can be found in its class documentation or by
+    inspecting the `@FieldFormatter` annotation which also lists the field types
+    that the formatter can be used for. Given a formatter class the available
+    settings can be found by inspecting the keys returned by the class'
+    `defaultSettings()` method.
+
+  * Weight:
+
+    ```php?start_inline=1
+    'weight' => 0,
+    ```
+
+    Weights allow the order of fields in the rendered output to be different
+    than their declaration order in the `baseFieldDefinitions()` method. Fields
+    with heigher weights "sink" to the bottom and are displayed after fields
+    with lower weights.
+
+  Altogether, setting the view display options is comparable to using the
+  _Manage display_ table provided by _Field UI_ module, which also allows
+  configuring the label display, formatter, formatter settings and weight for
+  each field.
 
 * Visit _Recent log messages_ page
-  * Warning due to missing `event` theme hook
 
-* Add a `event.module` with the following:
-  ```php?start_inline=1
+  Note there is a warning due to a missing `event` theme hook.
+
+#### Add a theme function
+
+* Add an `event.module` with the following:
+
+  ```php
+  <?php
+
   function event_theme($existing, $type, $theme, $path) {
     return [
       'event' => [
-        'render element' => 'elements',
-        'file' => 'event.theme.inc',
+        'render element' => 'content',
       ],
     ];
   }
   ```
-* Add a `event.theme.inc` with the following:
-
-  ```php
-  use Drupal\Core\Render\Element;
-
-  function template_preprocess_event(&$variables) {
-    foreach (Element::children($variables['elements']) as $key) {
-      $variables['content'][$key] = $variables['elements'][$key];
-    }
-  }
-  ```
 
 * Add a `templates` directory
+
 * Add a `templates/event.html.twig` with the following:
+
   ```twig
   <div{{ attributes }}>
     {{ content }}
@@ -714,14 +767,14 @@ displayed unless explicitly configured to.
   ```
 
 * Visit `/event/{event}`
+
 * Visit _Recent log messages_ page
 
-
-## Forms
-Branch: `04-view-builder` → `05-forms`
+#### Forms
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   *     "form" = {
   *       "add" = "Drupal\Core\Entity\ContentEntityForm",
   *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
@@ -729,7 +782,7 @@ Branch: `04-view-builder` → `05-forms`
   *     },
   ```
 
-  ```php
+  ```php?start_inline=1
    *     "add-form" = "/admin/content/events/add",
    *     "edit-form" = "/admin/content/events/manage/{event}",
    *     "delete-form" = "/admin/content/events/manage/{event}/delete",
@@ -737,7 +790,7 @@ Branch: `04-view-builder` → `05-forms`
 
 * Visit `/admin/content/events/add`
 
-  ```php
+  ```php?start_inline=1
   ->setDisplayOptions('form', ['weight' => 0])
 
   ->setDisplayOptions('form', ['weight' => 5])
@@ -746,8 +799,11 @@ Branch: `04-view-builder` → `05-forms`
   ```
 
 * Rebuild caches
+
 * Visit `/admin/content/events/add`
+
 * Visit `/admin/content/events/manage/{event}/`
+
 * Visit `/admin/content/events/manage/{event}/delete`
 
 ## List builder
@@ -1094,4 +1150,8 @@ Branch: `10-additional-fields` → `11-bundles`
 [api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
 [api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
 [api-field-types]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldType.php/class/annotations/FieldType/8.2.x
+[api-field-formatters]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldFormatter.php/class/annotations/FieldFormatter/8.2.x
+[wikipedia-link-relation]: https://en.wikipedia.org/wiki/Link_relation
+[iana-link-relations]: https://www.iana.org/assignments/link-relations/link-relations.xml
 
+*[IANA]: Internet Assigned Numbers Authority
