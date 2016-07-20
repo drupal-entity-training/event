@@ -24,11 +24,11 @@ creating a `test.php` script and then running `drush php-script test.php`.
    2. [Add an annotation to the class](#add-an-annotation-to-the-class)
    3. [Install the entity type](#install-the-entity-type)
    4. [Add field definitions](#add-field-definitions)
-   5. [Install the new fields](#install-the-new-fields)
+   5. [Install the fields](#install-the-new-fields)
    6. [Add field methods](#add-field-methods)
 
-2. [Providing a user interface for entities](#providing-a-user-interface-for-entities)
-   1. [Add a view page](#add-a-view-page)
+2. [Adding a view page](#adding-a-view-page)
+   1. [Add a route](#add-a-route)
    2. [Add an administrative permission](#add-an-administrative-permission)
    3. [Configure fields for display](#configure-fields-for-display)
    4. [Add a theme function](#add-a-theme-function)
@@ -353,7 +353,7 @@ additional fields.
   Declaring a `label` key makes the (inherited) `label()` method on the `Event`
   class work and also allows autocompletion of events by their title.
 
-#### Install the new fields
+#### Install the fields
 
 Drupal notices changes to the entity type that affect the database schema and can
 update it automatically.
@@ -536,14 +536,14 @@ interface
   Note that the returned values match the values in the database before and that
   the values in the database have been updated accordingly.
 
-### Providing a user interface for entities
-
-#### Add a view page
+### Adding a view page
 
 Viewing an entity on a page requires a _view builder_ that is responsible for
 constructing a renderable array from an entity object. Futhermore, a route is
 needed that utilizes the view builder to output the entity's fields on a given
 path. All of this can be automated by amending the entity annotation.
+
+#### Add a route
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
@@ -740,6 +740,8 @@ displayed unless explicitly configured to.
 
   Note there is a warning due to a missing `event` theme hook.
 
+  Delete the recent log messages.
+
 #### Add a theme function
 
 * Add an `event.module` with the following:
@@ -756,21 +758,39 @@ displayed unless explicitly configured to.
   }
   ```
 
+  This registers the `event` theme hook and makes it so that the rendered entity
+  output is placed in a `content` variable that is available to preprocess
+  functions and templates.
+
+  Note that entity types in core use an `elements` variable by default and then
+  (selectively) copy that over to a `content` variable manually in a preprocess
+  function. That `content` variable is then used in the templates. The above
+  avoids having to provide a preprocess function while retaining the ability to
+  use the `content` variable in templates.
+
 * Add a `templates` directory
 
 * Add a `templates/event.html.twig` with the following:
 
+  {% raw %}
   ```twig
   <div{{ attributes }}>
     {{ content }}
   </div>
   ```
+  {% endraw %}
 
 * Visit `/event/{event}`
 
+  Note the additional `div` element.
+
 * Visit _Recent log messages_ page
 
-#### Forms
+  Note there is no warning.
+
+### Adding add, edit and delete forms
+
+#### Add the routes
 
 * Add the following to `src/Entity/Event.php`:
 
@@ -790,13 +810,15 @@ displayed unless explicitly configured to.
 
 * Visit `/admin/content/events/add`
 
-  ```php?start_inline=1
-  ->setDisplayOptions('form', ['weight' => 0])
+#### Configure fields for display
 
-  ->setDisplayOptions('form', ['weight' => 5])
+```php?start_inline=1
+->setDisplayOptions('form', ['weight' => 0])
 
-  ->setDisplayOptions('form', ['weight' => 10])
-  ```
+->setDisplayOptions('form', ['weight' => 5])
+
+->setDisplayOptions('form', ['weight' => 10])
+```
 
 * Rebuild caches
 
@@ -806,15 +828,15 @@ displayed unless explicitly configured to.
 
 * Visit `/admin/content/events/manage/{event}/delete`
 
-## List builder
-Branch: `05-forms` → `06-list-builder`
+### Adding an administrative entity listing
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
   ```
 
-  ```php
+  ```php?start_inline=1
   *     "collection" = "/admin/content/events",
   ```
   * Collection routes are not (yet) automatically generated
