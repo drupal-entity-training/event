@@ -43,7 +43,7 @@ class EventRevisionHtmlRouteProvider implements EntityRouteProviderInterface {
 
       $route = new Route($entity_type->getLinkTemplate('revision'));
       $route->addDefaults([
-        '_title_callback' => EntityViewController::class . '::buildTitle',
+        '_title_callback' => '\Drupal\Core\Entity\Controller\EntityController::title',
         '_controller' => EntityViewController::class . '::viewRevision',
       ]);
       $route->addRequirements([
