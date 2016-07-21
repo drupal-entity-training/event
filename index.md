@@ -17,21 +17,10 @@ are to be run, run them from within the Drupal installation. When PHP code is to
 executed, this can be done by running `drush core-cli` (preferred) or by
 creating a `test.php` script and then running `drush php-script test.php`.
 
-### Table of contents
+**Table of contents**
 
-1. [Using entities for data storage](#using-entities-for-data-storage)
-   1. [Create an entity class](#create-an-entity-class)
-   2. [Add an annotation to the class](#add-an-annotation-to-the-class)
-   3. [Install the entity type](#install-the-entity-type)
-   4. [Add field definitions](#add-field-definitions)
-   5. [Install the fields](#install-the-new-fields)
-   6. [Add field methods](#add-field-methods)
-
-2. [Adding a view page](#adding-a-view-page)
-   1. [Add a route](#add-a-route)
-   2. [Add an administrative permission](#add-an-administrative-permission)
-   3. [Configure fields for display](#configure-fields-for-display)
-   4. [Add a theme function](#add-a-theme-function)
+1. Table of contents
+{:toc}
 
 ### Using entities for data storage
 
