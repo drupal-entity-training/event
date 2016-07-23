@@ -725,6 +725,10 @@ displayed unless explicitly configured to.
   configuring the label display, formatter, formatter settings and weight for
   each field.
 
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit _Recent log messages_ page
 
   Note there is a warning due to a missing `event` theme hook.
@@ -769,7 +773,11 @@ displayed unless explicitly configured to.
   ```
   {% endraw %}
 
-* Visit `/event/{event}`
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
+* Visit `/event/2`
 
   Note the additional `div` element.
 
@@ -781,7 +789,8 @@ displayed unless explicitly configured to.
 
 #### Add the routes
 
-* Add the following to `src/Entity/Event.php`:
+* Add the following to the `handlers` section of the annotation in
+  `src/Entity/Event.php`:
 
   ```php?start_inline=1
   *     "form" = {
@@ -791,90 +800,159 @@ displayed unless explicitly configured to.
   *     },
   ```
 
+  <!-- TODO: Explain this -->
+
+* Add the following to the `links` section of the annotation in 
+  `src/Entity/Event.php`:
+
   ```php?start_inline=1
    *     "add-form" = "/admin/content/events/add",
    *     "edit-form" = "/admin/content/events/manage/{event}",
    *     "delete-form" = "/admin/content/events/manage/{event}/delete",
   ```
 
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/content/events/add`
+
+  Note that a route exists and _Save_ and _Delete_ buttons are shown, but no
+  actual form fields are shown.
 
 #### Configure fields for display
 
-```php?start_inline=1
-->setDisplayOptions('form', ['weight' => 0])
 
-->setDisplayOptions('form', ['weight' => 5])
+* Add the following to the `$fields['title']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
 
-->setDisplayOptions('form', ['weight' => 10])
-```
+  ```php?start_inline=1
+  ->setDisplayOptions('form', ['weight' => 0])
+  ```
+
+* Add the following to the `$fields['date']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
+
+  ```php?start_inline=1
+  ->setDisplayOptions('form', ['weight' => 10])
+  ```
+
+* Add the following to the `$fields['description']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
+
+  ```php?start_inline=1
+  ->setDisplayOptions('form', ['weight' => 20])
+  ```
 
 * Rebuild caches
 
-* Visit `/admin/content/events/add`
+  Run `drush cache-rebuild`
 
-* Visit `/admin/content/events/manage/{event}/`
+* Add an event in the user interface
 
-* Visit `/admin/content/events/manage/{event}/delete`
+  Visit `/admin/content/events/add`
+
+  Note that the form fields are displayed.
+
+  Enter a title, date and description and press _Save_.
+
+  Note that no message is displayed and no redirect is performed. This will be
+  added later by providing a specialized form handler.
+
+  Verify that the event was saved by checking that a new row was created in the
+  `{event}` table.
+
+* Edit an event in the user interface
+
+  Visit `/admin/content/events/manage/3`
+
+  Note that a route exists and form fields are displayed including proper
+  default values.
+
+  Modify the title, date and description and press _Save_.
+
+  Note that again no message is displayed and no redirect is performed.
+
+  Verify that the values in the respective row in the `{event}` table have been
+  updated. Also note that the default values of the form fields are correct on
+  the reloaded page.
+
+* Delete an event in the user interface
+
+  Visit `/admin/content/events/manage/3/delete`
+
+  Note that a route exists and a confirmation form is shown.
+
+  Press _Delete_.
+
+  Note that a message is shown and you are redirected to the front page.
+
+  Verify that the respective row in the `{event}` table has been deleted.
 
 ### Adding an administrative entity listing
 
-* Add the following to `src/Entity/Event.php`:
+#### Add a route
+
+* Add the following to the `handlers` section of the annotation in
+  `src/Entity/Event.php`:
 
   ```php?start_inline=1
   *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
   ```
 
+* Add the following to the `links` section of the annotation in
+  `src/Entity/Event.php`:
+
   ```php?start_inline=1
   *     "collection" = "/admin/content/events",
   ```
-  * Collection routes are not (yet) automatically generated
-
-* Add a `src/Routing` directory
-* Add a `src/Routing/CollectionHtmlRouteProvider` with the following:
-
-  ```php
-  namespace Drupal\event\Routing;
-
-  use Drupal\Core\Entity\EntityTypeInterface;
-  use Drupal\Core\Entity\Routing\EntityRouteProviderInterface;
-  use Symfony\Component\Routing\RouteCollection;
-  use Symfony\Component\Routing\Route;
-
-  class EventCollectionHtmlRouteProvider implements EntityRouteProviderInterface {
-
-    public function getRoutes(EntityTypeInterface $entity_type) {
-      $routes = new RouteCollection();
-      if ($entity_type->hasListBuilderClass() && $entity_type->hasLinkTemplate('collection') && $entity_type->getAdminPermission()) {
-        $entity_type_id = $entity_type->id();
-
-        $route = new Route($entity_type->getLinkTemplate('collection'));
-        $route
-          ->setDefault('_entity_list', $entity_type_id)
-          ->setDefault('_title', 'Events')
-          ->setRequirement('_permission', $entity_type->getAdminPermission());
-
-        $routes->add("entity.$entity_type_id.collection", $route);
-      }
-      return $routes;
-    }
-
-  }
-  ```
-<!-- TODO: Mention routing.yml (they made me do it) -->
-
-* Add the following to `src/Entity/Event.php`:
-
-  ```php
-  *       "html_collection" = "Drupal\event\Routing\EventCollectionHtmlRouteProvider",
-  ```
-
-* Rebuild caches
 
 * Visit `/admin/content/events`
 
+  Note that a _Not found_ page is shown. Collection routes are not automatically
+  generated.
+
+* Add a `event.routing.yml` with the following
+
+  ```yaml
+  entity.event.collection:
+    path: '/admin/content/events'
+    defaults:
+      _entity_list: event
+      _title: 'Events'
+    requirements:
+      _permission: 'administer events'
+  ```
+
+  Note that alternatively a second route provider could be provided. While being
+  more verbose, this has the benefit of not duplicating the entity type ID, the
+  path and the administrative permission. By choosing a more generic route title
+  (for example _Event entities_) a route provider could futhermore be made
+  reusable by multiple entity types. For brevity and simplicity a static route
+  is provided here.
+
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
+* Visit `/admin/content/events`
+
+  Note that a route is provided and a list of entities is provided with
+  _Edit_ and _Delete_ operation links for each entity.
+
+  By not showing at least the title of each event the list is not actually
+  usable so we need to provide a specialized list builder.
+
+#### Add a specialized list builder
+
 * Add a `src/Entity/EventListBuilder` with the following:
+
   ```php
+  <?php
+
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Entity\EntityInterface;
@@ -899,40 +977,99 @@ displayed unless explicitly configured to.
 
   }
   ```
-  * Instead of hardcoding the format the `date.formatter` service should be
+
+  Parts of this code block are explained below:
+
+  * Separate methods:
+
+    ```php?start_inline=1
+    public function buildHeader() {
+    ```
+
+    List builders build the table header and the table rows in separate methods.
+
+  * Translation:
+
+    ```php?start_inline=1
+    $this->t('Title')
+    ```
+
+  * Array merging:
+
+    ```php?start_inline=1
+    $header + parent::buildHeader()
+    ```
+
+  * Inline type hint:
+
+    ```php?start_inline=1
+    /** @var \Drupal\event\Entity\EventInterface $event */
+    ```
+
+  * Entity links:
+
+    ```php?start_inline=1
+    $event->toLink()
+    ```
+
+  * Date formatting:
+
+    Instead of hardcoding the format the `date.formatter` service should be
     injected
 
-* Replace the list builder in `src/Entity/Event.php` with `Drupal\event\Entity\EventListBuilder`
+* Replace the value of the `list_builder` annotation key in the `handlers`
+  section of the annotation in `src/Entity/Event.php` with
+  `Drupal\event\Entity\EventListBuilder`.
+
 * Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/content/events`
 
+  Note that the entity list now shows the event title and date.
+
+* Delete an event again
+
+  Visit `/admin/content/events/manage/2/delete` and press _Delete_.
+
+  Note that this time you are redirected to the administrative event listing.
+  The redirect to the front page that happened above is only a fallback in case
+  no `collection` route exists.
+
 ## Views data
-Branch: `06-list-builder` → `07-views-data`
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   *     "views_data" = "Drupal\views\EntityViewsData",
   ```
+
 <!-- TODO: Mention views data sucks -->
 
 * Add a _Event_ view to replace the list builder
 
 ## Administration links
-Branch: `07-views-data` → `08-admin-links`
 
 * Add a `event.links.menu.yml` with the following:
+
   ```yaml
   entity.event.collection:
     title: 'Events'
     route_name: entity.event.collection
     parent: system.admin_content
   ```
+
   * Routes are separate from menu links
+
   * `hook_menu()` in D7 → multiple `event.links.*.yml` files
 
 * Rebuild caches
 
+  Run `drush cache-rebuild`
+
 * Add a `event.links.task.yml` with the following:
+
   ```yaml
   entity.event.collection:
     title: 'Events'
@@ -941,9 +1078,13 @@ Branch: `07-views-data` → `08-admin-links`
   ```
 
 * Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/content/events`
 
 * Add a `event.links.action.yml` with the following:
+
   ```ỳaml
   entity.event.collection:
     title: 'Add'
@@ -952,9 +1093,13 @@ Branch: `07-views-data` → `08-admin-links`
   ```
 
 * Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/content/events`
 
 * Add the following to `event.links.task.yml`:
+
   ```yaml
   entity.event.canonical:
     title: 'View'
@@ -971,14 +1116,17 @@ Branch: `07-views-data` → `08-admin-links`
   ```
 
 * Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/events/{event}`
 
 <!-- TODO: Add contextual links and form redirects -->
 
 ## Access control
-Branch: `08-admin-links` → `09-access`
 
 * Add the following to `event.permissions.yml`:
+
   ```yaml
   create events:
     title: 'Create events'
@@ -993,7 +1141,10 @@ Branch: `08-admin-links` → `09-access`
 * Add a `src/Access` directory
 
 * Add a `src/Access/EventAccessControlHandler.php` with the following:
+
   ```php
+  <?php
+
   namespace Drupal\event\Access;
 
   use Drupal\Core\Access\AccessResult;
@@ -1033,21 +1184,25 @@ Branch: `08-admin-links` → `09-access`
   ```
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   *     "access" = "Drupal\event\Access\EventAccessControlHandler",
   ```
 
 * Rebuild caches
 
+  Run `drush cache-rebuild`
+
 * Test permissions
+
   * `create events`, `edit events`, or `delete events` do not grant
     access to `/admin/content/events`
 
 ## Additional fields
-Branch: `09-access` → `10-additional-fields`
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
   $fields['path'] = BaseFieldDefinition::create('path')
@@ -1062,23 +1217,29 @@ Branch: `09-access` → `10-additional-fields`
   ```
 
 * Update entity/field definitions
+
   * `{event__attendees}` table created
+
   * `deleted`, `langcode`, `bundle`, `revision_id` not optional currently
 
 <!-- TODO: Add methods for managing attendees -->
 
 * Add the following to `src/Entity/EventInterface.php`:
+
   ```php
   use Drupal\Core\Entity\EntityChangedInterface;
   use Drupal\user\EntityOwnerInterface;
 
   , EntityChangedInterface, EntityOwnerInterface
   ```
+
   * Changed tracking allows edit-locking
+
   * Owners are used in entity reference, comment statistics, ...
 
 * Add the following to `src/Entity/Event.php`:
-  ```php
+
+  ```php?start_inline=1
   use Drupal\Core\Entity\EntityChangedTrait;
 
   use EntityChangedTrait;
@@ -1111,13 +1272,16 @@ Branch: `09-access` → `10-additional-fields`
 <!-- TODO: Add status field -->
 
 * Update entity/field definitions
+
   * `changed` and `owner` columns created
 
 ## Configuration entities
-Branch: `10-additional-fields` → `11-bundles`
 
 * Create a `src/Entity/EventType.php` with the following:
+
   ```php
+  <?php
+
   namespace Drupal\event\Entity;
 
   use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -1143,17 +1307,23 @@ Branch: `10-additional-fields` → `11-bundles`
   ```
 
 * Update entity/field definitions
+
   * No schema change
 
 * Try out event type CRUD
+
   * Create and save an event type
+
     * Row in `{config}` table
+
   * Load an event type by ID and print label
+
   * Delete an event type
+
     * Row in `{config}` table gone
 
-<!-- TODO: Config Translation ->
-<!-- TODO: Switch Translation & Revisions ->
+<!-- TODO: Config Translation -->
+<!-- TODO: Switch Translation & Revisions -->
 
 [guide-short-url]: https://git.io/d8entity
 [repository]: https://github.com/drupal-entity-training/event
