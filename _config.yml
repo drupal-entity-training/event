@@ -3,6 +3,9 @@ title:        Entity Type Walkthrough
 tagline:      Step-by-step instructions to create a custom entity type in Drupal 8
 baseurl:      "/event"
 
+repository:
+  default_branch: 00-empty-module
+
 # About/contact
 author:
   name:       The Drupal Entity Training Team
