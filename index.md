@@ -1078,7 +1078,7 @@ displayed unless explicitly configured to.
 
 * Replace the value of the `list_builder` annotation key in the `handlers`
   section of the annotation in `src/Entity/Event.php` with
-  `Drupal\event\Entity\EventListBuilder`.
+  `"Drupal\event\Entity\EventListBuilder"`.
 
 * Rebuild caches
 
