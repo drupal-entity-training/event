@@ -939,12 +939,12 @@ displayed unless explicitly configured to.
       return $header + parent::buildHeader();
     }
 
-    public function buildRow(EntityInterface $entity) {
+    public function buildRow(EntityInterface $event) {
       /** @var \Drupal\event\Entity\EventInterface $event */
       $row = [];
       $row['title'] = $event->toLink();
-      $row['date'] = $event->getDate()->format(DATETIME_DATETIME_STORAGE_FORMAT);
-      return $row + parent::buildRow($entity);
+      $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
+      return $row + parent::buildRow($event);
     }
 
   }
@@ -966,11 +966,18 @@ displayed unless explicitly configured to.
     $this->t('Title')
     ```
 
+    The base `EntityListBuilder` class, like many other base classes in Drupal,
+    provides a `t()` function that can be used to translate strings.
+
   * Array merging:
 
     ```php?start_inline=1
     $header + parent::buildHeader()
     ```
+
+    Arrays with string keys can be merged in PHP by "adding" them. Because the
+    base class provides the operations column we put our own part of the header
+    first and add the part from the parent last.
 
   * Inline type hint:
 
@@ -978,16 +985,96 @@ displayed unless explicitly configured to.
     /** @var \Drupal\event\Entity\EventInterface $event */
     ```
 
+    Because `EntityListBuilderInterface`, the interface for list builders,
+    dictates that we type hint the `$event` variable with `EntityInterface`
+    instead of our more specific `EventInterface` IDEs are not aware that the
+    `$event` variable has the methods `getTitle()` and `getDate()` in this case.
+    To inform IDEs that these methods are in fact available an inline type hint
+    can be added to the `$event` variable.
+
   * Entity links:
 
     ```php?start_inline=1
     $event->toLink()
     ```
 
+    Entities have a `toLink()` to generate links with a specified link text to a
+    specified link relation of the entity. By default a link with the entity
+    label as link text to the `canonical` link relation is generated which is
+    precisely what we want here.
+
   * Date formatting:
 
-    Instead of hardcoding the format the `date.formatter` service should be
-    injected
+    ```php?start_inline=1
+    $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
+    ```
+
+    Because the `getDate()` method returns a date object we can attain the
+    formatted date by using its `format()` method. If the same date format is to
+    be used in multiple places on the site, hardcoding it here can lead to
+    duplication or worse, inconsistent user interfaces. To prevent this, Drupal
+    associates PHP date formats which machine-readable names to form a _Date
+    format_ configuration entity. (More on configuration entities in general
+    below.) That way the name, such as `short`, `medium` or `long` can be
+    used without having to remember associated the PHP date format. This also
+    allows changing the PHP date format later without having to update each
+    place it is used. To utilize Drupal's date format system the
+    `date.formatter` service can be used. Unfortunately, Drupal's date formatter
+    cannot handle date objects but works with timestamps instead. It is not used
+    above because it would be more verbose and introduce new concepts, such as
+    services and dependency injection, even though it would be the preferred
+    implementation. For reference, the entire `EventListBuilder.php` would then
+    be:
+
+    ```php
+    <?php
+
+    namespace Drupal\event\Entity;
+
+    use Drupal\Core\Datetime\DateFormatterInterface;
+    use Drupal\Core\Entity\EntityInterface;
+    use Drupal\Core\Entity\EntityListBuilder;
+    use Drupal\Core\Entity\EntityStorageInterface;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Symfony\Component\DependencyInjection\ContainerInterface;
+
+    class EventListBuilder extends EntityListBuilder {
+
+      /**
+       * @var \Drupal\Core\Datetime\DateFormatterInterface
+       */
+      protected $dateFormatter;
+
+      public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter) {
+        parent::__construct($entity_type, $storage);
+        $this->dateFormatter = $date_formatter;
+      }
+
+      public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+        return new static(
+          $entity_type,
+          $container->get('entity.manager')->getStorage($entity_type->id()),
+          $container->get('date.formatter')
+        );
+      }
+
+      public function buildHeader() {
+        $header = [];
+        $header['title'] = $this->t('Title');
+        $header['date'] = $this->t('Date');
+        return $header + parent::buildHeader();
+      }
+
+      public function buildRow(EntityInterface $event) {
+        /** @var \Drupal\event\Entity\EventInterface $event */
+        $row = [];
+        $row['title'] = $event->toLink();
+        $row['date'] = $this->dateFormatter->format($event->getDate()->getTimestamp(), 'medium');
+        return $row + parent::buildRow($event);
+      }
+
+    }
+    ```
 
 * Replace the value of the `list_builder` annotation key in the `handlers`
   section of the annotation in `src/Entity/Event.php` with
