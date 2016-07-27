@@ -912,34 +912,6 @@ displayed unless explicitly configured to.
 
 * Visit `/admin/content/events`
 
-  Note that a _Not found_ page is shown. Collection routes are not automatically
-  generated.
-
-* Add a `event.routing.yml` with the following
-
-  ```yaml
-  entity.event.collection:
-    path: '/admin/content/events'
-    defaults:
-      _entity_list: event
-      _title: 'Events'
-    requirements:
-      _permission: 'administer events'
-  ```
-
-  Note that alternatively a second route provider could be provided. While being
-  more verbose, this has the benefit of not duplicating the entity type ID, the
-  path and the administrative permission. By choosing a more generic route title
-  (for example _Event entities_) a route provider could futhermore be made
-  reusable by multiple entity types. For brevity and simplicity a static route
-  is provided here.
-
-* Rebuild caches
-
-  Run `drush cache-rebuild`
-
-* Visit `/admin/content/events`
-
   Note that a route is provided and a list of entities is provided with
   _Edit_ and _Delete_ operation links for each entity.
 
