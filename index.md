@@ -58,7 +58,7 @@ functionality.
   }
   ```
 
-  Parts of this code block are explained below:
+  Each part of this code block is explained below:
 
   * Class declaration:
 
@@ -80,8 +80,8 @@ functionality.
     used simultaneously without risking naming conflicts. Namespaces can have
     multiple parts. All classes in Drupal core and modules have `Drupal` as the
     top-level namespace. The second part of module classes must be the module
-    name. Further sub-namespaces correspond to directory structure within the
-    `src` directory of the module.
+    name. Further sub-namespaces correspond to the directory structure within
+    the `src` directory of the module.
 
   * Base class:
 
@@ -196,7 +196,7 @@ Each part of this code block is explained below:
   mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
   commas are allowed in mappings.
 
-  See [Drupal API: Annotations][api-annotations] for more information.
+See [Drupal API: Annotations][api-annotations] for more information.
 
 #### Install the entity type
 
@@ -321,8 +321,8 @@ additional fields.
     ->setRequired(TRUE)
     ```
 
-    Many set methods return the object they were called on to allow
-    _chaining_ multiple set methods after another. The setting up of the
+    Many setter methods return the object they were called on to allow
+    _chaining_ multiple setter methods after another. The setting up of the
     `title` field definition above is functionally equivalent to the
     following code block which avoids chaining:
 
@@ -612,7 +612,7 @@ An administrative permission is used by the default entity access control
 handler for all operations as a fallback. More granular permissions together
 with an enhanced entity access control handler will be added below.
 
-* Add a `event.permissions.yml` with the following:
+* Add an `event.permissions.yml` file with the following:
 
   ```yaml
   administer events:
@@ -729,6 +729,8 @@ displayed unless explicitly configured to.
 
   Run `drush cache-rebuild`
 
+* Verify that the fields are shown
+
 * Visit _Recent log messages_ page
 
   Note there is a warning due to a missing `event` theme hook.
@@ -763,7 +765,7 @@ displayed unless explicitly configured to.
 
 * Add a `templates` directory
 
-* Add a `templates/event.html.twig` with the following:
+* Add a `templates/event.html.twig` file with the following:
 
   {% raw %}
   ```twig
@@ -860,7 +862,7 @@ displayed unless explicitly configured to.
   Enter a title, date and description and press _Save_.
 
   Note that no message is displayed and no redirect is performed. This will be
-  added later by providing a specialized form handler.
+  added below by providing a specialized form handler.
 
   Verify that the event was saved by checking that a new row was created in the
   `{event}` table.
@@ -892,6 +894,41 @@ displayed unless explicitly configured to.
 
   Verify that the respective row in the `{event}` table has been deleted.
 
+#### Add a specialized form
+
+* Add a `src/Entity/EventForm.php` file with the following:
+
+  ```php
+  <?php
+
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Entity\ContentEntityForm;
+  use Drupal\Core\Form\FormStateInterface;
+
+  class EventForm extends ContentEntityForm {
+
+    public function save(array $form, FormStateInterface $form_state) {
+      parent::save($form, $form_state);
+
+      $event = $this->getEntity();
+      drupal_set_message('The event %event has been saved.', [
+        '%event' => $event->label(),
+      ]);
+      $form_state->setRedirectUrl($event->toUrl());
+    }
+
+  }
+  ```
+
+* Replace the value of the `add` and `edit` annotation keys in the form handlers
+  section of the annotation in `src/Entity/Event.php` with
+  `"Drupal\event\Entity\EventForm"`.
+
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
 ### Adding an administrative entity listing
 
 #### Add a route
@@ -920,7 +957,7 @@ displayed unless explicitly configured to.
 
 #### Add a specialized list builder
 
-* Add a `src/Entity/EventListBuilder` with the following:
+* Add a `src/Entity/EventListBuilder.php` file with the following:
 
   ```php
   <?php
@@ -987,7 +1024,7 @@ displayed unless explicitly configured to.
 
     Because `EntityListBuilderInterface`, the interface for list builders,
     dictates that we type hint the `$event` variable with `EntityInterface`
-    instead of our more specific `EventInterface` IDEs are not aware that the
+    instead of our more specific `EventInterface`, IDEs are not aware that the
     `$event` variable has the methods `getTitle()` and `getDate()` in this case.
     To inform IDEs that these methods are in fact available an inline type hint
     can be added to the `$event` variable.
@@ -998,10 +1035,10 @@ displayed unless explicitly configured to.
     $event->toLink()
     ```
 
-    Entities have a `toLink()` to generate links with a specified link text to a
-    specified link relation of the entity. By default a link with the entity
-    label as link text to the `canonical` link relation is generated which is
-    precisely what we want here.
+    Entities have a `toLink()` method to generate links with a specified link
+    text to a specified link relation of the entity. By default a link with the
+    entity label as link text to the `canonical` link relation is generated
+    which is precisely what we want here.
 
   * Date formatting:
 
@@ -1013,10 +1050,10 @@ displayed unless explicitly configured to.
     formatted date by using its `format()` method. If the same date format is to
     be used in multiple places on the site, hardcoding it here can lead to
     duplication or worse, inconsistent user interfaces. To prevent this, Drupal
-    associates PHP date formats which machine-readable names to form a _Date
+    associates PHP date formats with machine-readable names to form a _Date
     format_ configuration entity. (More on configuration entities in general
     below.) That way the name, such as `short`, `medium` or `long` can be
-    used without having to remember associated the PHP date format. This also
+    used without having to remember the associated PHP date format. This also
     allows changing the PHP date format later without having to update each
     place it is used. To utilize Drupal's date format system the
     `date.formatter` service can be used. Unfortunately, Drupal's date formatter
@@ -1096,21 +1133,65 @@ displayed unless explicitly configured to.
   The redirect to the front page that happened above is only a fallback in case
   no `collection` route exists.
 
-## Views data
+### Add an administrative view
 
-* Add the following to `src/Entity/Event.php`:
+While a specialized entity list builder has the benefit of being re-usable one
+can also take advantage of Drupal's _Views_ module to create an administrative
+listing of events.
+
+* Add the following to the `handlers` section of the annotation in
+  `src/Entity/Event.php`:
 
   ```php?start_inline=1
   *     "views_data" = "Drupal\views\EntityViewsData",
   ```
 
-<!-- TODO: Mention views data sucks -->
+  Note that the views data that is provided by the default views data handler is
+  partially incomplete so - in particular when dealing with date or entity
+  reference fields - using Views for entity listings should be evaluated
+  carefully.
 
-* Add a _Event_ view to replace the list builder
+* Rebuild caches
 
-## Administration links
+  Run `drush cache-rebuild`
 
-* Add a `event.links.menu.yml` with the following:
+* Add an _Event_ view to replace the list builder
+
+  * Add a _Page_ views display with the path `/admin/content/events`
+
+    This will make Views replace the previously existing collection route.
+
+  * Use the _Table_ style for the display
+
+  * Add a _Dropbutton_ field for the operations
+
+    Add fields for edit and delete links and exlude them from display. Then
+    enable their use in the dropbutton field.
+
+  Views provides a number of features that increase the usability of
+  administrative listings when compared to the stock entity list builder. These
+  include:
+
+  * A `destination`query parameter in the operation links
+
+    This returns you back to the listing after editing or deleting an event.
+
+  * Exposed filters
+
+  * A click-sortable table header
+
+  * An Ajax-enabled pager
+
+  * A "sticky" table header
+
+## Adding administrative links
+
+To provide a usable and integrated administration experience the different pages
+need to be connected and enriched with Drupal's standard administrative links.
+
+### Add a menu link
+
+* Add an `event.links.menu.yml` file with the following:
 
   ```yaml
   entity.event.collection:
@@ -1119,15 +1200,13 @@ displayed unless explicitly configured to.
     parent: system.admin_content
   ```
 
-  * Routes are separate from menu links
-
-  * `hook_menu()` in D7 → multiple `event.links.*.yml` files
-
 * Rebuild caches
 
   Run `drush cache-rebuild`
 
-* Add a `event.links.task.yml` with the following:
+* Verify that the _Events_ menu link appears in the toolbar
+
+* Add an `event.links.task.yml` file with the following:
 
   ```yaml
   entity.event.collection:
@@ -1140,13 +1219,13 @@ displayed unless explicitly configured to.
 
   Run `drush cache-rebuild`
 
-* Visit `/admin/content/events`
+* Verify that the _Events_ local task appears on `/admin/content`
 
-* Add a `event.links.action.yml` with the following:
+* Add an `event.links.action.yml` file with the following:
 
   ```ỳaml
   entity.event.collection:
-    title: 'Add'
+    title: 'Add event'
     route_name: entity.event.add_form
     appears_on: [entity.event.collection]
   ```
@@ -1155,7 +1234,9 @@ displayed unless explicitly configured to.
 
   Run `drush cache-rebuild`
 
-* Visit `/admin/content/events`
+* Verify that the _Add event_ action link appears on `/admin/content/events`
+
+* Add an event
 
 * Add the following to `event.links.task.yml`:
 
@@ -1178,9 +1259,9 @@ displayed unless explicitly configured to.
 
   Run `drush cache-rebuild`
 
-* Visit `/events/{event}`
+* Visit `/events/4`
 
-<!-- TODO: Add contextual links and form redirects -->
+<!-- TODO: Add contextual links -->
 
 ## Access control
 
@@ -1242,7 +1323,8 @@ displayed unless explicitly configured to.
   }
   ```
 
-* Add the following to `src/Entity/Event.php`:
+* Add the following to the `handlers` section of the annotation in
+  `src/Entity/Event.php`:
 
   ```php?start_inline=1
   *     "access" = "Drupal\event\Access\EventAccessControlHandler",
