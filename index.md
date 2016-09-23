@@ -1133,7 +1133,7 @@ displayed unless explicitly configured to.
   The redirect to the front page that happened above is only a fallback in case
   no `collection` route exists.
 
-### Add an administrative view
+#### Add an administrative view
 
 While a specialized entity list builder has the benefit of being re-usable one
 can also take advantage of Drupal's _Views_ module to create an administrative
@@ -1184,12 +1184,12 @@ listing of events.
 
   * A "sticky" table header
 
-## Adding administrative links
+### Adding administrative links
 
 To provide a usable and integrated administration experience the different pages
 need to be connected and enriched with Drupal's standard administrative links.
 
-### Add a menu link
+#### Add links for the administrative listing
 
 * Add an `event.links.menu.yml` file with the following:
 
@@ -1221,6 +1221,8 @@ need to be connected and enriched with Drupal's standard administrative links.
 
 * Verify that the _Events_ local task appears on `/admin/content`
 
+#### Add an action link to add an event
+
 * Add an `event.links.action.yml` file with the following:
 
   ```ỳaml
@@ -1237,6 +1239,8 @@ need to be connected and enriched with Drupal's standard administrative links.
 * Verify that the _Add event_ action link appears on `/admin/content/events`
 
 * Add an event
+
+#### Add local tasks for editing and deleting events
 
 * Add the following to `event.links.task.yml`:
 
@@ -1263,20 +1267,24 @@ need to be connected and enriched with Drupal's standard administrative links.
 
 <!-- TODO: Add contextual links -->
 
-## Access control
+### Adding permission-based access-control
 
-* Add the following to `event.permissions.yml`:
+#### Add permissions
 
-  ```yaml
-  create events:
-    title: 'Create events'
-  delete events:
-    title: 'Delete events'
-  edit events:
-    title: 'Edit events'
-  view events:
-    title: 'View events'
-  ```
+Add the following to `event.permissions.yml`:
+
+```yaml
+create events:
+  title: 'Create events'
+delete events:
+  title: 'Delete events'
+edit events:
+  title: 'Edit events'
+view events:
+  title: 'View events'
+```
+
+#### Add an access control handler
 
 * Add a `src/Access` directory
 
@@ -1339,7 +1347,7 @@ need to be connected and enriched with Drupal's standard administrative links.
   * `create events`, `edit events`, or `delete events` do not grant
     access to `/admin/content/events`
 
-## Additional fields
+### Additional fields
 
 * Add the following to `src/Entity/Event.php`:
 
@@ -1416,7 +1424,7 @@ need to be connected and enriched with Drupal's standard administrative links.
 
   * `changed` and `owner` columns created
 
-## Configuration entities
+### Configuration entities
 
 * Create a `src/Entity/EventType.php` with the following:
 
