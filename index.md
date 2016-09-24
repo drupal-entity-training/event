@@ -86,13 +86,22 @@ functionality.
   * Base class:
 
     ```php?start_inline=1
-    extends ContentEntityBase
+    extends
     ```
 
     Base classes can be used to implement functionality that is generic and
     useful for many classes. Classes inherit all functionality from their base
     class and only need to provide functionality specific to them. This avoids
     code duplication.
+
+  * Content entities:
+
+    ```php?start_inline=1
+    ContentEntityBase
+    ```
+
+    Content entities are entities that are created by site users. They are
+    typically stored in the database, often with a auto-incrementing integer ID.
 
   * Import:
 
@@ -280,6 +289,10 @@ additional fields.
       ->setRequired(TRUE);
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'));
+    $fields['published'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Published'))
+      ->setRequired(TRUE)
+      ->setDefaultValue(FALSE);
 
     return $fields;
   }
@@ -349,8 +362,8 @@ update it automatically.
 
 * Run `drush entity-updates`
 
-  Note that `title`, `date`, `description__value` and `description__format`
-  columns have been created in the `{event}` table.
+  Note that `title`, `date`, `description__value`, `description__format` and
+  `published` columns have been created in the `{event}` table.
 
   Although most field types consist of a single `value` _property_, text
   fields, for example, have an additional `format` property. Therefore
@@ -377,6 +390,8 @@ update it automatically.
   Note that there is a new row in the `{event}` table with the proper field
   values.
 
+  Note that the default value of the `published` field has been applied.
+
 * Load an event fetch its field values.
 
   Run the following PHP code:
@@ -394,6 +409,8 @@ update it automatically.
   $event->get('description')->value;
   $event->get('description')->format;
   $event->get('description')->processed;
+
+  $event->get('published')->value;
   ```
 
   Note that the returned values match the values in the database.
@@ -418,6 +435,7 @@ update it automatically.
       'value' => '<p>DrupalCon is a great place to meet international Drupal superstars.</p>',
       'format' => 'restricted_html',
     ])
+    ->set('published', TRUE)
     ->save();
   ```
 
@@ -438,7 +456,7 @@ interface
   }
 
   public function setTitle($title) {
-    $this->set('title', $title);
+    return $this->set('title', $title);
   }
 
   public function getDate() {
@@ -446,7 +464,7 @@ interface
   }
 
   public function setDate(\DateTimeInterface $date) {
-    $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+    return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
   }
 
   public function getDescription() {
@@ -454,18 +472,32 @@ interface
   }
 
   public function setDescription($description, $format) {
-    $this->set('description', [
+    return $this->set('description', [
       'value' => $description,
       'format' => $format,
     ]);
+  }
+
+  public function isPublished() {
+    return $this->get('published')->value;
+  }
+
+  public function publish() {
+    return $this->set('published', TRUE);
+  }
+
+  public function unpublish() {
+    return $this->set('published', FALSE);
   }
   ```
 
   Field methods not only provide autocompletion, but also allow designing richer
   APIs than the bare field types provide. The `setDate()` method, for example,
   hides the internal storage format of datetime values from anyone working with
-  events. Similarly the `setDescription()` method requires setting the descrtption
-  and the text format simultaneously for security.
+  events. Similarly the `setDescription()` method requires setting the
+  description and the text format simultaneously for security. The `publish()`
+  and `unpublish()` methods make the code more readable than with a generic
+  `setPublished()` method.
 
 * Create a `src/Event/EventInterface.php` with the following code:
 
@@ -478,17 +510,57 @@ interface
 
   interface EventInterface extends ContentEntityInterface {
 
+    /**
+     * @return string
+     */
     public function getTitle();
 
+    /**
+     * @param string $title
+     *
+     * @return $this
+     */
     public function setTitle($title);
 
+    /**
+     * @return \DateTimeInterface
+     */
     public function getDate();
 
+    /**
+     * @param \DateTimeInterface $date
+     *
+     * @return $this
+     */
     public function setDate(\DateTimeInterface $date);
 
+    /**
+     * @return string
+     */
     public function getDescription();
 
+    /**
+     * @param string $description
+     * @param string $format
+     *
+     * @return $this
+     */
     public function setDescription($description, $format);
+
+    /**
+     * @return bool
+     */
+    public function isPublished();
+
+    /**
+     * @return $this
+     */
+    public function publish();
+
+    /**
+     * @return $this
+     */
+    public function unpublish();
 
   }
   ```
@@ -511,6 +583,7 @@ interface
   $event->getTitle();
   $event->getDate();
   $event->getDescription();
+  $event->isPublished();
 
   $event
     ->setTitle('Drupal Developer Days')
@@ -519,13 +592,14 @@ interface
       '<p>The Drupal Developer Days are a great place to nerd out about all things Drupal!</p>',
       'basic_html'
     )
+    ->unpublish
     ->save();
   ```
 
   Note that the returned values match the values in the database before and that
   the values in the database have been updated accordingly.
 
-### Adding a view page
+### Viewing entities on a page
 
 Viewing an entity on a page requires a _view builder_ that is responsible for
 constructing a renderable array from an entity object. Futhermore, a route is
@@ -643,7 +717,8 @@ them, can be configured as part of the field definitions. Fields are not
 displayed unless explicitly configured to.
 
 * Add the following to the `$fields['date']` section of the
-  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the semicolon:
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
 
   ```php?start_inline=1
   ->setDisplayOptions('view', [
@@ -654,18 +729,6 @@ displayed unless explicitly configured to.
     'weight' => 0,
   ])
   ```
-
-  Add the following to the `$fields['description']` section of the
-  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the semicolon:
-
-  ```php?start_inline=1
-  ->setDisplayOptions('view', [
-    'label' => 'hidden',
-    'weight' => 10,
-  ])
-  ```
-
-  <!-- @todo: Explain why the title field is not displayed -->
 
   Parts of this code block are explained below:
 
@@ -725,11 +788,25 @@ displayed unless explicitly configured to.
   configuring the label display, formatter, formatter settings and weight for
   each field.
 
+* Add the following to the `$fields['description']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
+
+  ```php?start_inline=1
+  ->setDisplayOptions('view', [
+    'label' => 'hidden',
+    'weight' => 10,
+  ])
+  ```
+
 * Rebuild caches
 
   Run `drush cache-rebuild`
 
 * Verify that the fields are shown
+
+  As the event title is automatically used as a page title we do not explicitly
+  enable the title field as part of the view builder.
 
 * Visit _Recent log messages_ page
 
@@ -787,7 +864,7 @@ displayed unless explicitly configured to.
 
   Note there is no warning.
 
-### Adding add, edit and delete forms
+### Manipulating entities through forms
 
 #### Add the routes
 
@@ -849,6 +926,14 @@ displayed unless explicitly configured to.
   ->setDisplayOptions('form', ['weight' => 20])
   ```
 
+* Add the following to the `$fields['published']` section of the
+  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
+  semicolon:
+
+  ```php?start_inline=1
+  ->setDisplayOptions('form', ['weight' => 30])
+  ```
+
 * Rebuild caches
 
   Run `drush cache-rebuild`
@@ -874,7 +959,7 @@ displayed unless explicitly configured to.
   Note that a route exists and form fields are displayed including proper
   default values.
 
-  Modify the title, date and description and press _Save_.
+  Modify the title, date and description and published status and press _Save_.
 
   Note that again no message is displayed and no redirect is performed.
 
@@ -929,7 +1014,7 @@ displayed unless explicitly configured to.
 
   Run `drush cache-rebuild`
 
-### Adding an administrative entity listing
+### Listing entities
 
 #### Add a route
 
@@ -973,6 +1058,7 @@ displayed unless explicitly configured to.
       $header = [];
       $header['title'] = $this->t('Title');
       $header['date'] = $this->t('Date');
+      $header['published'] = $this->t('Published');
       return $header + parent::buildHeader();
     }
 
@@ -981,6 +1067,7 @@ displayed unless explicitly configured to.
       $row = [];
       $row['title'] = $event->toLink();
       $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
+      $row['published'] = $event->isPublished() ? $this->t('Yes') : $this->t('No');
       return $row + parent::buildRow($event);
     }
 
@@ -1060,17 +1147,12 @@ displayed unless explicitly configured to.
     cannot handle date objects but works with timestamps instead. It is not used
     above because it would be more verbose and introduce new concepts, such as
     services and dependency injection, even though it would be the preferred
-    implementation. For reference, the entire `EventListBuilder.php` would then
-    be:
+    implementation. For reference, the respective parts of
+    `EventListBuilder.php` would then be:
 
-    ```php
-    <?php
-
-    namespace Drupal\event\Entity;
-
+    ```php?start_inline=1
     use Drupal\Core\Datetime\DateFormatterInterface;
-    use Drupal\Core\Entity\EntityInterface;
-    use Drupal\Core\Entity\EntityListBuilder;
+    ...
     use Drupal\Core\Entity\EntityStorageInterface;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -1095,19 +1177,13 @@ displayed unless explicitly configured to.
         );
       }
 
-      public function buildHeader() {
-        $header = [];
-        $header['title'] = $this->t('Title');
-        $header['date'] = $this->t('Date');
-        return $header + parent::buildHeader();
-      }
+      ...
 
       public function buildRow(EntityInterface $event) {
         /** @var \Drupal\event\Entity\EventInterface $event */
-        $row = [];
-        $row['title'] = $event->toLink();
+        ...
         $row['date'] = $this->dateFormatter->format($event->getDate()->getTimestamp(), 'medium');
-        return $row + parent::buildRow($event);
+        ...
       }
 
     }
@@ -1221,7 +1297,7 @@ need to be connected and enriched with Drupal's standard administrative links.
 
 * Verify that the _Events_ local task appears on `/admin/content`
 
-#### Add an action link to add an event
+#### Add an action link for the add form
 
 * Add an `event.links.action.yml` file with the following:
 
@@ -1240,7 +1316,7 @@ need to be connected and enriched with Drupal's standard administrative links.
 
 * Add an event
 
-#### Add local tasks for editing and deleting events
+#### Add local tasks for the edit and delete forms
 
 * Add the following to `event.links.task.yml`:
 
@@ -1264,6 +1340,8 @@ need to be connected and enriched with Drupal's standard administrative links.
   Run `drush cache-rebuild`
 
 * Visit `/events/4`
+
+  Verify that _View_, _Edit_ and _Delete_ local tasks are shown.
 
 <!-- TODO: Add contextual links -->
 
@@ -1307,25 +1385,32 @@ view events:
       return $access_result->orIf(parent::checkCreateAccess($account, $context, $entity_bundle));
     }
 
-    protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+    protected function checkAccess(EntityInterface $event, $operation, AccountInterface $account) {
+      /** @var \Drupal\event\Entity\EventInterface $event */
+      // The parent class grants access based on the administrative permission.
+      $access_result = parent::checkAccess($event, $operation, $account);
       switch ($operation) {
         case "view":
-          $access_result = AccessResult::allowedIfHasPermission($account, 'view events');
+          // Only allow administrators to view unpublished events.
+          if ($event->isPublished()) {
+            $permission = 'view events';
+          }
+          else {
+            $permission = 'administer events';
+          }
+          $access_result->addCacheableDependency($event);
           break;
 
         case "update":
-          $access_result = AccessResult::allowedIfHasPermission($account, 'edit events');
+          $permission = 'edit events';
           break;
 
         case "delete":
-          $access_result = AccessResult::allowedIfHasPermission($account, 'delete events');
+          $permission = 'delete events';
           break;
 
-        default:
-          $access_result = AccessResult::neutral();
-          break;
       }
-      return $access_result->orIf(parent::checkAccess($entity, $operation, $account));
+      return $access_result->orIf(AccessResult::allowedIfHasPermission($account, $permission));
     }
 
   }
@@ -1347,84 +1432,222 @@ view events:
   * `create events`, `edit events`, or `delete events` do not grant
     access to `/admin/content/events`
 
-### Additional fields
+### Adding additional fields
+
+#### Add the field definitions
 
 * Add the following to `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+  public static function getCurrentUser() {
+    return \Drupal::currentUser()->id();
+  }
+  ```
+
+* Add the following to the `baseFieldDefinitions()` method in
+  `src/Entity/Event.php`:
 
   ```php?start_inline=1
   use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
   $fields['path'] = BaseFieldDefinition::create('path')
     ->setLabel(t('Path'))
-    ->setDisplayOptions('form', ['weight' => 15]);
+    ->setDisplayOptions('form', ['weight' => 5]);
 
   $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
     ->setLabel(t('Attendees'))
     ->setSetting('target_type', 'user')
     ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-    ->setDisplayOptions('form', ['weight' => 20]);
-  ```
+    ->setDisplayOptions('form', ['weight' => 25])
+    ->setDisplayOptions('view', ['weight' => 20]);
 
-* Update entity/field definitions
-
-  * `{event__attendees}` table created
-
-  * `deleted`, `langcode`, `bundle`, `revision_id` not optional currently
-
-<!-- TODO: Add methods for managing attendees -->
-
-* Add the following to `src/Entity/EventInterface.php`:
-
-  ```php
-  use Drupal\Core\Entity\EntityChangedInterface;
-  use Drupal\user\EntityOwnerInterface;
-
-  , EntityChangedInterface, EntityOwnerInterface
-  ```
-
-  * Changed tracking allows edit-locking
-
-  * Owners are used in entity reference, comment statistics, ...
-
-* Add the following to `src/Entity/Event.php`:
-
-  ```php?start_inline=1
-  use Drupal\Core\Entity\EntityChangedTrait;
-
-  use EntityChangedTrait;
-
-  public function getOwner() {
-    $this->get('owner')->entity;
-  }
-  public function setOwner(UserInterface $account) {
-    $this->set('owner', $account->id());
-  }
-  public function getOwnerId() {
-    $this->get('owner')->target_id;
-  }
-  public function setOwnerId($uid) {
-    $this->set('owner', $uid);
-  }
-
-  $fields['changed'] = BaseFieldDefinition::create('changed')
-    ->setLabel(t('Changed'));
   $fields['owner'] = BaseFieldDefinition::create('entity_reference')
     ->setLabel(t('Owner'))
     ->setSetting('target_type', 'user')
-    ->setDefaultValueCallback(static::class . '::getDefaultOwnerIds');
+    ->setDefaultValueCallback(static::class . '::getCurrentUser');
 
-    public static function getDefaultOwnerIds() {
-      return [\Drupal::currentUser()->id()];
-    }
+  $fields['changed'] = BaseFieldDefinition::create('changed')
+    ->setLabel(t('Changed'));
   ```
 
-<!-- TODO: Add status field -->
+  Parts of this code block are explained below:
 
-* Update entity/field definitions
+  * Multiple-value fields:
 
-  * `changed` and `owner` columns created
+    ```php?start_inline=1
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ```
 
-### Configuration entities
+    Fields can be allowed to have multiple values by changing the _cardinality_
+    of the field definition. If an unlimited amount of field values should be
+    possible, the constant
+    `FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED` should be used as
+    the cardinality value.
+
+  * Default value callbacks:
+
+    ```php?start_inline=1
+    ->setDefaultValueCallback(static::class . '::getCurrentUser')
+    ```
+
+    Instead of setting a static default value, a callback can be specified that
+    will calculate the default value of a field at runtime.
+
+  Note that the `owner` and `changed` fields are not exposed on the form.
+
+* Run `drush entity-updates`
+
+  * Note that the `{event__attendees}` table was created.
+
+#### Add additional field methods
+
+* Add the following to the use statements at the top of `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+  use Drupal\Core\Entity\EntityChangedTrait;
+  use Drupal\user\UserInterface;
+  ```
+
+* Add the following to the `Event` class in `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+  use EntityChangedTrait;
+
+  public function getAttendees() {
+    return $this->get('attendees')->referencedEntities();
+  }
+
+  public function addAttendee(UserInterface $attendee) {
+    $field_items = $this->get('attendees');
+
+    $exists = FALSE;
+    foreach ($field_items as $field_item) {
+      if ($field_item->target_id === $attendee->id()) {
+        $exists = TRUE;
+      }
+    }
+
+    if (!$exists) {
+      $field_items->appendItem($attendee);
+    }
+
+    return $this;
+  }
+
+  public function removeAttendee(UserInterface $attendee) {
+    $field_items = $this->get('attendees');
+    foreach ($field_items as $delta => $field_item) {
+      if ($field_item->target_id === $attendee->id()) {
+        $field_items->removeItem($delta);
+      }
+    }
+    return $this;
+  }
+
+  public function getOwner() {
+    return $this->get('owner')->entity;
+  }
+
+  public function setOwner(UserInterface $account) {
+    return $this->set('owner', $account->id());
+  }
+
+  public function getOwnerId() {
+    return $this->get('owner')->target_id;
+  }
+
+  public function setOwnerId($uid) {
+    return $this->set('owner', $uid);
+  }
+  ```
+
+  Parts of this code block are explained below:
+
+  * Traits:
+
+    ```php?start_inline=1
+    use EntityChangedTrait;
+    ```
+
+  * Field item lists:
+
+    ```php?start_inline=1
+    $this->get('attendees')->referencedEntities();
+    ```
+
+  * Object traversal:
+
+    ```php?start_inline=1
+    foreach ($field_items as $field_item)
+    ```
+
+* Add the following to the use statements at the top of
+  `src/Entity/EventInterface.php`:
+
+  ```php?start_inline=1
+  use Drupal\Core\Entity\EntityChangedInterface;
+  use Drupal\user\EntityOwnerInterface;
+  ```
+
+* Add `EntityOwnerInterface` and `EntityChangedInterface` the `implements`
+  section in `src/Entity/EventInterface.php`:
+
+  Such entity interfaces in general allow entity-related features to be
+  implemented generically so that any entity type can opt-in to using them. In
+  particular these interfaces are used for the following:
+
+  * Changed time tracking:
+
+    ```php?start_inline=1
+    EntityChangedInterface
+    ```
+
+    When an entity that supports changed time tracking is being saved, Drupal
+    checks whether the entity has been updated by someone else in the meantime
+    so that the changes do not get overwritten.
+
+  * Entity ownership:
+
+    ```php?start_inline=1
+    EntityOwnerInterface
+    ```
+
+    When creating an entity with owner support from an entity reference widget,
+    the owner of the host entity is taken over.
+
+* Add the following to the `EventInterface` interface in
+  `src/Entity/EventInterface.php`:
+
+  ```php?start_inline=1
+  /**
+   * @return \Drupal\user\UserInterface[]
+   */
+  public function getAttendees();
+
+  /**
+   * @param \Drupal\user\UserInterface $attendee
+   *
+   * @return $this
+   */
+  public function addAttendee(UserInterface $attendee);
+
+  /**
+   * @param \Drupal\user\UserInterface $attendee
+   *
+   * @return $this
+   */
+  public function removeAttendee(UserInterface $attendee);
+  ```
+
+### Storing dynamic data in configuration
+
+Apart from content entities there is a second type of entities in Drupal, the
+configuration entities. These have a machine-readable string ID and can be
+deployed between different environments along with the rest of the site
+configuration.
+
+While there are some distinctions creating a configuration entity type is very
+similar to creating a content entity type as it was done above.
 
 * Create a `src/Entity/EventType.php` with the following:
 
@@ -1455,7 +1678,44 @@ view events:
   }
   ```
 
-* Update entity/field definitions
+  Parts of this code block are explained below:
+
+  * Configuration prefix:
+
+    ```php?start_inline=1
+    config_prefix = "type"
+    ```
+
+    To clearly identify the source of all configuration, the names of the
+    respective configuration files of configuration entities are automatically
+    prefixed with the module name (`event` in this case) and a period (`.`) as a
+    separator. To distinguish different configuration entity types from the same
+    module each configuration entity type specifies a _configuration prefix_
+    which is the second part of the configuration file name prefix followed by
+    an additional period. The full name of a configuration entity's
+    configuration file is, thus, `"$module_name.$config_prefix.$entity_id"`.
+
+  * Export properties:
+
+    ```php?start_inline=1
+    config_export = {
+      "id",
+      "label",
+    }
+    ```
+
+    ```php?start_inline=1
+    protected $id;
+
+    protected $label;
+    ```
+
+    Configuration entities do not have a notion of (base) field definitions like
+    content entities. Instead simple PHP properties can be declared in the
+    entity class to hold the values of the entity. The names of those properties
+    need to be specified as export properties in the entity annotation.
+
+* Run `drush entity-updates`
 
   * No schema change
 
