@@ -571,7 +571,7 @@ interface
   implements EventInterface
   ```
 
-* Try out the new methods
+* Try out the new getter methods
 
   Run the following PHP code:
 
@@ -584,7 +584,15 @@ interface
   $event->getDate();
   $event->getDescription();
   $event->isPublished();
+  ```
 
+  Note that the returned values match the values in the database.
+
+* Try out the new setter methods
+
+  Run the following PHP code:
+
+  ```
   $event
     ->setTitle('Drupal Developer Days')
     ->setDate(new \DateTime('tomorrow'))
@@ -596,8 +604,7 @@ interface
     ->save();
   ```
 
-  Note that the returned values match the values in the database before and that
-  the values in the database have been updated accordingly.
+  Note that the values in the database have been updated accordingly.
 
 ### Viewing entities on a page
 
@@ -981,7 +988,7 @@ displayed unless explicitly configured to.
 
 #### Add a specialized form
 
-* Add a `src/Entity/EventForm.php` file with the following:
+* Add a `src/Entity/MessageRedirectContentEntityForm.php` file with the following:
 
   ```php
   <?php
@@ -991,16 +998,17 @@ displayed unless explicitly configured to.
   use Drupal\Core\Entity\ContentEntityForm;
   use Drupal\Core\Form\FormStateInterface;
 
-  class EventForm extends ContentEntityForm {
+  class MessageRedirectContentEntityForm extends ContentEntityForm {
 
     public function save(array $form, FormStateInterface $form_state) {
       parent::save($form, $form_state);
 
-      $event = $this->getEntity();
-      drupal_set_message('The event %event has been saved.', [
-        '%event' => $event->label(),
+      $entity = $this->getEntity();
+      drupal_set_message('The @entity_type %entity has been saved.', [
+        '@entity_type' => $entity->getEntityType()->getLowercaseLabel(),
+        '%entity' => $entity->label(),
       ]);
-      $form_state->setRedirectUrl($event->toUrl());
+      $form_state->setRedirectUrl($entity->toUrl('canonical'));
     }
 
   }
@@ -1008,7 +1016,7 @@ displayed unless explicitly configured to.
 
 * Replace the value of the `add` and `edit` annotation keys in the form handlers
   section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Entity\EventForm"`.
+  `"Drupal\event\Entity\MessageRedirectContentEntityForm"`.
 
 * Rebuild caches
 
@@ -1639,7 +1647,41 @@ view events:
   public function removeAttendee(UserInterface $attendee);
   ```
 
+* Try out the new methods
+
+  Run the following PHP code:
+
+  ```
+  use Drupal\event\Entity\Event;
+  use Drupal\user\Entity\User;
+
+  $event = Event::load(4);
+  $user = User::load(1);
+
+  $event->getAttendees();
+
+  $event
+    ->addAttendee($user)
+    ->getAttendees();
+
+  $event
+    ->removeAttendee($user)
+    ->getAttendees();
+  ```
+
+  Note that an empty array is returned initially, then an array with one user,
+  then an empty array again.
+
+* Try out the new fields in the user interface
+
+  Visit `/admin/content/events/manage/4` and add a path and an attendee.
+
+  Note that you are redirected to the path and that the attendee is correctly
+  displayed.
+
 ### Storing dynamic data in configuration
+
+#### Create an entity class
 
 Apart from content entities there is a second type of entities in Drupal, the
 configuration entities. These have a machine-readable string ID and can be
@@ -1662,11 +1704,21 @@ similar to creating a content entity type as it was done above.
    * @ConfigEntityType(
    *   id = "event_type",
    *   label = @Translation("Event type"),
+   *   label_singular = @Translation("event type"),
+   *   label_plural = @Translation("event types"),
+   *   label_count = @PluralTranslation(
+   *     singular = "@count event type",
+   *     plural = "@count event types"
+   *   ),
    *   config_prefix = "type",
    *   config_export = {
    *     "id",
    *     "label",
-   *   }
+   *   },
+   *   entity_keys = {
+   *     "id" = "id",
+   *     "label" = "label",
+   *   },
    * )
    */
   class EventType extends ConfigEntityBase{
@@ -1715,24 +1767,181 @@ similar to creating a content entity type as it was done above.
     entity class to hold the values of the entity. The names of those properties
     need to be specified as export properties in the entity annotation.
 
+#### Install the entity type
+
 * Run `drush entity-updates`
 
-  * No schema change
+  * Note that there is no schema change
 
-* Try out event type CRUD
+* Create and save an event type
 
-  * Create and save an event type
+  Run the following PHP code:
 
-    * Row in `{config}` table
+  ```php?start_inline=1
+  use Drupal\event\Entity\EventType;
 
-  * Load an event type by ID and print label
+  EventType::create([
+    'id' => 'webinar',
+    'label' => 'Webinar',
+  ])->save();
+  ```
 
-  * Delete an event type
+  * Note that there is a new row in the `{config}` table with the name
+    `event.type.webinar`
 
-    * Row in `{config}` table gone
+* Load the event type by its ID
 
+  Run the following PHP code:
+
+  ```php?start_inline=1
+  use Drupal\event\Entity\EventType;
+
+  $event_type = EventType::load('webinar');
+  $event_type->label();
+  ```
+
+  Note that the proper label is returned.
+
+* Update the label of the event type
+
+  Run the following PHP code:
+
+  ```php?start_inline=1
+  use Drupal\event\Entity\EventType;
+
+  $event_type = EventType::load('webinar');
+  $event_type
+    ->set('webinar', 'Online webinar')
+    ->save();
+  ```
+
+* Delete the event type
+
+  Run the following PHP code:
+
+  ```php?start_inline=1
+  use Drupal\event\Entity\EventType;
+
+  $event_type = EventType::load('webinar')
+  $event_type->delete();
+  ```
+
+  Note that the row in the `{config}` table is gone.
+
+### Providing a user interface for configuration entities
+
+#### Add a list of event types
+
+* Add the following to `event.permissions.yml`:
+
+  ```yaml
+  administer event types:
+    title: 'Administer event types'
+  ```
+
+* Add a `src/Entity/EventTypeListBuilder.php` file with the following:
+
+  ```php
+  <?php
+
+  namespace Drupal\event\Entity;
+
+  use Drupal\Core\Entity\EntityInterface;
+  use Drupal\Core\Entity\EntityListBuilder;
+
+  class EventListBuilder extends EntityListBuilder {
+
+    public function buildHeader() {
+      $header = [];
+      $header['label'] = $this->t('Label');
+      return $header + parent::buildHeader();
+    }
+
+    public function buildRow(EntityInterface $event) {
+      $row = [];
+      $row['label'] = $event->label();
+      return $row + parent::buildRow($event);
+    }
+
+  }
+  ```
+
+* Add the following to the annotation in `src/Entity/EventType.php`:
+
+  ```php?start_inline=1
+  *   handlers = {
+  *     "list_builder" = "Drupal\event\Entity\EventTypeListBuilder",
+  *     "route_provider" = {
+  *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+  *     },
+  *   },
+  *   links = {
+  *     "collection" = "/admin/structure/event-types"
+  *   },
+  +   admin_permission = "administer event types",
+  ```
+
+#### Add forms for event types
+
+The `MessageRedirectContentEntityForm` created above assumes the entity type has
+a `canonical` link template, but a canonical route does not make sense for event
+types. Thus, we have to expand it to redirect to the `collection` link instead.
+
+* Replace the following in `src/Entity/MessageRedirectContentEntityForm`:
+
+  ```php?start_inline=1
+  $form_state->setRedirectUrl($entity->toUrl('canonical'));
+  ```
+
+  with:
+
+  ```php?start_inline=1
+  if ($entity->hasLinkTemplate('canonical')) {
+    $form_state->setRedirectUrl($entity->toUrl('canonical'));
+  }
+  elseif ($entity->hasLinkTemplate('collection')) {
+    $form_state->setRedirectUrl($entity->toUrl('collection'));
+  }
+  ```
+
+* Add the following to the `handlers` section of the annotation in
+  `src/Entity/EventType.php`:
+
+  ```php?start_inline=1
+  *     "form" = {
+  *       "add" = "Drupal\event\Entity\MessageRedirectContentEntityForm",
+  *       "edit" = "Drupal\event\Entity\MessageRedirectContentEntityForm",
+  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+  *     },
+  ```
+
+* Add the following to the `links` section of the annotation in
+  `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+   *     "add-form" = "/admin/structure/event-types/add",
+   *     "edit-form" = "/admin/structure/event-types/manage/{event}",
+   *     "delete-form" = "/admin/structure/event-types/manage/{event}/delete",
+  ```
+
+### Categorizing different entities of the same entity type
+
+Drupal provides a mechanism to distinguish content entities of the same type
+and attach different behavior to the entities based on this distinction. In the
+case of event entities, for example, it allows events to have different behavior
+based on the type of event they are. The nomenclature is that entity types can
+have _bundles_ where each entity of that entity type belongs to a certain
+bundle.
+
+Generally a configuration entity type is used to provide the bundles for a
+content entity type. In this case each event type entity will be a bundle for
+the _Event_ entity type.
+
+#### Add the bundle field
+
+<!-- TODO: Field UI -->
+<!-- TODO: Content Translation -->
 <!-- TODO: Config Translation -->
-<!-- TODO: Switch Translation & Revisions -->
 
 [guide-short-url]: https://git.io/d8entity
 [repository]: https://github.com/drupal-entity-training/event
