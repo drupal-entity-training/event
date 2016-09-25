@@ -1026,6 +1026,7 @@ displayed unless explicitly configured to.
       $this->logger($entity->getEntityTypeId())->notice("@entity_type with ID '@id' saved.", [
         '@entity_type' => $entity_type->getLabel(),
         '@id' => $entity->id(),
+        'link' => $entity->toLink($this->t('View'))->toString(),
       ]);
 
       drupal_set_message($this->t('The @entity_type %entity has been saved.', [
