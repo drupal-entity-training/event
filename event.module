@@ -1,0 +1,10 @@
+<?php
+
+function event_theme($existing, $type, $theme, $path) {
+  $info = [
+    'event' => [
+      'render element' => 'content',
+    ],
+  ];
+  return $info;
+}

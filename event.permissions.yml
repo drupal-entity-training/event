@@ -1,0 +1,11 @@
+administer events:
+  title: 'Administer events'
+
+create events:
+  title: 'Create events'
+delete events:
+  title: 'Delete events'
+edit events:
+  title: 'Edit events'
+view events:
+  title: 'View events'
