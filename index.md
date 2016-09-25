@@ -1292,16 +1292,21 @@ listing of events.
 
 * Add an _Event_ view to replace the list builder
 
-  * Add a _Page_ views display with the path `/admin/content/events`
+  * Add a _Page_ views display with the path `admin/content/events`
 
     This will make Views replace the previously existing collection route.
 
+    Note that the path is entered without a leading slash in Views.
+
   * Use the _Table_ style for the display
 
-  * Add a _Dropbutton_ field for the operations
+  * Add _Date_ and _Published_ fields
 
-    Add fields for edit and delete links and exlude them from display. Then
-    enable their use in the dropbutton field.
+  * Add _Link to edit Event_ and _Link to delete Event_ fields and check the
+    _Exclude from display_ checkbox
+
+  * Add a _Dropbutton_ field for the operations and enable the edit and delete
+    links
 
   Views provides a number of features that increase the usability of
   administrative listings when compared to the stock entity list builder. These
@@ -1312,6 +1317,12 @@ listing of events.
     This returns you back to the listing after editing or deleting an event.
 
   * Exposed filters
+
+  * Using formatters for fields
+
+    In this example this allows using Drupal's date formatting system for the
+    date field (see above) and for example using check (✔) and cross (✖) marks
+    for the published field.
 
   * A click-sortable table header
 
