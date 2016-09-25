@@ -1697,6 +1697,7 @@ entities.
   ```php?start_inline=1
   use Drupal\Core\Entity\EntityChangedInterface;
   use Drupal\user\EntityOwnerInterface;
+  use Drupal\user\UserInterface;
   ```
 
 * Add `EntityOwnerInterface` and `EntityChangedInterface` the `extends`
