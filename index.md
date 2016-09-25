@@ -1102,12 +1102,14 @@ displayed unless explicitly configured to.
 
 #### Add a specialized list builder
 
-* Add a `src/Entity/EventListBuilder.php` file with the following:
+* Create a `src/Controller` directory
+
+* Add a `src/Controller/EventListBuilder.php` file with the following:
 
   ```php
   <?php
 
-  namespace Drupal\event\Entity;
+  namespace Drupal\event\Controller;
 
   use Drupal\Core\Entity\EntityInterface;
   use Drupal\Core\Entity\EntityListBuilder;
@@ -1251,7 +1253,7 @@ displayed unless explicitly configured to.
 
 * Replace the value of the `list_builder` annotation key in the `handlers`
   section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Entity\EventListBuilder"`.
+  `"Drupal\event\Controller\EventListBuilder"`.
 
 * Rebuild caches
 
@@ -1965,17 +1967,17 @@ configuration object is validated against this schema.
     title: 'Administer event types'
   ```
 
-* Add a `src/Entity/EventTypeListBuilder.php` file with the following:
+* Add a `src/Controller/EventTypeListBuilder.php` file with the following:
 
   ```php
   <?php
 
-  namespace Drupal\event\Entity;
+  namespace Drupal\Controller\Entity;
 
   use Drupal\Core\Entity\EntityInterface;
   use Drupal\Core\Entity\EntityListBuilder;
 
-  class EventListBuilder extends EntityListBuilder {
+  class EventTypeListBuilder extends EntityListBuilder {
 
     public function buildHeader() {
       $header = [];
@@ -1996,7 +1998,7 @@ configuration object is validated against this schema.
 
   ```php?start_inline=1
   *   handlers = {
-  *     "list_builder" = "Drupal\event\Entity\EventTypeListBuilder",
+  *     "list_builder" = "Drupal\event\Controller\EventTypeListBuilder",
   *     "route_provider" = {
   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
   *     },
@@ -2004,7 +2006,7 @@ configuration object is validated against this schema.
   *   links = {
   *     "collection" = "/admin/structure/event-types"
   *   },
-  +   admin_permission = "administer event types",
+  *   admin_permission = "administer event types",
   ```
 
 #### Add forms for event types
