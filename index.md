@@ -1503,9 +1503,15 @@ view events:
 
   Note that the `owner` and `changed` fields are not exposed on the form.
 
+#### Install the fields
+
 * Run `drush entity-updates`
 
-  * Note that the `{event__attendees}` table was created.
+  * Note that the `{event__attendees}` table was created and `owner` and
+    `changed` fields have been created in the `{event}` table.
+
+    There is no `path` column because path aliases are stored separately in the
+    `{url_alias}` table.
 
 #### Add additional field methods
 
@@ -1767,6 +1773,26 @@ similar to creating a content entity type as it was done above.
     entity class to hold the values of the entity. The names of those properties
     need to be specified as export properties in the entity annotation.
 
+#### Provide a configuration schema
+
+To ensure that the structure of each configuration object is correct, a _schema_
+is provided. When importing configuration from another environment, each
+configuration object is validated against this schema.
+
+* Add a `config/schema/event.schema.yml` with the following:
+
+  ```yaml
+  event.type.*:
+    type: config_object
+    mapping:
+      id:
+        type: string
+        label: 'ID'
+      label:
+        type: label
+        label: 'Label'
+  ```
+
 #### Install the entity type
 
 * Run `drush entity-updates`
@@ -1939,9 +1965,88 @@ the _Event_ entity type.
 
 #### Add the bundle field
 
-<!-- TODO: Field UI -->
-<!-- TODO: Content Translation -->
-<!-- TODO: Config Translation -->
+* Delete the existing event
+
+  Visit `/admin/content/event/manage/4/delete` and press _Delete_.
+
+  Adding a bundle field cannot be done when there are existing entities.
+
+* Add the following to the `entity_keys` section of the annotation in
+  `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+  "bundle" = "type",
+  ```
+
+* Add the following to the annotation in `src/Entity/Event.php`:
+
+  ```php?start_inline=1
+  bundle_entity_type = "event_type",
+  ```
+
+* Replace the `add-form` link in the annotation in `src/Entity/Event.php` with:
+
+  ```php?start_inline=1
+  "/admin/content/events/add/{event_type}"
+  ```
+
+* Add the following to the `links` section of the annotation in
+  `src/Entity/Event.php` with:
+
+  ```php?start_inline=1
+  "add-page" = "/admin/content/events/add",
+  ```
+
+* Add the following to the annotation in `src/Entity/EventType.php`:
+
+  ```php?start_inline=1
+  bundle_of = "event",
+  ```
+
+#### Install the bundle field
+
+* Run `drush entity-updates`
+
+  * Note that the `type` column has been added to the `{event}` table.
+
+* Visit `/admin/structure/event-types/add` and add a _Conference_ event type
+
+* Visit `/admin/content/events/add`
+
+  Note that the two event types are displayed as options.
+
+* Create an event
+
+### Configuring bundles in the user interface
+
+#### Enable Field UI for events
+
+* Add the following to the annotation in `src/Entity/Event.php`:
+
+  ```php?start_inline
+  field_ui_base_route = "entity.event_type.edit_form",
+  ```
+
+* Visit `/admin/structure/event-types`
+
+  Note that there is a _Manage fields_, _Manage form display_ and _Manage
+  display_ operation for each event type.
+
+#### Add dynamic fields to events
+
+#### Configure view modes
+
+#### Configure form modes
+
+### Translating content
+
+#### Install the Content Translation module
+
+#### Make events translatable
+
+### Translating configuration
+
+#### Install the Configuration Translation module
 
 [guide-short-url]: https://git.io/d8entity
 [repository]: https://github.com/drupal-entity-training/event
