@@ -2048,7 +2048,7 @@ configuration object is validated against this schema.
         '#disabled' => !$event_type->isNew(),
       ];
 
-      return ;
+      return $form;
     }
 
     public function save(array $form, FormStateInterface $form_state) {
