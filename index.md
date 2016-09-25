@@ -2146,6 +2146,37 @@ the _Event_ entity type.
 
 #### Make events translatable
 
+We can also specify the metadata of our content entity, including if it CAN be translatable.
+For that, we use the translatable property in the annotation. But this doesn’t make the content entity translatable,
+this ALLOWS site builders to make it translatable in the UI. So they need to opt-in for this functionality.
+And for an entity being translatable, we need to define a base field that stores the language of our entity. 
+This is done by the langcode key in the entity keys annotation property.
+
+  ```php?start_inline
+ *   ...
+ *   translatable = TRUE,
+ *   ...
+ *   entity_keys = {
+ *     ....
+ *     "langcode" = "langcode",
+ *   }
+ *   ...
+ * )
+```
+
+After defining our langcode key, we just need to ensure that our ```baseFieldDefinitions``` method calls the
+```parent:baseFieldDefinitions``` method from ```ContentEntityBase```, so the ```langcode``` field is created.
+
+For our own base fields, we can define if they can be translatable too. So for base fields, we also will need 
+to opt-in in the interface for allowing its translatability, but Drupal will provide sane defaults when configuring that.
+
+```
+  $fields['title'] = BaseFieldDefinition::create('string')
+    ->setLabel(t('Title'))
+    ->setRequired(TRUE)
+    ->setTranslatable(TRUE);
+```
+
 ### Translating configuration
 
 #### Install the Configuration Translation module
