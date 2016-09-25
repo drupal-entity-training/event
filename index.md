@@ -9,8 +9,10 @@ using the example of an  _Event_ entity type.
 You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
 The starting point is a stock Drupal 8.2 core _Standard_ installation with an
-empty module named `event`. The state at the end of any given step can be seen
-in the corresponding branch in the [repository][repository].
+empty module directory at `modules/event`.
+
+<!-- The state at the end of any given step can be seen
+in the corresponding branch in the [repository][repository]. -->
 
 Having [Drush][drush] available is required to follow along. When Drush commands
 are to be run, run them from within the Drupal installation. When PHP code is to
@@ -23,6 +25,19 @@ creating a `test.php` script and then running `drush php-script test.php`.
 {:toc}
 
 ### Using entities for data storage
+
+#### Create a module
+
+* Within the `/modules/event` directory create a `event.info.yml` file with the
+  following:
+
+  ```yaml
+  name: Event
+  type: module
+  core: 8.x
+  ```
+
+* Visit `/admin/modules` and install the _Event_ module
 
 #### Create an entity class
 
@@ -122,7 +137,7 @@ _Annotations_ are a way to provide metadata about code. Because the annotation
 is placed right next to the code itself, this makes classes truly self-contained
 as both functionality and metadata are in the same file.
 
-Add the following comment block to the `Event` class:
+Add the following comment block above the `Event` class:
 
 ```php?start_inline=1
 /**
