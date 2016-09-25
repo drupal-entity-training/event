@@ -1023,16 +1023,14 @@ displayed unless explicitly configured to.
       $entity = $this->getEntity();
       $entity_type = $entity->getEntityType();
 
-      $this->logger($entity->getEntityTypeId())->notice("@entity_type with ID '@id' saved.", [
-        '@entity_type' => $entity_type->getLabel(),
-        '@id' => $entity->id(),
-        'link' => $entity->toLink($this->t('View'))->toString(),
-      ]);
-
-      drupal_set_message($this->t('The @entity_type %entity has been saved.', [
+      $arguments = [
         '@entity_type' => $entity_type->getLowercaseLabel(),
         '%entity' => $entity->label(),
-      ]));
+        'link' => $entity->toLink($this->t('View'))->toString(),
+      ];
+
+      $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
+      drupal_set_message($this->t('The @entity_type %entity has been saved.', $arguments));
 
       $form_state->setRedirectUrl($entity->toUrl('canonical'));
     }
