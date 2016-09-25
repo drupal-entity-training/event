@@ -1021,10 +1021,10 @@ displayed unless explicitly configured to.
       parent::save($form, $form_state);
 
       $entity = $this->getEntity();
-      drupal_set_message('The @entity_type %entity has been saved.', [
+      drupal_set_message($this->t('The @entity_type %entity has been saved.', [
         '@entity_type' => $entity->getEntityType()->getLowercaseLabel(),
         '%entity' => $entity->label(),
-      ]);
+      ]));
       $form_state->setRedirectUrl($entity->toUrl('canonical'));
     }
 
