@@ -1543,12 +1543,17 @@ entities.
   }
   ```
 
-* Add the following to the `baseFieldDefinitions()` method in
+* Add the following to the `use` statements at the top of
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
   use Drupal\Core\Field\FieldStorageDefinitionInterface;
+  ```
 
+* Add the following to the `baseFieldDefinitions()` method in
+  `src/Entity/Event.php` above `return $fields;`:
+
+  ```php?start_inline=1
   $fields['path'] = BaseFieldDefinition::create('path')
     ->setLabel(t('Path'))
     ->setDisplayOptions('form', ['weight' => 5]);
