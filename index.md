@@ -995,42 +995,15 @@ displayed unless explicitly configured to.
 
   Enter a title, date and description and press _Save_.
 
-  Note that no message is displayed and no redirect is performed. This will be
-  added below by providing a specialized form handler.
-
   Verify that the event was saved by checking that a new row was created in the
   `{event}` table.
 
-* Edit an event in the user interface
-
-  Visit `/admin/content/events/manage/3`
-
-  Note that a route exists and form fields are displayed including proper
-  default values.
-
-  Modify the title, date and description and published status and press _Save_.
-
-  Note that again no message is displayed and no redirect is performed.
-
-  Verify that the values in the respective row in the `{event}` table have been
-  updated. Also note that the default values of the form fields are correct on
-  the reloaded page.
-
-* Delete an event in the user interface
-
-  Visit `/admin/content/events/manage/3/delete`
-
-  Note that a route exists and a confirmation form is shown.
-
-  Press _Delete_.
-
-  Note that a message is shown and you are redirected to the front page.
-
-  Verify that the respective row in the `{event}` table has been deleted.
+  Note that no message is displayed and no redirect is performed.
 
 #### Add a specialized form
 
-* Add a `src/Entity/MessageRedirectContentEntityForm.php` file with the following:
+* Add a `src/Entity/MessageRedirectContentEntityForm.php` file with the
+  following:
 
   ```php
   <?php
@@ -1063,6 +1036,33 @@ displayed unless explicitly configured to.
 * Rebuild caches
 
   Run `drush cache-rebuild`
+
+* Edit an event in the user interface
+
+  Visit `/admin/content/events/manage/3`
+
+  Note that a route exists and form fields are displayed including proper
+  default values.
+
+  Modify the title, date and description and published status and press _Save_.
+
+  Note that again no message is displayed and no redirect is performed.
+
+  Verify that the values in the respective row in the `{event}` table have been
+  updated. Also note that the default values of the form fields are correct on
+  the reloaded page.
+
+* Delete an event in the user interface
+
+  Visit `/admin/content/events/manage/3/delete`
+
+  Note that a route exists and a confirmation form is shown.
+
+  Press _Delete_.
+
+  Note that a message is shown and you are redirected to the front page.
+
+  Verify that the respective row in the `{event}` table has been deleted.
 
 ### Listing entities
 
