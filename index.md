@@ -2011,10 +2011,6 @@ configuration object is validated against this schema.
 
 #### Add forms for event types
 
-The `MessageRedirectContentEntityForm` created above assumes the entity type has
-a `canonical` link template, but a canonical route does not make sense for event
-types. Thus, we have to expand it to redirect to the `collection` link instead.
-
 * Add a `src/Form/EventTypeForm.php` file with the
   following:
 
