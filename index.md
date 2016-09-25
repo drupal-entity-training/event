@@ -1648,9 +1648,10 @@ entities.
     $field_items = $this->get('attendees');
     foreach ($field_items as $delta => $field_item) {
       if ($field_item->target_id === $attendee->id()) {
-        $field_items->removeItem($delta);
+        $field_items->set($delta, NULL);
       }
     }
+    $field_items->filterEmtptyItems();
     return $this;
   }
 
