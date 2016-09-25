@@ -1027,7 +1027,7 @@ displayed unless explicitly configured to.
       $arguments = [
         '@entity_type' => $entity_type->getLowercaseLabel(),
         '%entity' => $entity->label(),
-        'link' => $entity->toLink($this->t('View'))->toString(),
+        'link' => $entity->toLink($this->t('View'), 'canonical')->toString(),
       ];
 
       $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
@@ -2060,7 +2060,7 @@ configuration object is validated against this schema.
       $arguments = [
         '@entity_type' => $entity_type->getLowercaseLabel(),
         '%entity' => $entity->label(),
-        'link' => $entity->toLink($this->t('View'))->toString(),
+        'link' => $entity->toLink($this->t('View'), 'edit-form')->toString(),
       ];
 
       $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
@@ -2092,8 +2092,8 @@ configuration object is validated against this schema.
 
   ```php?start_inline=1
    *     "add-form" = "/admin/structure/event-types/add",
-   *     "edit-form" = "/admin/structure/event-types/manage/{event}",
-   *     "delete-form" = "/admin/structure/event-types/manage/{event}/delete",
+   *     "edit-form" = "/admin/structure/event-types/manage/{event_type}",
+   *     "delete-form" = "/admin/structure/event-types/manage/{event_type}/delete",
   ```
 
 ### Categorizing different entities of the same entity type
