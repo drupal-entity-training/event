@@ -1002,13 +1002,15 @@ displayed unless explicitly configured to.
 
 #### Add a specialized form
 
-* Add a `src/Entity/MessageRedirectContentEntityForm.php` file with the
+* Add a `src/Form` directory
+
+* Add a `src/Form/MessageRedirectContentEntityForm.php` file with the
   following:
 
   ```php
   <?php
 
-  namespace Drupal\event\Entity;
+  namespace Drupal\event\Form;
 
   use Drupal\Core\Entity\ContentEntityForm;
   use Drupal\Core\Form\FormStateInterface;
@@ -1031,7 +1033,7 @@ displayed unless explicitly configured to.
 
 * Replace the value of the `add` and `edit` annotation keys in the form handlers
   section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Entity\MessageRedirectContentEntityForm"`.
+  `"Drupal\event\Form\MessageRedirectContentEntityForm"`.
 
 * Rebuild caches
 
@@ -1955,7 +1957,7 @@ The `MessageRedirectContentEntityForm` created above assumes the entity type has
 a `canonical` link template, but a canonical route does not make sense for event
 types. Thus, we have to expand it to redirect to the `collection` link instead.
 
-* Replace the following in `src/Entity/MessageRedirectContentEntityForm`:
+* Replace the following in `src/Form/MessageRedirectContentEntityForm`:
 
   ```php?start_inline=1
   $form_state->setRedirectUrl($entity->toUrl('canonical'));
@@ -1977,8 +1979,8 @@ types. Thus, we have to expand it to redirect to the `collection` link instead.
 
   ```php?start_inline=1
   *     "form" = {
-  *       "add" = "Drupal\event\Entity\MessageRedirectContentEntityForm",
-  *       "edit" = "Drupal\event\Entity\MessageRedirectContentEntityForm",
+  *       "add" = "Drupal\event\Form\MessageRedirectContentEntityForm",
+  *       "edit" = "Drupal\event\Form\MessageRedirectContentEntityForm",
   *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
   *     },
   ```
