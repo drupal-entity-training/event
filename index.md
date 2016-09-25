@@ -1699,7 +1699,7 @@ entities.
   use Drupal\user\EntityOwnerInterface;
   ```
 
-* Add `EntityOwnerInterface` and `EntityChangedInterface` the `implements`
+* Add `EntityOwnerInterface` and `EntityChangedInterface` the `extends`
   section in `src/Entity/EventInterface.php`:
 
   Such entity interfaces in general allow entity-related features to be
