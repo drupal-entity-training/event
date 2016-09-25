@@ -1005,7 +1005,7 @@ displayed unless explicitly configured to.
 
 * Add a `src/Form` directory
 
-* Add a `src/Form/MessageRedirectContentEntityForm.php` file with the
+* Add a `src/Form/EventForm.php` file with the
   following:
 
   ```php
@@ -1016,7 +1016,7 @@ displayed unless explicitly configured to.
   use Drupal\Core\Entity\ContentEntityForm;
   use Drupal\Core\Form\FormStateInterface;
 
-  class MessageRedirectContentEntityForm extends ContentEntityForm {
+  class EventForm extends ContentEntityForm {
 
     public function save(array $form, FormStateInterface $form_state) {
       parent::save($form, $form_state);
@@ -1041,7 +1041,7 @@ displayed unless explicitly configured to.
 
 * Replace the value of the `add` and `edit` annotation keys in the form handlers
   section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Form\MessageRedirectContentEntityForm"`.
+  `"Drupal\event\Form\EventForm"`.
 
 * Rebuild caches
 
@@ -2015,36 +2015,84 @@ The `MessageRedirectContentEntityForm` created above assumes the entity type has
 a `canonical` link template, but a canonical route does not make sense for event
 types. Thus, we have to expand it to redirect to the `collection` link instead.
 
-* Replace the following in `src/Form/MessageRedirectContentEntityForm`:
+* Add a `src/Form/EventTypeForm.php` file with the
+  following:
 
-  ```php?start_inline=1
-  $form_state->setRedirectUrl($entity->toUrl('canonical'));
+  ```php
+  <?php
+
+  namespace Drupal\event\Form;
+
+  use Drupal\Core\Entity\EntityForm;
+  use Drupal\Core\Entity\EntityTypeInterface;
+  use Drupal\Core\Form\FormStateInterface;
+
+  class EventTypeForm extends EntityForm {
+
+    public function form(array $form, FormStateInterface $form_state) {
+      $form = parent::form($form, $form_state);
+
+      $event_type = $this->getEntity();
+
+      $form['label'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Label'),
+        '#default_value' => $event_type->label(),
+        '#required' => TRUE,
+      ];
+
+      $form['id'] = [
+        '#type' => 'machine_name',
+        '#title' => $this->t('ID'),
+        '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
+        '#default_value' => $event_type->id(),
+        '#machine_name' => [
+          'exists' => [$event_type->getEntityType()->getClass(), 'load'],
+        ],
+        '#disabled' => !$event_type->isNew(),
+      ];
+
+      return ;
+    }
+
+    public function save(array $form, FormStateInterface $form_state) {
+      parent::save($form, $form_state);
+
+      $entity = $this->getEntity();
+      $entity_type = $entity->getEntityType();
+
+      $arguments = [
+        '@entity_type' => $entity_type->getLowercaseLabel(),
+        '%entity' => $entity->label(),
+        'link' => $entity->toLink($this->t('View'))->toString(),
+      ];
+
+      $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
+      drupal_set_message($this->t('The @entity_type %entity has been saved.', $arguments));
+
+      $form_state->setRedirectUrl($entity->toUrl('canonical'));
+    }
+
+  }
   ```
 
-  with:
-
-  ```php?start_inline=1
-  if ($entity->hasLinkTemplate('canonical')) {
-    $form_state->setRedirectUrl($entity->toUrl('canonical'));
-  }
-  elseif ($entity->hasLinkTemplate('collection')) {
-    $form_state->setRedirectUrl($entity->toUrl('collection'));
-  }
-  ```
+* Replace the value of the `add` and `edit` annotation keys in the form handlers
+  section of the annotation in `src/Entity/Event.php` with
+  `"Drupal\event\Form\EventForm
 
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/EventType.php`:
 
   ```php?start_inline=1
   *     "form" = {
-  *       "add" = "Drupal\event\Form\MessageRedirectContentEntityForm",
-  *       "edit" = "Drupal\event\Form\MessageRedirectContentEntityForm",
-  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+  *       "add" = "Drupal\event\Form\EventTypeForm",
+  *       "edit" = "Drupal\event\Form\EventTypeForm",
+  *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
   *     },
   ```
 
 * Add the following to the `links` section of the annotation in
-  `src/Entity/Event.php`:
+  `src/Entity/EventType.php`:
 
   ```php?start_inline=1
    *     "add-form" = "/admin/structure/event-types/add",
