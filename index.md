@@ -2060,7 +2060,7 @@ configuration object is validated against this schema.
       $arguments = [
         '@entity_type' => $entity_type->getLowercaseLabel(),
         '%entity' => $entity->label(),
-        'link' => $entity->toLink($this->t('View'), 'edit-form')->toString(),
+        'link' => $entity->toLink($this->t('Edit'), 'edit-form')->toString(),
       ];
 
       $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
