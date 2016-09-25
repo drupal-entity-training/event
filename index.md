@@ -1783,17 +1783,19 @@ entities.
   Note that you are redirected to the path and that the attendee is correctly
   displayed.
 
-### Storing dynamic data in configuration
+The event entities are feature complete for our purposes as of now.
 
-#### Create an entity class
+### Storing dynamic data in configuration
 
 Apart from content entities there is a second type of entities in Drupal, the
 configuration entities. These have a machine-readable string ID and can be
 deployed between different environments along with the rest of the site
 configuration.
 
-While there are some distinctions creating a configuration entity type is very
-similar to creating a content entity type as it was done above.
+#### Create an entity class
+
+While there are some distinctions, creating a configuration entity type is very
+similar to creating a content entity type.
 
 * Create a `src/Entity/EventType.php` with the following:
 
@@ -1825,7 +1827,7 @@ similar to creating a content entity type as it was done above.
    *   },
    * )
    */
-  class EventType extends ConfigEntityBase{
+  class EventType extends ConfigEntityBase {
 
     protected $id;
 
@@ -1846,7 +1848,7 @@ similar to creating a content entity type as it was done above.
     respective configuration files of configuration entities are automatically
     prefixed with the module name (`event` in this case) and a period (`.`) as a
     separator. To distinguish different configuration entity types from the same
-    module each configuration entity type specifies a _configuration prefix_
+    module, each configuration entity type specifies a _configuration prefix_
     which is the second part of the configuration file name prefix followed by
     an additional period. The full name of a configuration entity's
     configuration file is, thus, `"$module_name.$config_prefix.$entity_id"`.
@@ -1935,7 +1937,7 @@ configuration object is validated against this schema.
 
   $event_type = EventType::load('webinar');
   $event_type
-    ->set('webinar', 'Online webinar')
+    ->set('label', 'Online webinar')
     ->save();
   ```
 
