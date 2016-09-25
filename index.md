@@ -294,6 +294,7 @@ additional fields.
   use Drupal\Core\Field\BaseFieldDefinition;
 
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    // Get field definitions for 'id' and 'uuid' from the parent.
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['title'] = BaseFieldDefinition::create('string')
@@ -1499,10 +1500,38 @@ view events:
 
 * Test permissions
 
-  * `create events`, `edit events`, or `delete events` do not grant
-    access to `/admin/content/events`
+  * Add an _Event creator_ role and assign the `create events` permission
+
+    Add an _Event creator_ user and assign the respective role.
+
+    Login as the _Event creator_ user and verify that access is granted to
+     `/admin/content/events/add` but not granted to `/admin/content/events`,
+     `/admin/content/events/4` and `/admin/content/events/4/delete`
+
+  * Add an _Event editor_ role and assign the `edit events` permission
+
+    Add an _Event editor_ user and assign the respective role.
+
+    Login as the _Event editor_ user and verify that access is granted to
+     `/admin/content/events/events/4` but not granted to
+     `/admin/content/events`, `/admin/content/events/add` and
+     `/admin/content/events/4/delete`
+
+  * Add an _Event deletor_ role and assign the `delete events` permission
+
+    Add an _Event deletor_ user and assign the respective role.
+
+    Login as the _Event deletor_ user and verify that access is granted to
+     `/admin/content/events/events/4/delete` but not granted to
+     `/admin/content/events`, `/admin/content/events/add` and
+     `/admin/content/events/4`
 
 ### Adding additional fields
+
+Now that our basic implementation of _Events_ is functional and usable from the
+user interface, we can add some more fields. This is both to recap the above
+chapters and to show some additional features that are often used for content
+entities.
 
 #### Add the field definitions
 
