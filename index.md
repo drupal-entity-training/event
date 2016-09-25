@@ -691,7 +691,7 @@ path. All of this can be automated by amending the entity annotation.
 
     ```php?start_inline?1
     *   links = {
-    *     "canonical" = "/event/{event}"
+    *     "canonical" = "/event/{event}",
     *   },
     ```
 
