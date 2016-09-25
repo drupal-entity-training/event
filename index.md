@@ -1092,6 +1092,10 @@ displayed unless explicitly configured to.
   *     "collection" = "/admin/content/events",
   ```
 
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/content/events`
 
   Note that a route is provided and a list of entities is provided with
@@ -1303,6 +1307,10 @@ listing of events.
 
   * Use the _Table_ style for the display
 
+    Check the _Show the empty text in the table_ checkbox.
+
+  * Add an empty text field to the _No results behavior_ area
+
   * Add _Date_ and _Published_ fields
 
   * Add _Link to edit Event_ and _Link to delete Event_ fields and check the
@@ -1339,15 +1347,6 @@ To provide a usable and integrated administration experience the different pages
 need to be connected and enriched with Drupal's standard administrative links.
 
 #### Add links for the administrative listing
-
-* Add an `event.links.menu.yml` file with the following:
-
-  ```yaml
-  entity.event.collection:
-    title: 'Events'
-    route_name: entity.event.collection
-    parent: system.admin_content
-  ```
 
 * Rebuild caches
 
@@ -2009,6 +2008,21 @@ configuration object is validated against this schema.
   *   admin_permission = "administer event types",
   ```
 
+* Add the following to `event.links.menu.yml`:
+
+  ```yaml
+  entity.event_type.collection:
+    title: 'Event types'
+    route_name: entity.event_type.collection
+    parent: system.admin_structure
+  ```
+
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
+<!-- TODO: Visit /admin/structure/event-types and note there is a menu link -->
+
 #### Add forms for event types
 
 * Add a `src/Form/EventTypeForm.php` file with the
@@ -2096,6 +2110,37 @@ configuration object is validated against this schema.
    *     "delete-form" = "/admin/structure/event-types/manage/{event_type}/delete",
   ```
 
+* Add the following to `event.links.action.yml`:
+
+  ```ỳaml
+  entity.event_type.collection:
+    title: 'Add event type'
+    route_name: entity.event_type.add_form
+    appears_on: [entity.event_type.collection]
+  ```
+
+* Add the following to `event.links.task.yml`:
+
+  ```yaml
+  entity.event_type.edit_form:
+    title: 'Edit'
+    route_name: entity.event_type.edit_form
+    base_route: entity.event_type.edit_form
+  entity.event_type.delete_form:
+    title: 'Delete'
+    route_name: entity.event_type.delete_form
+    base_route: entity.event_type.edit_form
+  ```
+
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
+<!-- TODO: Add/edit/delete event types through the UI. Mention machine name form
+  element, Verify that the _Add event_ action link appears on
+  `/admin/content/events` and that local tasks appear
+-->
+
 ### Categorizing different entities of the same entity type
 
 Drupal provides a mechanism to distinguish content entities of the same type
@@ -2143,6 +2188,9 @@ the _Event_ entity type.
   "add-page" = "/admin/content/events/add",
   ```
 
+* Replace value of the `route_name` key in `event.links.action.yml` with
+  `entity.event.add_page'`
+
 * Add the following to the annotation in `src/Entity/EventType.php`:
 
   ```php?start_inline=1
@@ -2173,6 +2221,10 @@ the _Event_ entity type.
   field_ui_base_route = "entity.event_type.edit_form",
   ```
 
+* Rebuild caches
+
+  Run `drush cache-rebuild`
+
 * Visit `/admin/structure/event-types`
 
   Note that there is a _Manage fields_, _Manage form display_ and _Manage
@@ -2180,15 +2232,63 @@ the _Event_ entity type.
 
 #### Add dynamic fields to events
 
+The ability to have comments is managed as a field in Drupal, so we can use
+Field UI to add a _Comments_ field to an event type.
+
+* Add a comment type
+
+* Add a _Comments_ field to an event type
+
 #### Configure view modes
 
-#### Configure form modes
+* Visit the _Manage display_ page
+
+  Note that only the _Comments_ field appears
+
+* Add `->setDisplayConfigurable('view', TRUE)` to all fields
+
+* Upload a user picture
+
+* Note that all fields now appear
+
+* Use _Rendered entity_ for the _Attendees_ field
+
+* Add a _Teaser_ view mode, make it configurable (cache-rebuild) and configure
+  it
+
+* Add a _Teaser_ view
+
+  Path: `events`
+
+#### Configure the form
+
+* Visit the _Manage form display_ page
+
+  Note that only the _Comments_ field appears
+
+* Add `->setDisplayConfigurable('form', TRUE)` to all fields
+
+* Note that all fields now appear
+
+* Use _Select list_ for _Date_ field or _Checkboxes_ for _Attendees_ field
 
 ### Translating content
 
 #### Install the Content Translation module
 
+* Install module
+
+* Add another language /admin/config/regional/language (Irish)
+
+* Visit _Content language and translation_ /admin/config/regional/content-language
+
+  Note that there are no events.
+
 #### Make events translatable
+
+* Delete events
+
+* Delete EVents view /admin/content/events
 
 We can also specify the metadata of our content entity, including if it CAN be translatable.
 For that, we use the translatable property in the annotation. But this doesn’t make the content entity translatable,
@@ -2204,9 +2304,14 @@ This is done by the langcode key in the entity keys annotation property.
  *     ....
  *     "langcode" = "langcode",
  *   }
+ *   data_table = "event_field_data",
  *   ...
  * )
 ```
+
+* ENtity updates
+
+  See that only COmments is translatable
 
 After defining our langcode key, we just need to ensure that our ```baseFieldDefinitions``` method calls the
 ```parent:baseFieldDefinitions``` method from ```ContentEntityBase```, so the ```langcode``` field is created.
@@ -2220,6 +2325,37 @@ to opt-in in the interface for allowing its translatability, but Drupal will pro
     ->setRequired(TRUE)
     ->setTranslatable(TRUE);
 ```
+
+Make Translatable: title, description, published, path, changed
+Not trans: owner, attendees, date
+
+* Entity updates
+
+* Add entity
+
+* Translate tab
+
+Notice exception
+
+Uncaught PHP Exception
+  Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException:
+ "The "event" entity type did not specify a "default" form class." at core/lib/Drupal/Core/Entity/EntityTypeManager.php line 176
+
+"default" = "Drupal\event\Form\EventForm"
+
+* Rebuild cache
+
+* Translate entity
+
+  Note that non-translatable fields are shown, but edit source
+
+  Note that translation works
+
+* Add Event translator role + user + login
+
+* Note that non-translatable fields are not shown
+
+* Re-add Events view
 
 ### Translating configuration
 
