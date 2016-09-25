@@ -224,8 +224,8 @@ See [Drupal API: Annotations][api-annotations] for more information.
 
 #### Install the entity type
 
-Drupal can be create the database schema for our entity type automatically but
-this needs to be done explicitly. The preferred way of doing this is with Drush.
+Drupal can create the database schema for our entity type automatically but this
+needs to be done explicitly. The preferred way of doing this is with Drush.
 
 * Run `drush entity-updates`
 
@@ -299,11 +299,14 @@ additional fields.
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
       ->setRequired(TRUE);
+
     $fields['date'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Date'))
       ->setRequired(TRUE);
+
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'));
+
     $fields['published'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Published'))
       ->setRequired(TRUE)
