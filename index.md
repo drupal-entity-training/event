@@ -2066,7 +2066,7 @@ configuration object is validated against this schema.
       $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
       drupal_set_message($this->t('The @entity_type %entity has been saved.', $arguments));
 
-      $form_state->setRedirectUrl($entity->toUrl('canonical'));
+      $form_state->setRedirectUrl($entity->toUrl('collection'));
     }
 
   }
