@@ -98,16 +98,16 @@ functionality.
     name. Further sub-namespaces correspond to the directory structure within
     the `src` directory of the module.
 
-  * Base class:
+  * Inheritance:
 
     ```php?start_inline=1
     extends
     ```
 
     Base classes can be used to implement functionality that is generic and
-    useful for many classes. Classes inherit all functionality from their base
-    class and only need to provide functionality specific to them. This avoids
-    code duplication.
+    useful for many classes. Classes can inherit all functionality from such a
+    base class by using the `extends` keyword. they them. Then they only need
+    to provide functionality specific to them, which avoids code duplication.
 
   * Content entities:
 
@@ -331,6 +331,18 @@ additional fields.
     hint_. It dictates what type of object must be passed. Type hinting an
     interface allows any class that _implements_ the interface to be passed.
 
+  * Inheritance:
+
+    ```php?start_inline
+    $fields = parent::baseFieldDefinitions($entity_type);
+    ```
+
+    The class that is extended (`ContentEntityBase` in this case) is called the
+     _parent_ class. The `baseFieldDefinitions()` method in `ContentEntityBase`
+     provides field definitions for the `id` and `uuid` fields. Inheritance
+     allows us to re-use those field definitions while still adding additional
+     ones.
+
   * Field definition:
 
     ```php?start_inline=1
@@ -497,7 +509,7 @@ interface
   }
 
   public function isPublished() {
-    return $this->get('published')->value;
+    return (bool) $this->get('published')->value;
   }
 
   public function publish() {
@@ -517,7 +529,7 @@ interface
   and `unpublish()` methods make the code more readable than with a generic
   `setPublished()` method.
 
-* Create a `src/Event/EventInterface.php` with the following code:
+* Create a `src/Entity/EventInterface.php` with the following code:
 
   ```php
   <?php
