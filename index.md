@@ -309,7 +309,6 @@ additional fields.
 
     $fields['published'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Published'))
-      ->setRequired(TRUE)
       ->setDefaultValue(FALSE);
 
     return $fields;
@@ -858,6 +857,9 @@ displayed unless explicitly configured to.
   ```php
   <?php
 
+  /**
+   * Implements hook_theme().
+   */
   function event_theme($existing, $type, $theme, $path) {
     return [
       'event' => [
@@ -933,6 +935,11 @@ displayed unless explicitly configured to.
 
 * Visit `/admin/content/events/add`
 
+  Note that a route exists and a _Save_ button is shown, but no
+  actual form fields are shown.
+
+* Visit `/admin/content/events/manage/2`
+
   Note that a route exists and _Save_ and _Delete_ buttons are shown, but no
   actual form fields are shown.
 
@@ -968,7 +975,12 @@ displayed unless explicitly configured to.
   semicolon:
 
   ```php?start_inline=1
-  ->setDisplayOptions('form', ['weight' => 30])
+  ->setDisplayOptions('form', [
+    'settings' => [
+      'display_label' => TRUE,
+    ],
+    'weight' => 30,
+  ])
   ```
 
 * Rebuild caches
