@@ -1021,10 +1021,18 @@ displayed unless explicitly configured to.
       parent::save($form, $form_state);
 
       $entity = $this->getEntity();
+      $entity_type = $entity->getEntityType();
+
+      $this->logger($entity->getEntityTypeId())->notice("@entity_type with ID '@id' saved.", [
+        '@entity_type' => $entity_type->getLabel(),
+        '@id' => $entity->id(),
+      ]);
+
       drupal_set_message($this->t('The @entity_type %entity has been saved.', [
-        '@entity_type' => $entity->getEntityType()->getLowercaseLabel(),
+        '@entity_type' => $entity_type->getLowercaseLabel(),
         '%entity' => $entity->label(),
       ]));
+
       $form_state->setRedirectUrl($entity->toUrl('canonical'));
     }
 
