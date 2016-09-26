@@ -1990,7 +1990,7 @@ configuration object is validated against this schema.
   ```php
   <?php
 
-  namespace Drupal\Controller\Entity;
+  namespace Drupal\event\Controller;
 
   use Drupal\Core\Entity\EntityInterface;
   use Drupal\Core\Entity\EntityListBuilder;
