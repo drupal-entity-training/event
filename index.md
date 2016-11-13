@@ -167,7 +167,7 @@ Each part of this code block is explained below:
 * ID:
 
   ```php?start_inline=1
-  *   id = "event",
+   *   id = "event",
   ```
 
   This is the ID of the entity type that is needed whenever interacting with
@@ -176,13 +176,13 @@ Each part of this code block is explained below:
 * Labels:
 
   ```php?start_inline=1
-  *   label = @Translation("Event"),
-  *   label_singular = @Translation("event"),
-  *   label_plural = @Translation("events"),
-  *   label_count = @PluralTranslation(
-  *     singular = "@count event",
-  *     plural = "@count events"
-  *   ),
+   *   label = @Translation("Event"),
+   *   label_singular = @Translation("event"),
+   *   label_plural = @Translation("events"),
+   *   label_count = @PluralTranslation(
+   *     singular = "@count event",
+   *     plural = "@count events"
+   *   ),
   ```
 
   Because the label of this entity type might be used in a sentence and when
@@ -199,11 +199,11 @@ Each part of this code block is explained below:
 * Storage information:
 
   ```php?start_inline=1
-  *   base_table = "event",
-  *   entity_keys = {
-  *     "id" = "id",
-  *     "uuid" = "uuid",
-  *   },
+   *   base_table = "event",
+   *   entity_keys = {
+   *     "id" = "id",
+   *     "uuid" = "uuid",
+   *   },
   ```
 
   We need to specify the name of the database table we want the event data to
@@ -379,7 +379,7 @@ additional fields.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "label" = "title",
+   *     "label" = "title",
   ```
 
   Declaring a `label` key makes the (inherited) `label()` method on the `Event`
@@ -648,15 +648,15 @@ path. All of this can be automated by amending the entity annotation.
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *   handlers = {
-  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
-  *     "route_provider" = {
-  *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
-  *     },
-  *   },
-  *   links = {
-  *     "canonical" = "/event/{event}"
-  *   },
+   *   handlers = {
+   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+   *     "route_provider" = {
+   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+   *     },
+   *   },
+   *   links = {
+   *     "canonical" = "/event/{event}"
+   *   },
   ```
 
   Parts of this code block are explained below:
@@ -664,7 +664,9 @@ path. All of this can be automated by amending the entity annotation.
   * Entity handlers:
 
     ```php?start_inline=1
-    handlers
+     *   handlers = {
+    ...
+     *   },
     ```
 
     Entity _handlers_ are objects that take over certain tasks related to
@@ -676,9 +678,9 @@ path. All of this can be automated by amending the entity annotation.
   * Route providers:
 
     ```php?start_inline=1
-    *     "route_provider" = {
-    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
-    *     },
+     *     "route_provider" = {
+     *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+     *     },
     ```
 
     Instead of declaring routes belonging to entities in a `*.routing.yml` file
@@ -690,9 +692,9 @@ path. All of this can be automated by amending the entity annotation.
   * Links:
 
     ```php?start_inline?1
-    *   links = {
-    *     "canonical" = "/event/{event}",
-    *   },
+     *   links = {
+     *     "canonical" = "/event/{event}",
+     *   },
     ```
 
     Entity links denote at which paths on the website we can see an entity (or
@@ -912,11 +914,11 @@ displayed unless explicitly configured to.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "form" = {
-  *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-  *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-  *     },
+   *     "form" = {
+   *       "add" = "Drupal\Core\Entity\ContentEntityForm",
+   *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
+   *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+   *     },
   ```
 
   <!-- TODO: Explain this -->
@@ -1082,14 +1084,14 @@ displayed unless explicitly configured to.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+   *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
   ```
 
 * Add the following to the `links` section of the annotation in
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "collection" = "/admin/content/events",
+   *     "collection" = "/admin/content/events",
   ```
 
 * Rebuild caches
@@ -1285,7 +1287,7 @@ listing of events.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "views_data" = "Drupal\views\EntityViewsData",
+   *     "views_data" = "Drupal\views\EntityViewsData",
   ```
 
   Note that the views data that is provided by the default views data handler is
@@ -1391,7 +1393,7 @@ to provide a menu link for it.
 * Add an `event.links.action.yml` file with the following:
 
   ```ỳaml
-  entity.event.collection:
+  entity.event.add_form:
     title: 'Add event'
     route_name: entity.event.add_form
     appears_on: [entity.event.collection]
@@ -1511,7 +1513,7 @@ view events:
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  *     "access" = "Drupal\event\Access\EventAccessControlHandler",
+   *     "access" = "Drupal\event\Access\EventAccessControlHandler",
   ```
 
 * Rebuild caches
@@ -1671,7 +1673,7 @@ entities.
         $field_items->set($delta, NULL);
       }
     }
-    $field_items->filterEmtptyItems();
+    $field_items->filterEmptyItems();
     return $this;
   }
 
@@ -1917,7 +1919,7 @@ configuration object is validated against this schema.
 
 * Run `drush entity-updates`
 
-  * Note that there is no schema change
+  Note that there is no schema change
 
 * Create and save an event type
 
@@ -1932,8 +1934,8 @@ configuration object is validated against this schema.
   ])->save();
   ```
 
-  * Note that there is a new row in the `{config}` table with the name
-    `event.type.webinar`
+  Note that there is a new row in the `{config}` table with the name
+  `event.type.webinar`
 
 * Load the event type by its ID
 
@@ -2015,16 +2017,16 @@ configuration object is validated against this schema.
 * Add the following to the annotation in `src/Entity/EventType.php`:
 
   ```php?start_inline=1
-  *   handlers = {
-  *     "list_builder" = "Drupal\event\Controller\EventTypeListBuilder",
-  *     "route_provider" = {
-  *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
-  *     },
-  *   },
-  *   links = {
-  *     "collection" = "/admin/structure/event-types",
-  *   },
-  *   admin_permission = "administer event types",
+   *   handlers = {
+   *     "list_builder" = "Drupal\event\Controller\EventTypeListBuilder",
+   *     "route_provider" = {
+   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+   *     },
+   *   },
+   *   links = {
+   *     "collection" = "/admin/structure/event-types",
+   *   },
+   *   admin_permission = "administer event types",
   ```
 
 * Add the following to `event.links.menu.yml`:
@@ -2119,11 +2121,11 @@ elements ourselves.
   `src/Entity/EventType.php`:
 
   ```php?start_inline=1
-  *     "form" = {
-  *       "add" = "Drupal\event\Form\EventTypeForm",
-  *       "edit" = "Drupal\event\Form\EventTypeForm",
-  *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
-  *     },
+   *     "form" = {
+   *       "add" = "Drupal\event\Form\EventTypeForm",
+   *       "edit" = "Drupal\event\Form\EventTypeForm",
+   *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
+   *     },
   ```
 
 * Add the following to the `links` section of the annotation in
@@ -2196,13 +2198,13 @@ the _Event_ entity type.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  "bundle" = "type",
+   *     "bundle" = "type",
   ```
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  bundle_entity_type = "event_type",
+   *   bundle_entity_type = "event_type",
   ```
 
 * Replace the `add-form` link in the annotation in `src/Entity/Event.php` with:
@@ -2215,16 +2217,21 @@ the _Event_ entity type.
   `src/Entity/Event.php` with:
 
   ```php?start_inline=1
-  "add-page" = "/admin/content/events/add",
+   *     "add-page" = "/admin/content/events/add",
   ```
 
-* Replace value of the `route_name` key in `event.links.action.yml` with
-  `entity.event.add_page'`
+* Replace the `entity.event.add_form` section in `event.links.action.yml` with the following:
+  ```yaml
+  entity.event.add_page:
+    title: 'Add event'
+    route_name: entity.event.add_page
+    appears_on: [entity.event.collection]
+  ```
 
 * Add the following to the annotation in `src/Entity/EventType.php`:
 
   ```php?start_inline=1
-  bundle_of = "event",
+   *   bundle_of = "event",
   ```
 
 Like for the `id` and `uuid` fields, the field definition for the `type` field
@@ -2251,7 +2258,7 @@ is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php?start_inline
-  field_ui_base_route = "entity.event_type.edit_form",
+   *   field_ui_base_route = "entity.event_type.edit_form",
   ```
 
 * Rebuild caches
@@ -2366,8 +2373,8 @@ translatable in the user interface with the _Content Translation_ module.
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php?start_inline
-  translatable = TRUE,
-  data_table = "event_field_data",
+   *   translatable = TRUE,
+   *   data_table = "event_field_data",
   ```
 
 <!-- TODO: Explain data table -->
@@ -2376,7 +2383,7 @@ translatable in the user interface with the _Content Translation_ module.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  "langcode" = "langcode",
+   *     "langcode" = "langcode",
   ```
 
   Like for the `id`, `uuid` and `type` fields, the field definition for the
@@ -2385,8 +2392,8 @@ translatable in the user interface with the _Content Translation_ module.
 
 * Run `drush entity-updates`
 
-  * Note that the `{event_field_data}` table has been created and the `type`
-    column has been added to the `{event}` table.
+  Note that the `{event_field_data}` table has been created and the `type`
+  column has been added to the `{event}` table.
 
 * Verify that _Events_ can be marked as translatable
 
@@ -2419,7 +2426,7 @@ translatable in the user interface with the _Content Translation_ module.
   `src/Entity/Event.php`:
 
   ```php?start_inline=1
-  "default" = "Drupal\event\Form\EventForm"
+   *     "default" = "Drupal\event\Form\EventForm"
   ```
 
 * Rebuild caches
