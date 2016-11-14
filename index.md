@@ -647,7 +647,6 @@ are output on a given path. This can be automated by amending the entity annotat
 
   ```php?start_inline=1
    *   handlers = {
-   *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
    *     "route_provider" = {
    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
    *     },
