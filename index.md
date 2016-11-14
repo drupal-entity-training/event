@@ -638,10 +638,8 @@ interface
 
 ### Viewing entities on a page
 
-Viewing an entity on a page requires a _view builder_ that is responsible for
-constructing a renderable array from an entity object. Futhermore, a route is
-needed that utilizes the view builder to output the entity's fields on a given
-path. All of this can be automated by amending the entity annotation.
+Viewing an entity on a page requires a route on which the entity's field values
+are output on a given path. This can be automated by amending the entity annotation.
 
 #### Add a route
 
