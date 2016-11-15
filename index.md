@@ -622,7 +622,7 @@ interface
 
   Run the following PHP code:
 
-  ```
+  ```php?start_inline=1
   $event
     ->setTitle('Drupal Developer Days')
     ->setDate(new \DateTime('tomorrow'))
