@@ -264,7 +264,7 @@ needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::create();
@@ -302,7 +302,7 @@ needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
@@ -320,7 +320,7 @@ additional fields.
 
 * Add the following method to `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\Core\Entity\EntityTypeInterface;
   use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -351,7 +351,7 @@ additional fields.
 
   * Type hint:
 
-    ```php?start_inline=1
+    ```php
     EntityTypeInterface $entity_type
     ```
 
@@ -376,7 +376,7 @@ additional fields.
 
   * Field definition:
 
-    ```php?start_inline=1
+    ```php
     BaseFieldDefinition::create('string');
     ```
 
@@ -390,7 +390,7 @@ additional fields.
 
   * Chaining:
 
-    ```php?start_inline=1
+    ```php
     ->setLabel(t('Title'))
     ->setRequired(TRUE)
     ```
@@ -400,7 +400,7 @@ additional fields.
     `title` field definition above is functionally equivalent to the
     following code block which avoids chaining:
 
-    ```php?start_inline=1
+    ```php
     $fields['title'] = BaseFieldDefinition::create('string');
     $fields['title']->setLabel(t('Title'));
     $fields['title']->setRequired(TRUE);
@@ -409,7 +409,7 @@ additional fields.
 * Add the following to the `entity_keys` part of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "label" = "title",
   ```
 
@@ -434,7 +434,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::create([
@@ -457,7 +457,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -484,7 +484,7 @@ update it automatically.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -511,7 +511,7 @@ interface
 
 * Add the following methods to `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   public function getTitle() {
     return $this->get('title')->value;
   }
@@ -628,7 +628,7 @@ interface
 
 * Add the following to the class declaration in `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   implements EventInterface
   ```
 
@@ -636,7 +636,7 @@ interface
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
@@ -653,7 +653,7 @@ interface
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   $event
     ->setTitle('Drupal Developer Days')
     ->setDate(new \DateTime('tomorrow'))
@@ -676,7 +676,7 @@ are output on a given path. This can be automated by amending the entity annotat
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *   handlers = {
    *     "route_provider" = {
    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
@@ -691,7 +691,7 @@ are output on a given path. This can be automated by amending the entity annotat
 
   * Entity handlers:
 
-    ```php?start_inline=1
+    ```php
      *   handlers = {
     ...
      *   },
@@ -705,7 +705,7 @@ are output on a given path. This can be automated by amending the entity annotat
 
   * Route providers:
 
-    ```php?start_inline=1
+    ```php
      *     "route_provider" = {
      *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
      *     },
@@ -762,7 +762,7 @@ with an enhanced entity access control handler will be added below.
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   *   admin_permission = "administer events",
   ```
 
@@ -787,7 +787,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('view', [
     'label' => 'inline',
     'settings' => [
@@ -801,7 +801,7 @@ displayed unless explicitly configured to.
 
   * Display mode:
 
-    ```php?start_inline=1
+    ```php
     ->setDisplayOptions('view'
     ```
 
@@ -810,7 +810,7 @@ displayed unless explicitly configured to.
 
   * Label display:
 
-    ```php?start_inline=1
+    ```php
     'label' => 'inline',
     ```
 
@@ -820,7 +820,7 @@ displayed unless explicitly configured to.
 
   * Formatter settings:
 
-    ```php?start_inline=1
+    ```php
     'settings' => [
       'format_type' => 'html_date',
     ],
@@ -841,7 +841,7 @@ displayed unless explicitly configured to.
 
   * Weight:
 
-    ```php?start_inline=1
+    ```php
     'weight' => 0,
     ```
 
@@ -859,7 +859,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('view', [
     'label' => 'hidden',
     'weight' => 10,
@@ -941,7 +941,7 @@ displayed unless explicitly configured to.
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "form" = {
    *       "add" = "Drupal\Core\Entity\ContentEntityForm",
    *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
@@ -954,7 +954,7 @@ displayed unless explicitly configured to.
 * Add the following to the `links` section of the annotation in 
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "add-form" = "/admin/content/events/add",
    *     "edit-form" = "/admin/content/events/manage/{event}",
    *     "delete-form" = "/admin/content/events/manage/{event}/delete",
@@ -981,7 +981,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('form', ['weight' => 0])
   ```
 
@@ -989,7 +989,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('form', ['weight' => 10])
   ```
 
@@ -997,7 +997,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('form', ['weight' => 20])
   ```
 
@@ -1005,7 +1005,7 @@ displayed unless explicitly configured to.
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
   semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayOptions('form', [
     'settings' => [
       'display_label' => TRUE,
@@ -1111,14 +1111,14 @@ displayed unless explicitly configured to.
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
   ```
 
 * Add the following to the `links` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "collection" = "/admin/content/events",
   ```
 
@@ -1174,7 +1174,7 @@ displayed unless explicitly configured to.
 
   * Separate methods:
 
-    ```php?start_inline=1
+    ```php
     public function buildHeader() {
     ```
 
@@ -1182,7 +1182,7 @@ displayed unless explicitly configured to.
 
   * Translation:
 
-    ```php?start_inline=1
+    ```php
     $this->t('Title')
     ```
 
@@ -1191,7 +1191,7 @@ displayed unless explicitly configured to.
 
   * Array merging:
 
-    ```php?start_inline=1
+    ```php
     $header + parent::buildHeader()
     ```
 
@@ -1201,7 +1201,7 @@ displayed unless explicitly configured to.
 
   * Inline type hint:
 
-    ```php?start_inline=1
+    ```php
     /** @var \Drupal\event\Entity\EventInterface $event */
     ```
 
@@ -1214,7 +1214,7 @@ displayed unless explicitly configured to.
 
   * Entity links:
 
-    ```php?start_inline=1
+    ```php
     $event->toLink()
     ```
 
@@ -1225,7 +1225,7 @@ displayed unless explicitly configured to.
 
   * Date formatting:
 
-    ```php?start_inline=1
+    ```php
     $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
     ```
 
@@ -1246,7 +1246,7 @@ displayed unless explicitly configured to.
     implementation. For reference, the respective parts of
     `EventListBuilder.php` would then be:
 
-    ```php?start_inline=1
+    ```php
     use Drupal\Core\Datetime\DateFormatterInterface;
     ...
     use Drupal\Core\Entity\EntityStorageInterface;
@@ -1314,7 +1314,7 @@ listing of events.
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "views_data" = "Drupal\views\EntityViewsData",
   ```
 
@@ -1540,7 +1540,7 @@ view events:
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "access" = "Drupal\event\Access\EventAccessControlHandler",
   ```
 
@@ -1587,7 +1587,7 @@ entities.
 
 * Add the following to `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   public static function getCurrentUser() {
     return \Drupal::currentUser()->id();
   }
@@ -1596,14 +1596,14 @@ entities.
 * Add the following to the `use` statements at the top of
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\Core\Field\FieldStorageDefinitionInterface;
   ```
 
 * Add the following to the `baseFieldDefinitions()` method in
   `src/Entity/Event.php` above `return $fields;`:
 
-  ```php?start_inline=1
+  ```php
   $fields['path'] = BaseFieldDefinition::create('path')
     ->setLabel(t('Path'))
     ->setDisplayOptions('form', ['weight' => 5]);
@@ -1628,7 +1628,7 @@ entities.
 
   * Multiple-value fields:
 
-    ```php?start_inline=1
+    ```php
     ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
     ```
 
@@ -1640,7 +1640,7 @@ entities.
 
   * Default value callbacks:
 
-    ```php?start_inline=1
+    ```php
     ->setDefaultValueCallback(static::class . '::getCurrentUser')
     ```
 
@@ -1663,14 +1663,14 @@ entities.
 
 * Add the following to the use statements at the top of `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\Core\Entity\EntityChangedTrait;
   use Drupal\user\UserInterface;
   ```
 
 * Add the following to the `Event` class in `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
   use EntityChangedTrait;
 
   public function getAttendees() {
@@ -1726,26 +1726,26 @@ entities.
 
   * Traits:
 
-    ```php?start_inline=1
+    ```php
     use EntityChangedTrait;
     ```
 
   * Field item lists:
 
-    ```php?start_inline=1
+    ```php
     $this->get('attendees')->referencedEntities();
     ```
 
   * Object traversal:
 
-    ```php?start_inline=1
+    ```php
     foreach ($field_items as $field_item)
     ```
 
 * Add the following to the use statements at the top of
   `src/Entity/EventInterface.php`:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\Core\Entity\EntityChangedInterface;
   use Drupal\user\EntityOwnerInterface;
   use Drupal\user\UserInterface;
@@ -1760,7 +1760,7 @@ entities.
 
   * Changed time tracking:
 
-    ```php?start_inline=1
+    ```php
     EntityChangedInterface
     ```
 
@@ -1770,7 +1770,7 @@ entities.
 
   * Entity ownership:
 
-    ```php?start_inline=1
+    ```php
     EntityOwnerInterface
     ```
 
@@ -1780,7 +1780,7 @@ entities.
 * Add the following to the `EventInterface` interface in
   `src/Entity/EventInterface.php`:
 
-  ```php?start_inline=1
+  ```php
   /**
    * @return \Drupal\user\UserInterface[]
    */
@@ -1890,7 +1890,7 @@ similar to creating a content entity type.
 
   * Configuration prefix:
 
-    ```php?start_inline=1
+    ```php
     config_prefix = "type"
     ```
 
@@ -1905,14 +1905,14 @@ similar to creating a content entity type.
 
   * Export properties:
 
-    ```php?start_inline=1
+    ```php
     config_export = {
       "id",
       "label",
     }
     ```
 
-    ```php?start_inline=1
+    ```php
     protected $id;
 
     protected $label;
@@ -1953,7 +1953,7 @@ configuration object is validated against this schema.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\EventType;
 
   EventType::create([
@@ -1969,7 +1969,7 @@ configuration object is validated against this schema.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\EventType;
 
   $event_type = EventType::load('webinar');
@@ -1982,7 +1982,7 @@ configuration object is validated against this schema.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\EventType;
 
   $event_type = EventType::load('webinar');
@@ -1995,7 +1995,7 @@ configuration object is validated against this schema.
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\EventType;
 
   $event_type = EventType::load('webinar')
@@ -2044,7 +2044,7 @@ configuration object is validated against this schema.
 
 * Add the following to the annotation in `src/Entity/EventType.php`:
 
-  ```php?start_inline=1
+  ```php
    *   handlers = {
    *     "list_builder" = "Drupal\event\Controller\EventTypeListBuilder",
    *     "route_provider" = {
@@ -2148,7 +2148,7 @@ elements ourselves.
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/EventType.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "form" = {
    *       "add" = "Drupal\event\Form\EventTypeForm",
    *       "edit" = "Drupal\event\Form\EventTypeForm",
@@ -2159,7 +2159,7 @@ elements ourselves.
 * Add the following to the `links` section of the annotation in
   `src/Entity/EventType.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "add-form" = "/admin/structure/event-types/add",
    *     "edit-form" = "/admin/structure/event-types/manage/{event_type}",
    *     "delete-form" = "/admin/structure/event-types/manage/{event_type}/delete",
@@ -2225,26 +2225,26 @@ the _Event_ entity type.
 * Add the following to the `entity_keys` section of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "bundle" = "type",
   ```
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *   bundle_entity_type = "event_type",
   ```
 
 * Replace the `add-form` link in the annotation in `src/Entity/Event.php` with:
 
-  ```php?start_inline=1
+  ```php
   "/admin/content/events/add/{event_type}"
   ```
 
 * Add the following to the `links` section of the annotation in
   `src/Entity/Event.php` with:
 
-  ```php?start_inline=1
+  ```php
    *     "add-page" = "/admin/content/events/add",
   ```
 
@@ -2258,7 +2258,7 @@ the _Event_ entity type.
 
 * Add the following to the annotation in `src/Entity/EventType.php`:
 
-  ```php?start_inline=1
+  ```php
    *   bundle_of = "event",
   ```
 
@@ -2318,7 +2318,7 @@ Field UI to add a _Comments_ field to an event type.
 * Add the following to all field definitions in the `baseFieldDefinitions()`
   method of `src/Entity/Event.php` before the semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayConfigurable('view', TRUE)
   ```
 
@@ -2363,7 +2363,7 @@ Field UI to add a _Comments_ field to an event type.
 * Add the following to all field definitions in the `baseFieldDefinitions()`
   method of `src/Entity/Event.php` before the semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setDisplayConfigurable('form', TRUE)
   ```
 
@@ -2410,7 +2410,7 @@ translatable in the user interface with the _Content Translation_ module.
 * Add the following to the `entity_keys` part of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "langcode" = "langcode",
   ```
 
@@ -2431,7 +2431,7 @@ translatable in the user interface with the _Content Translation_ module.
   `published`, `path` and `changed` fields in the `baseFieldDefinitions()`
   method of `src/Entity/Event.php` before the semicolon:
 
-  ```php?start_inline=1
+  ```php
   ->setTranslatable(TRUE)
   ```
 
@@ -2453,7 +2453,7 @@ translatable in the user interface with the _Content Translation_ module.
 * Add the following to the form handlers part of the annotation in
   `src/Entity/Event.php`:
 
-  ```php?start_inline=1
+  ```php
    *     "default" = "Drupal\event\Form\EventForm"
   ```
 
