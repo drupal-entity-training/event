@@ -8,22 +8,70 @@ using the example of an  _Event_ entity type.
 
 You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
-The starting point is a stock Drupal 8.2 core _Standard_ installation with an
+The starting point is a stock Drupal 8.6 core _Standard_ installation with an
 empty module directory at `modules/event`.
 
 <!-- The state at the end of any given step can be seen
 in the corresponding branch in the [repository][repository]. -->
 
-Having [Drush][drush] available is required to follow along. When Drush commands
-are to be run, run them from within the Drupal installation. When PHP code is to
-executed, this can be done by running `drush core-cli` (preferred) or by
-creating a `test.php` script and then running `drush php-script test.php`.
+Having [Drush 9][drush] available is required to follow along. When Drush
+commands are to be run, run them from within the Drupal installation. When PHP
+code is to be executed, this can be done by running `drush core:cli` or by
+creating a test script and then running `drush php:script <name-of-script>`.
 
 **Table of contents**
-
-1. Table of contents
-{:toc}
-
+1. [Using entities for data storage](#using-entities-for-data-storage)
+      1. [Create a module](#create-a-module)
+      2. [Create a minimal entity class](#create-a-minimal-entity-class)
+      3. [Install the entity type](#install-the-entity-type)
+      4. [Add field definitions](#add-field-definitions)
+      5. [Install the fields](#install-the-fields)
+      6. [Add field methods](#add-field-methods)
+2. [Viewing entities on a page](#viewing-entities-on-a-page)
+      1. [Add a route](#add-a-route)
+      2. [Add an administrative permission](#add-an-administrative-permission)
+      3. [Configure fields for display](#configure-fields-for-display)
+      4. [Add a theme function](#add-a-theme-function)
+3. [Manipulating entities through forms](#manipulating-entities-through-forms)
+      1. [Add the routes](#add-the-routes)
+      2. [Configure fields for display](#configure-fields-for-display)
+      3. [Add a specialized form](#add-a-specialized-form)
+4. [Listing entities](#listing-entities)
+      1. [Add a route](#add-a-route)
+      2. [Add a specialized list builder](#add-a-specialized-list-builder)
+      3. [Add an administrative view](#add-an-administrative-view)
+5. [Adding administrative links](#adding-administrative-links)
+      1. [Add a menu link for the event listing](#add-a-menu-link-for-the-event-listing)
+      2. [Add a local task for the event listing](#add-a-local-task-for-the-event-listing)
+      3. [Add an action link for the add form](#add-an-action-link-for-the-add-form)
+      4. [Add local tasks for the edit and delete forms](#add-local-tasks-for-the-edit-and-delete-forms)
+6. [Adding permission-based access-control](#adding-permission-based-access-control)
+      1. [Add permissions](#add-permissions)
+      2. [Add an access control handler](#add-an-access-control-handler)
+7. [Adding additional fields](#adding-additional-fields)
+      1. [Add the field definitions](#add-the-field-definitions)
+      2. [Install the fields](#install-the-fields)
+      3. [Add additional field methods](#add-additional-field-methods)
+8. [Storing dynamic data in configuration](#storing-dynamic-data-in-configuration)
+      1. [Create an entity class](#create-an-entity-class)
+      2. [Provide a configuration schema](#provide-a-configuration-schema)
+      3. [Install the entity type](#install-the-entity-type)
+9. [Providing a user interface for configuration entities](#providing-a-user-interface-for-configuration-entities)
+      1. [Add a list of event types](#add-a-list-of-event-types)
+      2. [Add forms for event types](#add-forms-for-event-types)
+10. [Categorizing different entities of the same entity type](#categorizing-different-entities-of-the-same-entity-type)
+      1. [Add the bundle field](#add-the-bundle-field)
+      2. [Install the bundle field](#install-the-bundle-field)
+11. [Configuring bundles in the user interface](#configuring-bundles-in-the-user-interface)
+      1. [Enable Field UI for events](#enable-field-ui-for-events)
+      2. [Add dynamic fields to events](#add-dynamic-fields-to-events)
+      3. [Configure view modes](#configure-view-modes)
+      4. [Configure the form](#configure-the-form)
+12. [Translating content](#translating-content)
+      1. [Install the Content Translation module](#install-the-content-translation-module)
+      2. [Make events translatable](#make-events-translatable)
+13. [Translating configuration](#translating-configuration)
+      1. [Install the Configuration Translation module](#install-the-configuration-translation-module)
 ### Using entities for data storage
 
 #### Create a module
