@@ -7,18 +7,9 @@ $headers = array_filter($file, function (string $line) {
   return substr($line, 0, 3) === '###';
 });
 
-$h3 = 0;
-$h4 = 0;
 foreach ($headers as $header) {
-  list(, $title) = explode(' ', rtrim($header), 2);
-
-  if ($header[3] !== '#') {
-    ++$h3;
-    $h4 = 0;
-  }
-  else {
-    ++$h4;
-  }
+  list(, $numeral, $title) = explode(' ', rtrim($header), 3);
+  list($h3, $h4) = explode('.', $numeral . '.0');
 
   $link = '[' . $title . '](#' . strtolower(str_replace(' ', '-', $title)) . ')';
   if ($header[3] !== '#') {

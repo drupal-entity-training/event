@@ -8,11 +8,9 @@ using the example of an  _Event_ entity type.
 
 You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
-The starting point is a stock Drupal 8.6 core _Standard_ installation with an
+The starting point is a stock Drupal 8.6 core _Standard_ installation with the
+contributed [Entity API][contrib-entity-api] available at `modules/entity` and an
 empty module directory at `modules/event`.
-
-<!-- The state at the end of any given step can be seen
-in the corresponding branch in the [repository][repository]. -->
 
 Having [Drush 9][drush] available is required to follow along. When Drush
 commands are to be run, run them from within the Drupal installation. When PHP
@@ -28,10 +26,9 @@ creating a test script and then running `drush php:script <name-of-script>`.
       5. [Install the fields](#install-the-fields)
       6. [Add field methods](#add-field-methods)
 2. [Viewing entities on a page](#viewing-entities-on-a-page)
-      1. [Add a route](#add-a-route)
-      2. [Add an administrative permission](#add-an-administrative-permission)
+      1. [Install the contributed _Entity API_ module.](#install-the-contributed-_entity-api_-module.)
+      2. [Add a route](#add-a-route)
       3. [Configure fields for display](#configure-fields-for-display)
-      4. [Add a theme function](#add-a-theme-function)
 3. [Manipulating entities through forms](#manipulating-entities-through-forms)
       1. [Add the routes](#add-the-routes)
       2. [Configure fields for display](#configure-fields-for-display)
@@ -72,9 +69,10 @@ creating a test script and then running `drush php:script <name-of-script>`.
       2. [Make events translatable](#make-events-translatable)
 13. [Translating configuration](#translating-configuration)
       1. [Install the Configuration Translation module](#install-the-configuration-translation-module)
-### Using entities for data storage
 
-#### Create a module
+### 1. Using entities for data storage
+
+#### 1.1. Create a module
 
 * Within the `/modules/event` directory create an `event.info.yml` file with the
   following:
@@ -85,9 +83,10 @@ creating a test script and then running `drush php:script <name-of-script>`.
   core: 8.x
   ```
 
-* Run `drush pm:enable` or visit `/admin/modules` and install the _Event_ module
+* Run `drush pm:enable event` or visit `/admin/modules` and install the _Event_
+  module
 
-#### Create a minimal entity class
+#### 1.2. Create a minimal entity class
 
 _Classes_ allow categorizing objects as being of a certain type. Event
 entities, that will be created below, will be _instances_ of the entity
@@ -250,7 +249,7 @@ functionality.
     information.
   </details>
 
-#### Install the entity type
+#### 1.3. Install the entity type
 
 Drupal can create the database schema for our entity type automatically but this
 needs to be done explicitly. The preferred way of doing this is with Drush.
@@ -311,21 +310,61 @@ needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Note that the row in the `{event}` table is gone.
 
-#### Add field definitions
+#### 1.4. Add field definitions
 
 Fields are the pieces of data that make up an entity. The ID and UUID that
 were saved as part of the event above are examples of field values. To be
 able to store actual event data in our entities, we need to declare
 additional fields.
 
-* Add the following method to `src/Entity/Event.php`:
+Just like with the ID and UUID fields above, Drupal can automatically provide
+_Author_ and _Published_ fields for us, which we will take advantage of so that
+we can track who created events and distinguish published and unpublished
+events.
+
+* Add the following to `event.info.yml`:
+
+  ```yaml
+  dependencies:
+    - drupal:user
+  ```
+
+* Add the following use statements to `src/Entity/Event.php`:
 
   ```php
+  use Drupal\Core\Entity\EntityPublishedInterface;
+  use Drupal\Core\Entity\EntityPublishedTrait;
   use Drupal\Core\Entity\EntityTypeInterface;
   use Drupal\Core\Field\BaseFieldDefinition;
+  use Drupal\user\EntityOwnerInterface;
+  use Drupal\user\EntityOwnerTrait;
+  ```
+
+* Add the following to the `entity_keys` part of the annotation of the `Event`
+  class:
+
+  ```php
+   *     "label" = "title",
+   *     "owner" = "author",
+   *     "published" = "published",
+  ```
+
+  Declaring a `label` key makes the (inherited) `label()` method on the `Event`
+  class work and also allows autocompletion of events by their title.
+
+* Add the following to the end of the class declaration of the `Event` class:
+
+  ```php
+  implements EntityOwnerInterface, EntityPublishedInterface
+  ```
+
+* Add the following inside of the class declaration of the `Event` class:
+
+  ```php
+  use EntityOwnerTrait, EntityPublishedTrait;
 
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    // Get field definitions for 'id' and 'uuid' from the parent.
+    // Get the field definitions for 'id' and 'uuid' from the parent.
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['title'] = BaseFieldDefinition::create('string')
@@ -406,17 +445,71 @@ additional fields.
     $fields['title']->setRequired(TRUE);
     ```
 
-* Add the following to the `entity_keys` part of the annotation in
-  `src/Entity/Event.php`:
+  <!-- TODO: Explain += -->
 
-  ```php
-   *     "label" = "title",
-  ```
+  </details>
 
-  Declaring a `label` key makes the (inherited) `label()` method on the `Event`
-  class work and also allows autocompletion of events by their title.
+  <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
 
-#### Install the fields
+    ```php
+    <?php
+    
+    namespace Drupal\event\Entity;
+    
+    use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\EntityPublishedInterface;
+    use Drupal\Core\Entity\EntityPublishedTrait;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\user\EntityOwnerInterface;
+    use Drupal\user\EntityOwnerTrait;
+    
+    /**
+    * @ContentEntityType(
+    *   id = "event",
+    *   label = @Translation("Event"),
+    *   base_table = "event",
+    *   entity_keys = {
+    *     "id" = "id",
+    *     "uuid" = "uuid",
+    *     "label" = "title",
+    *     "owner" = "author",
+    *     "published" = "published",
+    *   },
+    * )
+    */
+    class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
+    
+    use EntityOwnerTrait, EntityPublishedTrait;
+    
+    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+      // Get the field definitions for 'id' and 'uuid' from the parent.
+      $fields = parent::baseFieldDefinitions($entity_type);
+    
+      $fields['title'] = BaseFieldDefinition::create('string')
+        ->setLabel(t('Title'))
+        ->setRequired(TRUE);
+    
+      $fields['date'] = BaseFieldDefinition::create('datetime')
+        ->setLabel(t('Date'))
+        ->setRequired(TRUE);
+    
+      $fields['description'] = BaseFieldDefinition::create('text_long')
+        ->setLabel(t('Description'));
+    
+      // Get the field definitions for 'author' and 'published' from the traits.
+      $fields += static::ownerBaseFieldDefinitions($entity_type);
+      $fields += static::publishedBaseFieldDefinitions($entity_type);
+    
+      return $fields;
+    }
+    
+    }
+    ```
+
+  </details>
+
+#### 1.5. Install the fields
 
 Drupal notices changes to the entity type that affect the database schema and can
 update it automatically.
@@ -496,59 +589,79 @@ update it automatically.
       'value' => '<p>DrupalCon is a great place to meet international Drupal superstars.</p>',
       'format' => 'basic_html',
     ])
-    ->set('published', TRUE)
+    ->set('author', 1)
+    ->set('published', FALSE)
     ->save();
   ```
 
   Note that the values in the database have been updated accordingly.
 
-#### Add field methods
+#### 1.6. Add field methods
 
 Instead of relying on the generic `get()` and `set()` methods it is recommended
 to add field-specific methods that wrap them. This makes interacting with
 events in code more convenient. Futhermore, it is recommended to add an
 interface
 
-* Add the following methods to `src/Entity/Event.php`:
+* Add the following use statements to `src/Entity/Event.php`:
 
   ```php
+  use Drupal\Core\Datetime\DrupalDateTime;
+  ```
+
+* Add the following methods to the `Event` class:
+
+  ```php
+  /**
+   * @return string
+   */
   public function getTitle() {
     return $this->get('title')->value;
   }
 
+  /**
+   * @param string $title
+   *
+   * @return $this
+   */
   public function setTitle($title) {
     return $this->set('title', $title);
   }
 
+  /**
+   * @return \Drupal\Core\Datetime\DrupalDateTime
+   */
   public function getDate() {
     return $this->get('date')->date;
   }
 
-  public function setDate(\DateTimeInterface $date) {
+  /**
+   * @param \Drupal\Core\Datetime\DrupalDateTime $date
+   *
+   * @return $this
+   */
+  public function setDate(DrupalDateTime $date) {
     return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
   }
 
+  /**
+   * @return \Drupal\filter\Render\FilteredMarkup
+   */
   public function getDescription() {
     return $this->get('description')->processed;
   }
 
+  /**
+   * @param string $description
+   * @param string $format
+   *
+   * @return $this
+   */
   public function setDescription($description, $format) {
     return $this->set('description', [
       'value' => $description,
       'format' => $format,
     ]);
-  }
-
-  public function isPublished() {
-    return (bool) $this->get('published')->value;
-  }
-
-  public function publish() {
-    return $this->set('published', TRUE);
-  }
-
-  public function unpublish() {
-    return $this->set('published', FALSE);
   }
   ```
 
@@ -654,30 +767,52 @@ interface
   Run the following PHP code:
 
   ```php
+  use Drupal\Core\Datetime\DrupalDateTime;
+  use Drupal\event\Entity\Event;
+
   $event
     ->setTitle('Drupal Developer Days')
-    ->setDate(new \DateTime('tomorrow'))
+    ->setDate(new DrupalDateTime('tomorrow'))
     ->setDescription(
       '<p>The Drupal Developer Days are a great place to nerd out about all things Drupal!</p>',
       'basic_html'
     )
-    ->unpublish
+    ->setOwnerId(0)
+    ->setPublished(FALSE)
     ->save();
   ```
 
   Note that the values in the database have been updated accordingly.
 
-### Viewing entities on a page
+### 2. Viewing entities on a page
 
 Viewing an entity on a page requires a route on which the entity's field values
-are output on a given path. This can be automated by amending the entity annotation.
+are output on a given path. This can be automated by amending the entity
+annotation.
 
-#### Add a route
+#### 2.1. Install the contributed _Entity API_ module.
+
+The contributed [Entity API](contrib-entity-api) provides various enhancements
+to the core Entity API. One such enhancement is the ability to more easily
+provide permissions entity types which we will now use.
+
+* Run `drush pm:enable entity` or visit `/admin/modules` and install the
+ _Entity API_ module
+
+* Add the following to the `dependencies` section of `event.info.yml`:
+
+  ```yaml
+    - entity:entity
+  ```
+
+#### 2.2. Add a route
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php
    *   handlers = {
+   *     "access" = "Drupal\entity\EntityAccessControlHandler",
+   *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
    *     "route_provider" = {
    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
    *     },
@@ -685,54 +820,185 @@ are output on a given path. This can be automated by amending the entity annotat
    *   links = {
    *     "canonical" = "/event/{event}"
    *   },
+   *   admin_permission = "administer event",
   ```
 
-  Parts of this code block are explained below:
-
-  * Entity handlers:
-
+  <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
+    
     ```php
-     *   handlers = {
-    ...
-     *   },
+    <?php
+    
+    namespace Drupal\event\Entity;
+    
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\EntityPublishedInterface;
+    use Drupal\Core\Entity\EntityPublishedTrait;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\user\EntityOwnerInterface;
+    use Drupal\user\EntityOwnerTrait;
+    
+    /**
+    * @ContentEntityType(
+    *   id = "event",
+    *   label = @Translation("Event"),
+    *   base_table = "event",
+    *   entity_keys = {
+    *     "id" = "id",
+    *     "uuid" = "uuid",
+    *     "label" = "title",
+    *     "owner" = "author",
+    *     "published" = "published",
+    *   },
+    *   handlers = {
+    *     "access" = "Drupal\entity\EntityAccessControlHandler",
+    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
+    *     "route_provider" = {
+    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+    *     },
+    *   },
+    *   links = {
+    *     "canonical" = "/event/{event}"
+    *   },
+    *   admin_permission = "administer event"
+    * )
+    */
+    class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
+    
+    use EntityOwnerTrait, EntityPublishedTrait;
+    
+    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+      // Get the field definitions for 'id' and 'uuid' from the parent.
+      $fields = parent::baseFieldDefinitions($entity_type);
+    
+      $fields['title'] = BaseFieldDefinition::create('string')
+        ->setLabel(t('Title'))
+        ->setRequired(TRUE);
+    
+      $fields['date'] = BaseFieldDefinition::create('datetime')
+        ->setLabel(t('Date'))
+        ->setRequired(TRUE);
+    
+      $fields['description'] = BaseFieldDefinition::create('text_long')
+        ->setLabel(t('Description'));
+    
+      // Get the field definitions for 'owner' and 'published' from the traits.
+      $fields += static::ownerBaseFieldDefinitions($entity_type);
+      $fields += static::publishedBaseFieldDefinitions($entity_type);
+    
+      return $fields;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getTitle() {
+      return $this->get('title')->value;
+    }
+    
+    /**
+     * @param string $title
+     *
+     * @return $this
+     */
+    public function setTitle($title) {
+      return $this->set('title', $title);
+    }
+    
+    /**
+     * @return \Drupal\Core\Datetime\DrupalDateTime
+     */
+    public function getDate() {
+      return $this->get('date')->date;
+    }
+    
+    /**
+     * @param \Drupal\Core\Datetime\DrupalDateTime $date
+     *
+     * @return $this
+     */
+    public function setDate(DrupalDateTime $date) {
+      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+    }
+    
+    /**
+     * @return \Drupal\filter\Render\FilteredMarkup
+     */
+    public function getDescription() {
+      return $this->get('description')->processed;
+    }
+    
+    /**
+     * @param string $description
+     * @param string $format
+     *
+     * @return $this
+     */
+    public function setDescription($description, $format) {
+      return $this->set('description', [
+        'value' => $description,
+        'format' => $format,
+      ]);
+    }
+    
+    }
     ```
 
-    Entity _handlers_ are objects that take over certain tasks related to
-    entities. Each entity type can declare which handler it wants to use for which
-    task. In many cases - as can be seen above - Drupal core provides generic
-    handlers that can be used as is. In other cases or when more advanced
-    functionality is required, custom handlers can be used instead.
+  </details>
 
-  * Route providers:
+  <details><summary>Click here for more information on the above</summary>
 
-    ```php
-     *     "route_provider" = {
-     *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
-     *     },
-    ```
+    * Entity handlers:
 
-    Instead of declaring routes belonging to entities in a `*.routing.yml` file
-    like other routes, they can be provided by a handler, as well. This has the
-    benefit of being able to re-use the same route provider for multiple entity
-    types, as is proven by the usage of the generic route provider provided by
-    core.
+      ```php
+       *   handlers = {
+      ...
+       *   },
+      ```
 
-  * Links:
+      Entity _handlers_ are objects that take over certain tasks related to
+      entities. Each entity type can declare which handler it wants to use for
+      which task. In many cases - as can be seen above - Drupal core provides
+      generic handlers that can be used as is. In other cases or when more
+      advanced functionality is required, custom handlers can be used instead.
 
-    ```php?start_inline?1
-     *   links = {
-     *     "canonical" = "/event/{event}",
-     *   },
-    ```
+    <!-- TODO: Explain access handlers, permission providers -->
 
-    Entity links denote at which paths on the website we can see an entity (or
-    multiple entities) of the given type. They are used by the default route
-    provider to set the path of the generated route. The usage of `canonical`
-    (instead of `view`, for example) stems from the specification of link
-    relations in the web by the IANA.
+    * Route providers:
 
-    See [Wikipedia: Link relation][wikipedia-link-relation] and
-    [IANA: Link relations][iana-link-relations] for more information.
+      ```php
+       *     "route_provider" = {
+       *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+       *     },
+      ```
+
+      Instead of declaring routes belonging to entities in a `*.routing.yml`
+      file like other routes, they can be provided by a handler, as well. This
+      has the benefit of being able to re-use the same route provider for 
+      multiple entity types, as is proven by the usage of the generic route
+      provider provided by core.
+
+    * Links:
+
+      ```php
+       *   links = {
+       *     "canonical" = "/event/{event}",
+       *   },
+      ```
+
+      Entity links denote at which paths on the website we can see an entity (or
+      multiple entities) of the given type. They are used by the default route
+      provider to set the path of the generated route. The usage of `canonical`
+      (instead of `view`, for example) stems from the specification of link
+      relations in the web by the IANA.
+
+      See [Wikipedia: Link relation][wikipedia-link-relation] and
+      [IANA: Link relations][iana-link-relations] for more information.
+
+    <!-- TODO: Explain admin permission -->
+
+  </details>
 
 * Rebuild caches
 
@@ -742,50 +1008,16 @@ are output on a given path. This can be automated by amending the entity annotat
 
   Visit `/event/2`
 
-  Note that an _Access denied_ page is shown. This means a route exists at this
-  path (otherwise a _Not found_ page would be shown). However, access has not
-  been defined, so that - even for the administrative user - the page will not
-  be shown.
+  Note that an empty page is shown. However, no field values are shown.
 
-#### Add an administrative permission
-
-An administrative permission is used by the default entity access control
-handler for all operations as a fallback. More granular permissions together
-with an enhanced entity access control handler will be added below.
-
-* Add an `event.permissions.yml` file with the following:
-
-  ```yaml
-  administer events:
-    title: 'Administer events'
-  ```
-
-* Add the following to the annotation in `src/Entity/Event.php`:
-
-  ```php
-  *   admin_permission = "administer events",
-  ```
-
-* Rebuild caches
-
-  Run `drush cache-rebuild`
-
-* Verify that access is granted
-
-  Visit `/event/2`
-
-  Note that an empty page is shown (and no longer an _Access denied_ page).
-  However, no field values are shown.
-
-#### Configure fields for display
+#### 2.3. Configure fields for display
 
 Which fields to display when rendering the entity, as well as how to display
 them, can be configured as part of the field definitions. Fields are not
 displayed unless explicitly configured to.
 
 * Add the following to the `$fields['date']` section of the
-  `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
-  semicolon:
+  `baseFieldDefinitions()` method of the `Event` class before the semicolon:
 
   ```php
   ->setDisplayOptions('view', [
@@ -866,6 +1098,142 @@ displayed unless explicitly configured to.
   ])
   ```
 
+
+  <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
+    
+    ```php
+    <?php
+    
+    namespace Drupal\event\Entity;
+    
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\EntityPublishedInterface;
+    use Drupal\Core\Entity\EntityPublishedTrait;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\user\EntityOwnerInterface;
+    use Drupal\user\EntityOwnerTrait;
+    
+    /**
+    * @ContentEntityType(
+    *   id = "event",
+    *   label = @Translation("Event"),
+    *   base_table = "event",
+    *   entity_keys = {
+    *     "id" = "id",
+    *     "uuid" = "uuid",
+    *     "label" = "title",
+    *     "owner" = "author",
+    *     "published" = "published",
+    *   },
+    *   handlers = {
+    *     "access" = "Drupal\entity\EntityAccessControlHandler",
+    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
+    *     "route_provider" = {
+    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+    *     },
+    *   },
+    *   links = {
+    *     "canonical" = "/event/{event}"
+    *   },
+    *   admin_permission = "administer event"
+    * )
+    */
+    class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
+    
+    use EntityOwnerTrait, EntityPublishedTrait;
+    
+    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+      // Get the field definitions for 'id' and 'uuid' from the parent.
+      $fields = parent::baseFieldDefinitions($entity_type);
+    
+      $fields['title'] = BaseFieldDefinition::create('string')
+        ->setLabel(t('Title'))
+        ->setRequired(TRUE);
+    
+      $fields['date'] = BaseFieldDefinition::create('datetime')
+        ->setLabel(t('Date'))
+        ->setRequired(TRUE)
+        ->setDisplayOptions('view', [
+          'label' => 'inline',
+          'settings' => [
+            'format_type' => 'html_date',
+          ],
+          'weight' => 0,
+        ]);
+    
+      $fields['description'] = BaseFieldDefinition::create('text_long')
+        ->setLabel(t('Description'))
+        ->setDisplayOptions('view', [
+          'label' => 'hidden',
+          'weight' => 10,
+        ]);
+    
+      // Get the field definitions for 'owner' and 'published' from the traits.
+      $fields += static::ownerBaseFieldDefinitions($entity_type);
+      $fields += static::publishedBaseFieldDefinitions($entity_type);
+    
+      return $fields;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getTitle() {
+      return $this->get('title')->value;
+    }
+    
+    /**
+     * @param string $title
+     *
+     * @return $this
+     */
+    public function setTitle($title) {
+      return $this->set('title', $title);
+    }
+    
+    /**
+     * @return \Drupal\Core\Datetime\DrupalDateTime
+     */
+    public function getDate() {
+      return $this->get('date')->date;
+    }
+    
+    /**
+     * @param \Drupal\Core\Datetime\DrupalDateTime $date
+     *
+     * @return $this
+     */
+    public function setDate(DrupalDateTime $date) {
+      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+    }
+    
+    /**
+     * @return \Drupal\filter\Render\FilteredMarkup
+     */
+    public function getDescription() {
+      return $this->get('description')->processed;
+    }
+    
+    /**
+     * @param string $description
+     * @param string $format
+     *
+     * @return $this
+     */
+    public function setDescription($description, $format) {
+      return $this->set('description', [
+        'value' => $description,
+        'format' => $format,
+      ]);
+    }
+    
+    }
+    ```
+
+  </details>
+
 * Rebuild caches
 
   Run `drush cache-rebuild`
@@ -873,70 +1241,14 @@ displayed unless explicitly configured to.
 * Verify that the fields are shown
 
   As the event title is automatically used as a page title we do not explicitly
-  enable the title field as part of the view builder.
+  enable the title field for display.
 
-* Visit _Recent log messages_ page
+  Note that the output of the entity can be further customized by adding a theme
+  function. This is omitted for brevity.
 
-  Note there is a warning due to a missing `event` theme hook.
+### 3. Manipulating entities through forms
 
-  Delete the recent log messages.
-
-#### Add a theme function
-
-* Add an `event.module` with the following:
-
-  ```php
-  <?php
-
-  /**
-   * Implements hook_theme().
-   */
-  function event_theme($existing, $type, $theme, $path) {
-    return [
-      'event' => [
-        'render element' => 'content',
-      ],
-    ];
-  }
-  ```
-
-  This registers the `event` theme hook and makes it so that the rendered entity
-  output is placed in a `content` variable that is available to preprocess
-  functions and templates.
-
-  Note that entity types in core use an `elements` variable by default and then
-  (selectively) copy that over to a `content` variable manually in a preprocess
-  function. That `content` variable is then used in the templates. The above
-  avoids having to provide a preprocess function while retaining the ability to
-  use the `content` variable in templates.
-
-* Add a `templates` directory
-
-* Add a `templates/event.html.twig` file with the following:
-
-  {% raw %}
-  ```twig
-  <div{{ attributes }}>
-    {{ content }}
-  </div>
-  ```
-  {% endraw %}
-
-* Rebuild caches
-
-  Run `drush cache-rebuild`
-
-* Visit `/event/2`
-
-  Note the additional `div` element.
-
-* Visit _Recent log messages_ page
-
-  Note there is no warning.
-
-### Manipulating entities through forms
-
-#### Add the routes
+#### 3.1. Add the routes
 
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
@@ -974,7 +1286,7 @@ displayed unless explicitly configured to.
   Note that a route exists and _Save_ and _Delete_ buttons are shown, but no
   actual form fields are shown.
 
-#### Configure fields for display
+#### 3.2. Configure fields for display
 
 
 * Add the following to the `$fields['title']` section of the
@@ -1031,7 +1343,7 @@ displayed unless explicitly configured to.
 
   Note that no message is displayed and no redirect is performed.
 
-#### Add a specialized form
+#### 3.3. Add a specialized form
 
 * Add a `src/Form` directory
 
@@ -1104,9 +1416,9 @@ displayed unless explicitly configured to.
 
   Verify that the respective row in the `{event}` table has been deleted.
 
-### Listing entities
+### 4. Listing entities
 
-#### Add a route
+#### 4.1. Add a route
 
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
@@ -1134,7 +1446,7 @@ displayed unless explicitly configured to.
   By not showing at least the title of each event the list is not actually
   usable so we need to provide a specialized list builder.
 
-#### Add a specialized list builder
+#### 4.2. Add a specialized list builder
 
 * Create a `src/Controller` directory
 
@@ -1305,7 +1617,7 @@ displayed unless explicitly configured to.
   The redirect to the front page that happened above is only a fallback in case
   no `collection` route exists.
 
-#### Add an administrative view
+#### 4.3. Add an administrative view
 
 While a specialized entity list builder has the benefit of being re-usable one
 can also take advantage of Drupal's _Views_ module to create an administrative
@@ -1372,12 +1684,12 @@ listing of events.
 
   * A "sticky" table header
 
-### Adding administrative links
+### 5. Adding administrative links
 
 To provide a usable and integrated administration experience the different pages
 need to be connected and enriched with Drupal's standard administrative links.
 
-#### Add a menu link for the event listing
+#### 5.1. Add a menu link for the event listing
 
 For the event listing to show up in the toolbar menu under _Content_, we need
 to provide a menu link for it.
@@ -1399,7 +1711,7 @@ to provide a menu link for it.
 
   Note that there is no _Event_ local task on `/admin/content`.
 
-#### Add a local task for the event listing
+#### 5.2. Add a local task for the event listing
 
 * Add an `event.links.task.yml` file with the following:
 
@@ -1416,7 +1728,7 @@ to provide a menu link for it.
 
 * Verify that the _Events_ local task appears on `/admin/content`
 
-#### Add an action link for the add form
+#### 5.3. Add an action link for the add form
 
 * Add an `event.links.action.yml` file with the following:
 
@@ -1435,7 +1747,7 @@ to provide a menu link for it.
 
 * Add an event
 
-#### Add local tasks for the edit and delete forms
+#### 5.4. Add local tasks for the edit and delete forms
 
 * Add the following to `event.links.task.yml`:
 
@@ -1464,9 +1776,9 @@ to provide a menu link for it.
 
 <!-- TODO: Add contextual links -->
 
-### Adding permission-based access-control
+### 6. Adding permission-based access-control
 
-#### Add permissions
+#### 6.1. Add permissions
 
 Add the following to `event.permissions.yml`:
 
@@ -1481,7 +1793,7 @@ view events:
   title: 'View events'
 ```
 
-#### Add an access control handler
+#### 6.2. Add an access control handler
 
 * Add a `src/Access` directory
 
@@ -1576,14 +1888,14 @@ view events:
      `/admin/content/events`, `/admin/content/events/add` and
      `/admin/content/events/4`
 
-### Adding additional fields
+### 7. Adding additional fields
 
 Now that our basic implementation of _Events_ is functional and usable from the
 user interface, we can add some more fields. This is both to recap the above
 chapters and to show some additional features that are often used for content
 entities.
 
-#### Add the field definitions
+#### 7.1. Add the field definitions
 
 * Add the following to `src/Entity/Event.php`:
 
@@ -1649,7 +1961,7 @@ entities.
 
   Note that the `owner` and `changed` fields are not exposed on the form.
 
-#### Install the fields
+#### 7.2. Install the fields
 
 * Run `drush entity-updates`
 
@@ -1659,7 +1971,7 @@ entities.
     There is no `path` column because path aliases are stored separately in the
     `{url_alias}` table.
 
-#### Add additional field methods
+#### 7.3. Add additional field methods
 
 * Add the following to the use statements at the top of `src/Entity/Event.php`:
 
@@ -1835,14 +2147,14 @@ entities.
 
 The event entities are feature complete for our purposes as of now.
 
-### Storing dynamic data in configuration
+### 8. Storing dynamic data in configuration
 
 Apart from content entities there is a second type of entities in Drupal, the
 configuration entities. These have a machine-readable string ID and can be
 deployed between different environments along with the rest of the site
 configuration.
 
-#### Create an entity class
+#### 8.1. Create an entity class
 
 While there are some distinctions, creating a configuration entity type is very
 similar to creating a content entity type.
@@ -1923,7 +2235,7 @@ similar to creating a content entity type.
     entity class to hold the values of the entity. The names of those properties
     need to be specified as export properties in the entity annotation.
 
-#### Provide a configuration schema
+#### 8.2. Provide a configuration schema
 
 To ensure that the structure of each configuration object is correct, a _schema_
 is provided. When importing configuration from another environment, each
@@ -1943,7 +2255,7 @@ configuration object is validated against this schema.
         label: 'Label'
   ```
 
-#### Install the entity type
+#### 8.3. Install the entity type
 
 * Run `drush entity-updates`
 
@@ -2004,9 +2316,9 @@ configuration object is validated against this schema.
 
   Note that the row in the `{config}` table is gone.
 
-### Providing a user interface for configuration entities
+### 9. Providing a user interface for configuration entities
 
-#### Add a list of event types
+#### 9.1. Add a list of event types
 
 * Add the following to `event.permissions.yml`:
 
@@ -2076,7 +2388,7 @@ configuration object is validated against this schema.
 
   Note that a listing of event types is shown.
 
-#### Add forms for event types
+#### 9.2. Add forms for event types
 
 In contrast to content entities, configuration entities do not have the ability
 to use widgets for their forms, so we need to provide the respective form
@@ -2201,7 +2513,7 @@ elements ourselves.
 
   Delete an event type.
 
-### Categorizing different entities of the same entity type
+### 10. Categorizing different entities of the same entity type
 
 Drupal provides a mechanism to distinguish content entities of the same type
 and attach different behavior to the entities based on this distinction. In the
@@ -2214,7 +2526,7 @@ Generally a configuration entity type is used to provide the bundles for a
 content entity type. In this case each _Event type_ entity will be a bundle for
 the _Event_ entity type.
 
-#### Add the bundle field
+#### 10.1. Add the bundle field
 
 * Delete the existing event(s)
 
@@ -2265,7 +2577,7 @@ the _Event_ entity type.
 Like for the `id` and `uuid` fields, the field definition for the `type` field
 is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
 
-#### Install the bundle field
+#### 10.2. Install the bundle field
 
 * Run `drush entity-updates`
 
@@ -2279,9 +2591,9 @@ is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
 
 * Create an event
 
-### Configuring bundles in the user interface
+### 11. Configuring bundles in the user interface
 
-#### Enable Field UI for events
+#### 11.1. Enable Field UI for events
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
@@ -2298,7 +2610,7 @@ is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
   Note that there is a _Manage fields_, _Manage form display_ and _Manage
   display_ operation for each event type.
 
-#### Add dynamic fields to events
+#### 11.2. Add dynamic fields to events
 
 The ability to have comments is managed as a field in Drupal, so we can use
 Field UI to add a _Comments_ field to an event type.
@@ -2309,7 +2621,7 @@ Field UI to add a _Comments_ field to an event type.
 
 * Add a _Comments_ field to an event type
 
-#### Configure view modes
+#### 11.3. Configure view modes
 
 * Visit the _Manage display_ page
 
@@ -2354,7 +2666,7 @@ Field UI to add a _Comments_ field to an event type.
 
 * Verify that the event teasers are displayed correctly
 
-#### Configure the form
+#### 11.4. Configure the form
 
 * Visit the _Manage form display_ page
 
@@ -2375,14 +2687,14 @@ Field UI to add a _Comments_ field to an event type.
 
   * Use the _Check boxes/radio buttons_ widget for the _Attendees_ field
 
-### Translating content
+### 12. Translating content
 
 Content entities can be made translatable in the storage by amending the entity
 type annotation. However, this by itself does not make the content entity
 translatable in the user interface. It only _allows_ site builders to make it
 translatable in the user interface with the _Content Translation_ module.
 
-#### Install the Content Translation module
+#### 12.1. Install the Content Translation module
 
 * Install the _Content Translation_ module on `/admin/modules`
 
@@ -2392,7 +2704,7 @@ translatable in the user interface with the _Content Translation_ module.
 
   Note that events cannot be selected for translation.
 
-#### Make events translatable
+#### 12.2. Make events translatable
 
 * Delete all existing events
 
@@ -2474,9 +2786,9 @@ translatable in the user interface with the _Content Translation_ module.
 
 * Re-add the _Events_ view
 
-### Translating configuration
+### 13. Translating configuration
 
-#### Install the Configuration Translation module
+#### 13.1. Install the Configuration Translation module
 
 * Install the _Content Translation_ module on `/admin/modules`
 
@@ -2486,6 +2798,7 @@ translatable in the user interface with the _Content Translation_ module.
 
 [guide-short-url]: https://git.io/d8entity
 [repository]: https://github.com/drupal-entity-training/event
+[contrib-entity-api]: https://www.drupal.org/project/entity
 [drush]: http://docs.drush.org/en/master
 [api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
 [api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
