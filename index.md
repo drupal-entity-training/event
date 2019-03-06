@@ -37,27 +37,31 @@ creating a `test.php` script and then running `drush php-script test.php`.
   core: 8.x
   ```
 
-* Visit `/admin/modules` and install the _Event_ module
+* Run `drush pm:enable` or visit `/admin/modules` and install the _Event_ module
 
-#### Create an entity class
+#### Create a minimal entity class
 
 _Classes_ allow categorizing objects as being of a certain type. Event
 entities, that will be created below, will be _instances_ of the entity
 class. In terms of code organization, classes can be used to group related
 functionality.
 
-* Create a `src` directory
+* <details><summary>Create a <code>src</code> directory</summary>
 
-  In Drupal 8 the `src` directory contains all object-oriented code (classes,
-  interfaces, traits). Procedural code (functions) is placed in the `.module`
-  file (or other files) outside of the `src` directory.
+    In Drupal 8 the `src` directory contains all object-oriented code (classes,
+    interfaces, traits). Procedural code (functions) is placed in the `.module`
+    file (or other files) outside of the `src` directory.
 
-* Create a `src/Entity` directory
+  </details>
 
-  As modules often contain many classes, they can be placed into arbitrary
-  subdirectories for organizational purposes. Certain directory names have a
-  special meaning in Drupal and are required for certain things. In
-  particular, Drupal looks in `Entity` for entity types.
+* <details>
+    <summary>Create a <code>src/Entity</code> directory</summary>
+
+    As modules often contain many classes, they can be placed into arbitrary
+    subdirectories for organizational purposes. Certain directory names have a
+    special meaning in Drupal and are required for certain things. In
+    particular, Drupal looks in `Entity` for entity types.
+  </details>
 
 * Create a `src/Entity/Event.php` file with the following:
 
@@ -68,159 +72,135 @@ functionality.
 
   use Drupal\Core\Entity\ContentEntityBase;
 
+  /**
+   * @ContentEntityType(
+   *   id = "event",
+   *   label = @Translation("Event"),
+   *   base_table = "event",
+   *   entity_keys = {
+   *     "id" = "id",
+   *     "uuid" = "uuid",
+   *   },
+   * )
+   */
   class Event extends ContentEntityBase {
 
   }
   ```
 
-  Each part of this code block is explained below:
+  <details><summary>Click here for more information on the above</summary>
+
+  * Namespace:
+
+    ```php
+    namespace Drupal\event\Entity;
+    ```
+
+      Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
+      used simultaneously without risking naming conflicts. Namespaces can have
+      multiple parts. All classes in Drupal core and modules have `Drupal` as the
+      top-level namespace. The second part of module classes must be the module
+      name. Further sub-namespaces correspond to the directory structure within
+      the `src` directory of the module.
+
+  * Import:
+
+    ```php
+    use Drupal\Core\Entity\ContentEntityBase;
+    ```
+
+    In the same way we declare a namespace for the `Event` class the
+    `ContentEntityBase` class used below also belongs to a namespace. Thus, in
+    order to use it below, we need to import the class using the full namespace.
+
+  * Annotation:
+
+    _Annotations_ are a way to provide metadata about code. Because the
+    annotation is placed right next to the code itself, this makes classes truly
+    self-contained as both functionality and metadata are in the same file.
+
+    Even though the annotation is part of a comment block, it is required for
+    the entity type to function.
+
+    * ID:
+
+      ```php
+       *   id = "event",
+      ```
+
+      This is the ID of the entity type that is needed whenever interacting with
+      a specific entity type in code.
+
+    * Label:
+
+      ```php
+       *   label = @Translation("Event"),
+      ```
+
+      This is the label of this entity type when presented to a user.
+
+      To make the values we provide in the annotation translatable we need to
+      wrap them in `@Translation` which is themself an annotations.
+
+    * Storage information:
+
+      ```php
+       *   base_table = "event",
+       *   entity_keys = {
+       *     "id" = "id",
+       *     "uuid" = "uuid",
+       *   },
+      ```
+
+      We need to specify the name of the database table we want the event data
+      to be stored. (This is called _base_ table, as there can be multiple
+      tables that store entity information, as will be seen below.)
+
+      Entities are required to have an ID which they can be loaded by. We need
+      to specify what the ID field will be called for our entity. This will also
+      determine the name of the database column that will hold the entity IDs.
+      Similarly entity types can (and are encouraged to) provide a UUID field.
+      Again, we can specify the name of the UUID field.
+
+      Note that top-level keys of the annotation are not quoted, but keys in
+      mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
+      commas are allowed in mappings.
+
+    See [Drupal API: Annotations][api-annotations] for more information.
 
   * Class declaration:
 
-    ```php?start_inline=1
-    class Event {
+    ```php
+    class Event extends ContentEntityBase {
 
     }
     ```
 
     The file name must correspond to class name (including capitalization).
 
-  * Namespace:
+    * Inheritance:
 
-    ```php?start_inline=1
-    namespace Drupal\event\Entity;
-    ```
+      ```php
+      extends
+      ```
 
-    Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
-    used simultaneously without risking naming conflicts. Namespaces can have
-    multiple parts. All classes in Drupal core and modules have `Drupal` as the
-    top-level namespace. The second part of module classes must be the module
-    name. Further sub-namespaces correspond to the directory structure within
-    the `src` directory of the module.
+      Base classes can be used to implement functionality that is generic and
+      useful for many classes. Classes can inherit all functionality from such a
+      base class by using the `extends` keyword. they them. Then they only need
+      to provide functionality specific to them, which avoids code duplication.
 
-  * Inheritance:
+    * Content entities:
 
-    ```php?start_inline=1
-    extends
-    ```
+      ```php
+      ContentEntityBase
+      ```
 
-    Base classes can be used to implement functionality that is generic and
-    useful for many classes. Classes can inherit all functionality from such a
-    base class by using the `extends` keyword. they them. Then they only need
-    to provide functionality specific to them, which avoids code duplication.
+      Content entities are entities that are created by site users. They are
+      typically stored in the database, often with a auto-incrementing integer ID.
 
-  * Content entities:
-
-    ```php?start_inline=1
-    ContentEntityBase
-    ```
-
-    Content entities are entities that are created by site users. They are
-    typically stored in the database, often with a auto-incrementing integer ID.
-
-  * Import:
-
-    ```php?start_inline=1
-    use Drupal\Core\Entity\ContentEntityBase;
-    ```
-
-    In the same way we declare a namespace for the `Event` class the
-    `ContentEntityBase` class also belongs to a namespace. Thus, in order to use
-    it below, we need to import the class using the full namespace.
-
-  See [Drupal API: Object-oriented programming conventions][api-oop] for more
-  information.
-
-#### Add an annotation to the class
-
-_Annotations_ are a way to provide metadata about code. Because the annotation
-is placed right next to the code itself, this makes classes truly self-contained
-as both functionality and metadata are in the same file.
-
-Add the following comment block above the `Event` class:
-
-```php?start_inline=1
-/**
- * @ContentEntityType(
- *   id = "event",
- *   label = @Translation("Event"),
- *   label_singular = @Translation("event"),
- *   label_plural = @Translation("events"),
- *   label_count = @PluralTranslation(
- *     singular = "@count event",
- *     plural = "@count events"
- *   ),
- *   base_table = "event",
- *   entity_keys = {
- *     "id" = "id",
- *     "uuid" = "uuid",
- *   },
- * )
- */
-```
-
-Even though the annotation is part of a comment block, it is required for the
-entity type to function.
-
-Each part of this code block is explained below:
-
-* ID:
-
-  ```php?start_inline=1
-   *   id = "event",
-  ```
-
-  This is the ID of the entity type that is needed whenever interacting with
-  a specific entity type in code.
-
-* Labels:
-
-  ```php?start_inline=1
-   *   label = @Translation("Event"),
-   *   label_singular = @Translation("event"),
-   *   label_plural = @Translation("events"),
-   *   label_count = @PluralTranslation(
-   *     singular = "@count event",
-   *     plural = "@count events"
-   *   ),
-  ```
-
-  Because the label of this entity type might be used in a sentence and when
-  referencing multiple entities we need to provide different labels for the
-  different possible usages.
-
-  To make the values we provide in the annotation translatable we need to
-  wrap them in `@Translation` or `@PluralTranslation` which are themselves
-  annotations.
-  
-  Note that the keys in the `@PluralTranslation` annotation are not quoted and a
-  trailing comma after the `plural = "@count events"` line is not permitted.
-
-* Storage information:
-
-  ```php?start_inline=1
-   *   base_table = "event",
-   *   entity_keys = {
-   *     "id" = "id",
-   *     "uuid" = "uuid",
-   *   },
-  ```
-
-  We need to specify the name of the database table we want the event data to
-  be stored. (This is called _base_ table, as there can be multiple tables
-  that store entity information, as will be seen below.)
-
-  Entities are required to have an ID which they can be loaded by. We need to
-  specify what the ID field will be called for our entity. This will also
-  determine the name of the database column that will hold the entity IDs.
-  Similarly entity types can (and are encouraged to) provide a UUID field.
-  Again, we can specify the name of the UUID field.
-
-  Note that top-level keys of the annotation are not quoted, but keys in
-  mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
-  commas are allowed in mappings.
-
-See [Drupal API: Annotations][api-annotations] for more information.
+    See [Drupal API: Object-oriented programming conventions][api-oop] for more
+    information.
+  </details>
 
 #### Install the entity type
 
@@ -245,19 +225,22 @@ needs to be done explicitly. The preferred way of doing this is with Drush.
 
   Note that there is a new row in the `{event}` table with an ID and a UUID.
 
-  The `Event` class inherits the `create()` and `save()` methods from
-  `ContentEntityBase` so they can be called without being present in the
-  `Event` class itself.
+  <details><summary>Click here for more information on the above</summary>
 
-  `create()` is a _static_ method so it is called by using the class name and
-  the `::` syntax. `save()` is not a static method so it is used with an
-  instance of the class and the `->` syntax.
+    The `Event` class inherits the `create()` and `save()` methods from
+    `ContentEntityBase` so they can be called without being present in the
+    `Event` class itself.
+
+    `create()` is a _static_ method so it is called by using the class name and
+    the `::` syntax. `save()` is not a static method so it is used with an
+    instance of the class and the `->` syntax.
+  </details>
 
 * Load an event fetch its ID and UUID
 
   Run the following PHP code:
 
-  ```php?start_inline=1
+  ```php
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
