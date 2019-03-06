@@ -455,9 +455,9 @@ events.
 
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
@@ -465,7 +465,7 @@ events.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
     * @ContentEntityType(
     *   id = "event",
@@ -481,31 +481,31 @@ events.
     * )
     */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
     use EntityOwnerTrait, EntityPublishedTrait;
-    
+
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
       $fields = parent::baseFieldDefinitions($entity_type);
-    
+
       $fields['title'] = BaseFieldDefinition::create('string')
         ->setLabel(t('Title'))
         ->setRequired(TRUE);
-    
+
       $fields['date'] = BaseFieldDefinition::create('datetime')
         ->setLabel(t('Date'))
         ->setRequired(TRUE);
-    
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'));
-    
+
       // Get the field definitions for 'author' and 'published' from the traits.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
       return $fields;
     }
-    
+
     }
     ```
 
@@ -554,18 +554,18 @@ update it automatically.
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
-  
+
   print 'Title: ' . $event->get('title')->value . "\n\n";
-  
+
   print 'Date value: ' . $event->get('date')->value . "\n";
   print 'Date object: ' . var_export($event->get('date')->date, TRUE) . "\n\n";
-  
+
   print 'Description value: ' . $event->get('description')->value . "\n";
   print 'Description format: ' . $event->get('description')->format . "\n";
   print 'Processed description: ' . var_export($event->get('description')->processed, TRUE) . "\n\n";
-  
+
   print 'Author: ' . $event->get('author')->entity->getDisplayName() . "\n\n";
-  
+
   print 'Published: ' . $event->get('published')->value . "\n";
   ```
 
@@ -680,12 +680,12 @@ interface
   is omitted here for brevity.
 
   <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
-    
+
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -694,7 +694,7 @@ interface
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
     * @ContentEntityType(
     *   id = "event",
@@ -710,38 +710,38 @@ interface
     * )
     */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
     use EntityOwnerTrait, EntityPublishedTrait;
-    
+
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
       $fields = parent::baseFieldDefinitions($entity_type);
-    
+
       $fields['title'] = BaseFieldDefinition::create('string')
         ->setLabel(t('Title'))
         ->setRequired(TRUE);
-    
+
       $fields['date'] = BaseFieldDefinition::create('datetime')
         ->setLabel(t('Date'))
         ->setRequired(TRUE);
-    
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'));
-    
+
       // Get the field definitions for 'author' and 'published' from the traits.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
       return $fields;
     }
-    
+
     /**
      * @return string
      */
     public function getTitle() {
       return $this->get('title')->value;
     }
-    
+
     /**
      * @param string $title
      *
@@ -750,14 +750,14 @@ interface
     public function setTitle($title) {
       return $this->set('title', $title);
     }
-    
+
     /**
      * @return \Drupal\Core\Datetime\DrupalDateTime
      */
     public function getDate() {
       return $this->get('date')->date;
     }
-    
+
     /**
      * @param \Drupal\Core\Datetime\DrupalDateTime $date
      *
@@ -766,14 +766,14 @@ interface
     public function setDate(DrupalDateTime $date) {
       return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
     }
-    
+
     /**
      * @return \Drupal\filter\Render\FilteredMarkup
      */
     public function getDescription() {
       return $this->get('description')->processed;
     }
-    
+
     /**
      * @param string $description
      * @param string $format
@@ -786,7 +786,7 @@ interface
         'format' => $format,
       ]);
     }
-    
+
     }
     ```
 
@@ -871,12 +871,12 @@ provide permissions entity types which we will now use.
   ```
 
   <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
-    
+
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -885,7 +885,7 @@ provide permissions entity types which we will now use.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
     * @ContentEntityType(
     *   id = "event",
@@ -912,38 +912,38 @@ provide permissions entity types which we will now use.
     * )
     */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
     use EntityOwnerTrait, EntityPublishedTrait;
-    
+
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
       $fields = parent::baseFieldDefinitions($entity_type);
-    
+
       $fields['title'] = BaseFieldDefinition::create('string')
         ->setLabel(t('Title'))
         ->setRequired(TRUE);
-    
+
       $fields['date'] = BaseFieldDefinition::create('datetime')
         ->setLabel(t('Date'))
         ->setRequired(TRUE);
-    
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'));
-    
+
       // Get the field definitions for 'owner' and 'published' from the traits.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
       return $fields;
     }
-    
+
     /**
      * @return string
      */
     public function getTitle() {
       return $this->get('title')->value;
     }
-    
+
     /**
      * @param string $title
      *
@@ -952,14 +952,14 @@ provide permissions entity types which we will now use.
     public function setTitle($title) {
       return $this->set('title', $title);
     }
-    
+
     /**
      * @return \Drupal\Core\Datetime\DrupalDateTime
      */
     public function getDate() {
       return $this->get('date')->date;
     }
-    
+
     /**
      * @param \Drupal\Core\Datetime\DrupalDateTime $date
      *
@@ -968,14 +968,14 @@ provide permissions entity types which we will now use.
     public function setDate(DrupalDateTime $date) {
       return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
     }
-    
+
     /**
      * @return \Drupal\filter\Render\FilteredMarkup
      */
     public function getDescription() {
       return $this->get('description')->processed;
     }
-    
+
     /**
      * @param string $description
      * @param string $format
@@ -988,7 +988,7 @@ provide permissions entity types which we will now use.
         'format' => $format,
       ]);
     }
-    
+
     }
     ```
 
@@ -1022,7 +1022,7 @@ provide permissions entity types which we will now use.
 
       Instead of declaring routes belonging to entities in a `*.routing.yml`
       file like other routes, they can be provided by a handler, as well. This
-      has the benefit of being able to re-use the same route provider for 
+      has the benefit of being able to re-use the same route provider for
       multiple entity types, as is proven by the usage of the generic route
       provider provided by core.
 
@@ -1149,12 +1149,12 @@ displayed unless explicitly configured to.
 
 
   <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
-    
+
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -1163,7 +1163,7 @@ displayed unless explicitly configured to.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
     * @ContentEntityType(
     *   id = "event",
@@ -1190,17 +1190,17 @@ displayed unless explicitly configured to.
     * )
     */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
     use EntityOwnerTrait, EntityPublishedTrait;
-    
+
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
       $fields = parent::baseFieldDefinitions($entity_type);
-    
+
       $fields['title'] = BaseFieldDefinition::create('string')
         ->setLabel(t('Title'))
         ->setRequired(TRUE);
-    
+
       $fields['date'] = BaseFieldDefinition::create('datetime')
         ->setLabel(t('Date'))
         ->setRequired(TRUE)
@@ -1211,28 +1211,28 @@ displayed unless explicitly configured to.
           ],
           'weight' => 0,
         ]);
-    
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'))
         ->setDisplayOptions('view', [
           'label' => 'hidden',
           'weight' => 10,
         ]);
-    
+
       // Get the field definitions for 'owner' and 'published' from the traits.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
       return $fields;
     }
-    
+
     /**
      * @return string
      */
     public function getTitle() {
       return $this->get('title')->value;
     }
-    
+
     /**
      * @param string $title
      *
@@ -1241,14 +1241,14 @@ displayed unless explicitly configured to.
     public function setTitle($title) {
       return $this->set('title', $title);
     }
-    
+
     /**
      * @return \Drupal\Core\Datetime\DrupalDateTime
      */
     public function getDate() {
       return $this->get('date')->date;
     }
-    
+
     /**
      * @param \Drupal\Core\Datetime\DrupalDateTime $date
      *
@@ -1257,14 +1257,14 @@ displayed unless explicitly configured to.
     public function setDate(DrupalDateTime $date) {
       return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
     }
-    
+
     /**
      * @return \Drupal\filter\Render\FilteredMarkup
      */
     public function getDescription() {
       return $this->get('description')->processed;
     }
-    
+
     /**
      * @param string $description
      * @param string $format
@@ -1277,7 +1277,7 @@ displayed unless explicitly configured to.
         'format' => $format,
       ]);
     }
-    
+
     }
     ```
 
@@ -1312,7 +1312,7 @@ displayed unless explicitly configured to.
 
   <!-- TODO: Explain this -->
 
-* Add the following to the `links` section of the annotation in 
+* Add the following to the `links` section of the annotation in
   `src/Entity/Event.php`:
 
   ```php
