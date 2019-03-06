@@ -291,8 +291,8 @@ needs to be done explicitly. The preferred way of doing this is with Drush.
   use Drupal\event\Entity\Event;
 
   $event = Event::load(1);
-  $event->id();
-  $event->uuid();
+  print 'ID: ' . $event->id() . PHP_EOL;
+  print 'UUID: ' . $event->uuid() . PHP_EOL;
   ```
 
   Note that the returned values match the values in the database.
@@ -378,15 +378,17 @@ events.
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'));
 
-    $fields['published'] = BaseFieldDefinition::create('boolean')
-      ->setLabel(t('Published'))
-      ->setDefaultValue(FALSE);
+    // Get the field definitions for 'author' and 'published' from the trait.
+    $fields += static::ownerBaseFieldDefinitions($entity_type);
+    $fields += static::publishedBaseFieldDefinitions($entity_type);
 
     return $fields;
   }
   ```
 
-  Parts of this code block are explained below:
+  <details><summary>Click here for more information on the above</summary>
+
+  <!-- TODO: Explain traits -->
 
   * Type hint:
 
@@ -544,27 +546,27 @@ update it automatically.
   Note that there is a new row in the `{event}` table with the proper field
   values.
 
-  Note that the default value of the `published` field has been applied.
-
-* Load an event fetch its field values.
+* Load an event and fetch its field values.
 
   Run the following PHP code:
 
   ```php
   use Drupal\event\Entity\Event;
 
-  $event = Event::load(2);
-
-  $event->get('title')->value;
-
-  $event->get('date')->value;
-  $event->get('date')->date;
-
-  $event->get('description')->value;
-  $event->get('description')->format;
-  $event->get('description')->processed;
-
-  $event->get('published')->value;
+  $event = Event::load(1);
+  
+  print 'Title: ' . $event->get('title')->value . "\n\n";
+  
+  print 'Date value: ' . $event->get('date')->value . "\n";
+  print 'Date object: ' . var_export($event->get('date')->date, TRUE) . "\n\n";
+  
+  print 'Description value: ' . $event->get('description')->value . "\n";
+  print 'Description format: ' . $event->get('description')->format . "\n";
+  print 'Processed description: ' . var_export($event->get('description')->processed, TRUE) . "\n\n";
+  
+  print 'Author: ' . $event->get('author')->entity->getDisplayName() . "\n\n";
+  
+  print 'Published: ' . $event->get('published')->value . "\n";
   ```
 
   Note that the returned values match the values in the database.
@@ -673,77 +675,122 @@ interface
   and `unpublish()` methods make the code more readable than with a generic
   `setPublished()` method.
 
-* Create a `src/Entity/EventInterface.php` with the following code:
+  Note that entity types in core provide an entity-type-specific interface (such
+  as `EventInterface` in this case) to which they add such field methods. This
+  is omitted here for brevity.
 
-  ```php
-  <?php
-
-  namespace Drupal\event\Entity;
-
-  use Drupal\Core\Entity\ContentEntityInterface;
-
-  interface EventInterface extends ContentEntityInterface {
-
+  <details><summary>Click here to see the entire <code>Event.php</code> file at this point</summary>
+    
+    ```php
+    <?php
+    
+    namespace Drupal\event\Entity;
+    
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\EntityPublishedInterface;
+    use Drupal\Core\Entity\EntityPublishedTrait;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\user\EntityOwnerInterface;
+    use Drupal\user\EntityOwnerTrait;
+    
+    /**
+    * @ContentEntityType(
+    *   id = "event",
+    *   label = @Translation("Event"),
+    *   base_table = "event",
+    *   entity_keys = {
+    *     "id" = "id",
+    *     "uuid" = "uuid",
+    *     "label" = "title",
+    *     "owner" = "author",
+    *     "published" = "published",
+    *   },
+    * )
+    */
+    class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
+    
+    use EntityOwnerTrait, EntityPublishedTrait;
+    
+    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+      // Get the field definitions for 'id' and 'uuid' from the parent.
+      $fields = parent::baseFieldDefinitions($entity_type);
+    
+      $fields['title'] = BaseFieldDefinition::create('string')
+        ->setLabel(t('Title'))
+        ->setRequired(TRUE);
+    
+      $fields['date'] = BaseFieldDefinition::create('datetime')
+        ->setLabel(t('Date'))
+        ->setRequired(TRUE);
+    
+      $fields['description'] = BaseFieldDefinition::create('text_long')
+        ->setLabel(t('Description'));
+    
+      // Get the field definitions for 'author' and 'published' from the traits.
+      $fields += static::ownerBaseFieldDefinitions($entity_type);
+      $fields += static::publishedBaseFieldDefinitions($entity_type);
+    
+      return $fields;
+    }
+    
     /**
      * @return string
      */
-    public function getTitle();
-
+    public function getTitle() {
+      return $this->get('title')->value;
+    }
+    
     /**
      * @param string $title
      *
      * @return $this
      */
-    public function setTitle($title);
-
+    public function setTitle($title) {
+      return $this->set('title', $title);
+    }
+    
     /**
-     * @return \DateTimeInterface
+     * @return \Drupal\Core\Datetime\DrupalDateTime
      */
-    public function getDate();
-
+    public function getDate() {
+      return $this->get('date')->date;
+    }
+    
     /**
-     * @param \DateTimeInterface $date
+     * @param \Drupal\Core\Datetime\DrupalDateTime $date
      *
      * @return $this
      */
-    public function setDate(\DateTimeInterface $date);
-
+    public function setDate(DrupalDateTime $date) {
+      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+    }
+    
     /**
-     * @return string
+     * @return \Drupal\filter\Render\FilteredMarkup
      */
-    public function getDescription();
-
+    public function getDescription() {
+      return $this->get('description')->processed;
+    }
+    
     /**
      * @param string $description
      * @param string $format
      *
      * @return $this
      */
-    public function setDescription($description, $format);
+    public function setDescription($description, $format) {
+      return $this->set('description', [
+        'value' => $description,
+        'format' => $format,
+      ]);
+    }
+    
+    }
+    ```
 
-    /**
-     * @return bool
-     */
-    public function isPublished();
-
-    /**
-     * @return $this
-     */
-    public function publish();
-
-    /**
-     * @return $this
-     */
-    public function unpublish();
-
-  }
-  ```
-
-* Add the following to the class declaration in `src/Entity/Event.php`:
-
-  ```php
-  implements EventInterface
-  ```
+  </details>
 
 * Try out the new getter methods
 
@@ -752,7 +799,7 @@ interface
   ```php
   use Drupal\event\Entity\Event;
 
-  $event = Event::load(2);
+  $event = Event::load(1);
 
   $event->getTitle();
   $event->getDate();
@@ -1029,63 +1076,65 @@ displayed unless explicitly configured to.
   ])
   ```
 
-  Parts of this code block are explained below:
+  <details><summary>Click here for more information on the above</summary>
 
-  * Display mode:
+    * Display mode:
 
-    ```php
-    ->setDisplayOptions('view'
-    ```
+      ```php
+      ->setDisplayOptions('view'
+      ```
 
-    Display options can be set for two different display _modes_: `view` and
-    `form`. Form display options will be set below.
+      Display options can be set for two different display _modes_: `view` and
+      `form`. Form display options will be set below.
 
-  * Label display:
+    * Label display:
 
-    ```php
-    'label' => 'inline',
-    ```
+      ```php
+      'label' => 'inline',
+      ```
 
-    The field label can be configured to be displayed above the field value (the
-    default), inline in front of the field value or hidden altogether. The
-    respective values of the `label` setting are `above`, `inline` and `hidden`.
+      The field label can be configured to be displayed above the field value (the
+      default), inline in front of the field value or hidden altogether. The
+      respective values of the `label` setting are `above`, `inline` and `hidden`.
 
-  * Formatter settings:
+    * Formatter settings:
 
-    ```php
-    'settings' => [
-      'format_type' => 'html_date',
-    ],
-    ```
+      ```php
+      'settings' => [
+        'format_type' => 'html_date',
+      ],
+      ```
 
-    Each field is displayed using a _formatter_. The field type declares a
-    default formatter which is used unless a different formatter is chosen by
-    specifying a `type` key in the display options. Some formatters have
-    settings which can be configured through the `settings` key in the display
-    options. There is no list of IDs of available field types, but
-    [Drupal API: List of classes annotated with FieldFormatter][api-field-formatters]
-    lists all field formatter classes (for all field types) in core. The ID of a
-    given field formatter can be found in its class documentation or by
-    inspecting the `@FieldFormatter` annotation which also lists the field types
-    that the formatter can be used for. Given a formatter class the available
-    settings can be found by inspecting the keys returned by the class'
-    `defaultSettings()` method.
+      Each field is displayed using a _formatter_. The field type declares a
+      default formatter which is used unless a different formatter is chosen by
+      specifying a `type` key in the display options. Some formatters have
+      settings which can be configured through the `settings` key in the display
+      options. There is no list of IDs of available field types, but
+      [Drupal API: List of classes annotated with FieldFormatter][api-field-formatters]
+      lists all field formatter classes (for all field types) in core. The ID of a
+      given field formatter can be found in its class documentation or by
+      inspecting the `@FieldFormatter` annotation which also lists the field types
+      that the formatter can be used for. Given a formatter class the available
+      settings can be found by inspecting the keys returned by the class'
+      `defaultSettings()` method.
 
-  * Weight:
+    * Weight:
 
-    ```php
-    'weight' => 0,
-    ```
+      ```php
+      'weight' => 0,
+      ```
 
-    Weights allow the order of fields in the rendered output to be different
-    than their declaration order in the `baseFieldDefinitions()` method. Fields
-    with heigher weights "sink" to the bottom and are displayed after fields
-    with lower weights.
+      Weights allow the order of fields in the rendered output to be different
+      than their declaration order in the `baseFieldDefinitions()` method. Fields
+      with heigher weights "sink" to the bottom and are displayed after fields
+      with lower weights.
 
-  Altogether, setting the view display options is comparable to using the
-  _Manage display_ table provided by _Field UI_ module, which also allows
-  configuring the label display, formatter, formatter settings and weight for
-  each field.
+    Altogether, setting the view display options is comparable to using the
+    _Manage display_ table provided by _Field UI_ module, which also allows
+    configuring the label display, formatter, formatter settings and weight for
+    each field.
+
+  </details>
 
 * Add the following to the `$fields['description']` section of the
   `baseFieldDefinitions()` method of `src/Entity/Event.php` before the
