@@ -326,6 +326,7 @@ events.
 
   ```yaml
   dependencies:
+    - drupal:datetime
     - drupal:user
   ```
 
@@ -870,7 +871,7 @@ provide permissions entity types which we will now use.
    *     "access" = "Drupal\entity\EntityAccessControlHandler",
    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
    *     "route_provider" = {
-   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
    *     },
    *   },
    *   links = {
@@ -911,7 +912,7 @@ provide permissions entity types which we will now use.
     *     "access" = "Drupal\entity\EntityAccessControlHandler",
     *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
     *     "route_provider" = {
-    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+    *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
     *     },
     *   },
     *   links = {
@@ -1025,7 +1026,7 @@ provide permissions entity types which we will now use.
 
       ```php
        *     "route_provider" = {
-       *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+       *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
        *     },
       ```
 
@@ -1157,7 +1158,7 @@ displayed unless explicitly configured to.
   ```
 
 
-  <details><summary>>The entire <code>Event.php</code> file at this point</summary>
+  <details><summary>The entire <code>Event.php</code> file at this point</summary>
 
     ```php
     <?php
@@ -1189,7 +1190,7 @@ displayed unless explicitly configured to.
     *     "access" = "Drupal\entity\EntityAccessControlHandler",
     *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
     *     "route_provider" = {
-    *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+    *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
     *     },
     *   },
     *   links = {
@@ -1367,7 +1368,7 @@ displayed unless explicitly configured to.
      *     },
      *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
      *     "route_provider" = {
-     *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
      *     },
      *   },
      *   links = {
@@ -1563,7 +1564,7 @@ displayed unless explicitly configured to.
      *     },
      *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
      *     "route_provider" = {
-     *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
      *     },
      *   },
      *   links = {
@@ -1844,7 +1845,7 @@ displayed unless explicitly configured to.
      *     },
      *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
      *     "route_provider" = {
-     *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
      *     },
      *   },
      *   links = {
@@ -2311,14 +2312,6 @@ entities.
 
 #### 6.1. Add the field definitions
 
-* Add the following to the `use` statements at the top of
-  `src/Entity/Event.php`:
-
-  ```php
-
-  ```
-
-
 * Add the following use statements to `src/Entity/Event.php`:
 
   ```php
@@ -2708,7 +2701,7 @@ entities.
    *     },
    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
    *     "route_provider" = {
-   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
    *     },
    *     "views_data" = "Drupal\views\EntityViewsData",
    *   },
@@ -3008,6 +3001,25 @@ _revision_ of an entity each time it is saved.
 * Verify that the _Revision information_ vertical tab appears on the event edit
   form
 
+#### 7.2. Add a user interface for managing revisions
+
+
+* Add the following to the `route_provider` entry of the `handlers` section of
+  the annotation of the `Event` class:
+
+  ```php
+   *       "revision" = "Drupal\entity\Routing\RevisionRouteProvider",
+  ```
+
+* Add the following to the `links` section of the annotation of the `Event`
+  class:
+
+  ```php
+   *     "version-history" = "/event/{event}/revisions",
+   *     "revision" = "/event/{event}/revisions/{event_revision}",
+   *     "revision-revert-form" = "/event/{event}/revisions/{event_revision}/revert",
+  ```
+
 ### 8. Storing dynamic data in configuration
 
 Apart from content entities there is a second type of entities in Drupal, the
@@ -3218,7 +3230,7 @@ configuration object is validated against this schema.
    *     },
    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
    *     "route_provider" = {
-   *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
    *     },
    *   },
    *   links = {
