@@ -47,25 +47,27 @@ creating a test script and then running `drush php:script <name-of-script>`.
       3. [Add validation constraints](#add-validation-constraints)
       4. [Implement the computed field](#implement-the-computed-field)
       5. [Install the fields](#install-the-fields)
-7. [Storing dynamic data in configuration](#storing-dynamic-data-in-configuration)
+7. [Tracking changes to entities](#tracking-changes-to-entities)
+      1. [Make events revisionable](#make-events-revisionable)
+8. [Storing dynamic data in configuration](#storing-dynamic-data-in-configuration)
       1. [Create an entity class](#create-an-entity-class)
       2. [Provide a configuration schema](#provide-a-configuration-schema)
       3. [Install the entity type](#install-the-entity-type)
-8. [Providing a user interface for configuration entities](#providing-a-user-interface-for-configuration-entities)
+9. [Providing a user interface for configuration entities](#providing-a-user-interface-for-configuration-entities)
       1. [Add a list of event types](#add-a-list-of-event-types)
       2. [Add forms for event types](#add-forms-for-event-types)
-9. [Categorizing different entities of the same entity type](#categorizing-different-entities-of-the-same-entity-type)
+10. [Categorizing different entities of the same entity type](#categorizing-different-entities-of-the-same-entity-type)
       1. [Add the bundle field](#add-the-bundle-field)
       2. [Install the bundle field](#install-the-bundle-field)
-10. [Configuring bundles in the user interface](#configuring-bundles-in-the-user-interface)
+11. [Configuring bundles in the user interface](#configuring-bundles-in-the-user-interface)
       1. [Enable Field UI for events](#enable-field-ui-for-events)
       2. [Add dynamic fields to events](#add-dynamic-fields-to-events)
       3. [Configure view modes](#configure-view-modes)
       4. [Configure the form](#configure-the-form)
-11. [Translating content](#translating-content)
+12. [Translating content](#translating-content)
       1. [Install the Content Translation module](#install-the-content-translation-module)
       2. [Make events translatable](#make-events-translatable)
-12. [Translating configuration](#translating-configuration)
+13. [Translating configuration](#translating-configuration)
       1. [Install the Configuration Translation module](#install-the-configuration-translation-module)
 
 ### 1. Using entities for data storage
@@ -252,7 +254,7 @@ functionality.
 Drupal can create the database schema for our entity type automatically but this
 needs to be done explicitly. The preferred way of doing this is with Drush.
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   Note that the `{event}` table has been created in the database with `id`
   and `uuid` columns.
@@ -523,7 +525,7 @@ events.
 Drupal notices changes to the entity type that affect the database schema and can
 update it automatically.
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   Note that `title`, `date`, `description__value`, `description__format` and
   `published` columns have been created in the `{event}` table.
@@ -1513,8 +1515,7 @@ displayed unless explicitly configured to.
   ```
 
 * Add the following before the `return` statement of the
-  `baseFieldDefinitions()` method of the `Event` class before the
-  semicolon:
+  `baseFieldDefinitions()` method of the `Event` class:
 
   ```php
   $fields['published']->setDisplayOptions('form', [
@@ -2221,6 +2222,13 @@ listing of events.
     interface. (Note that adding a local task does not work in this case as it
     conflicts with the overriding of the list-builder route.)
 
+* Verify that events can be accessed via JSON API, as well, by visiting, for
+  example, following paths:
+
+  * /jsonapi/event/event
+  * /jsonapi/event/event?include=author
+  * /jsonapi/event/event?filter[date][operator]=<&filter[date][value]=2019-01-01T00:00:00
+
 ### 5. Adding administrative links
 
 To provide a usable and integrated administration experience the different pages
@@ -2910,7 +2918,7 @@ entities.
 
 #### 6.5. Install the fields
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   * Note that the `{event__attendees}` table was created and `maximum` and
     `changed` fields have been created in the `{event}` table.
@@ -2959,14 +2967,55 @@ entities.
 
 The event entities are feature complete for our purposes as of now.
 
-### 7. Storing dynamic data in configuration
+### 7. Tracking changes to entities
+
+Drupal provides a mechanism to track changes of entities by storing a new
+_revision_ of an entity each time it is saved.
+
+#### 7.1. Make events revisionable
+
+* Add the following use statements to `src/Entity/Event.php`:
+
+  ```php
+  use Drupal\Core\Entity\RevisionLogEntityTrait;
+  ```
+
+* Add the following to the annotation of the `Event` class:
+
+  ```
+   *   revision_table = "event_revision",
+   *   revision_metadata_keys = {
+   *     "revision_user" = "revision_author",
+   *     "revision_created" = "revision_created",
+   *     "revision_log_message" = "revision_log_message",
+   *   },
+   *   show_revision_ui = true,
+  ```
+
+* Add `, RevisionLogEntityTrait` to the `use` part inside of the `Event` class
+
+* Add the following before the `return` statement of the
+  `baseFieldDefinitions()` method of the `Event` class:
+
+  ```php
+   $fields += static::revisionLogBaseFieldDefinitions($entity_type);
+  ```
+
+* Run `drush entity:updates`
+
+* Verify that the `event_revision` table was created
+
+* Verify that the _Revision information_ vertical tab appears on the event edit
+  form
+
+### 8. Storing dynamic data in configuration
 
 Apart from content entities there is a second type of entities in Drupal, the
 configuration entities. These have a machine-readable string ID and can be
 deployed between different environments along with the rest of the site
 configuration.
 
-#### 7.1. Create an entity class
+#### 8.1. Create an entity class
 
 While there are some distinctions, creating a configuration entity type is very
 similar to creating a content entity type.
@@ -3046,7 +3095,7 @@ similar to creating a content entity type.
 
   </details>
 
-#### 7.2. Provide a configuration schema
+#### 8.2. Provide a configuration schema
 
 To ensure that the structure of each configuration object is correct, a _schema_
 is provided. When importing configuration from another environment, each
@@ -3066,9 +3115,9 @@ configuration object is validated against this schema.
         label: 'Label'
   ```
 
-#### 7.3. Install the entity type
+#### 8.3. Install the entity type
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   Note that there is no schema change
 
@@ -3127,9 +3176,9 @@ configuration object is validated against this schema.
 
   Note that the row in the `{config}` table is gone.
 
-### 8. Providing a user interface for configuration entities
+### 9. Providing a user interface for configuration entities
 
-#### 8.1. Add a list of event types
+#### 9.1. Add a list of event types
 
 * Add a `src/Controller/EventTypeListBuilder.php` file with the following:
 
@@ -3197,7 +3246,7 @@ configuration object is validated against this schema.
 
   Note that a listing of event types is shown.
 
-#### 8.2. Add forms for event types
+#### 9.2. Add forms for event types
 
 In contrast to content entities, configuration entities do not have the ability
 to use widgets for their forms, so we need to provide the respective form
@@ -3313,7 +3362,7 @@ elements ourselves.
 
   Delete an event type.
 
-### 9. Categorizing different entities of the same entity type
+### 10. Categorizing different entities of the same entity type
 
 Drupal provides a mechanism to distinguish content entities of the same type
 and attach different behavior to the entities based on this distinction. In the
@@ -3326,7 +3375,7 @@ Generally a configuration entity type is used to provide the bundles for a
 content entity type. In this case each _Event type_ entity will be a bundle for
 the _Event_ entity type.
 
-#### 9.1. Add the bundle field
+#### 10.1. Add the bundle field
 
 * Delete the existing event(s)
 
@@ -3369,9 +3418,9 @@ the _Event_ entity type.
 Like for the `id` and `uuid` fields, the field definition for the `type` field
 is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
 
-#### 9.2. Install the bundle field
+#### 10.2. Install the bundle field
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   * Note that the `type` column has been added to the `{event}` table.
 
@@ -3383,9 +3432,9 @@ is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
 
 * Create an event
 
-### 10. Configuring bundles in the user interface
+### 11. Configuring bundles in the user interface
 
-#### 10.1. Enable Field UI for events
+#### 11.1. Enable Field UI for events
 
 * Add the following to the annotation in `src/Entity/Event.php`:
 
@@ -3402,7 +3451,7 @@ is automatically generated by `ContentEntityBase::baseFieldDefinitions()`.
   Note that there is a _Manage fields_, _Manage form display_ and _Manage
   display_ operation for each event type.
 
-#### 10.2. Add dynamic fields to events
+#### 11.2. Add dynamic fields to events
 
 The ability to have comments is managed as a field in Drupal, so we can use
 Field UI to add a _Comments_ field to an event type.
@@ -3413,7 +3462,7 @@ Field UI to add a _Comments_ field to an event type.
 
 * Add a _Comments_ field to an event type
 
-#### 10.3. Configure view modes
+#### 11.3. Configure view modes
 
 * Visit the _Manage display_ page
 
@@ -3458,7 +3507,7 @@ Field UI to add a _Comments_ field to an event type.
 
 * Verify that the event teasers are displayed correctly
 
-#### 10.4. Configure the form
+#### 11.4. Configure the form
 
 * Visit the _Manage form display_ page
 
@@ -3479,14 +3528,14 @@ Field UI to add a _Comments_ field to an event type.
 
   * Use the _Check boxes/radio buttons_ widget for the _Attendees_ field
 
-### 11. Translating content
+### 12. Translating content
 
 Content entities can be made translatable in the storage by amending the entity
 type annotation. However, this by itself does not make the content entity
 translatable in the user interface. It only _allows_ site builders to make it
 translatable in the user interface with the _Content Translation_ module.
 
-#### 11.1. Install the Content Translation module
+#### 12.1. Install the Content Translation module
 
 * Install the _Content Translation_ module on `/admin/modules`
 
@@ -3496,7 +3545,7 @@ translatable in the user interface with the _Content Translation_ module.
 
   Note that events cannot be selected for translation.
 
-#### 11.2. Make events translatable
+#### 12.2. Make events translatable
 
 * Delete all existing events
 
@@ -3522,7 +3571,7 @@ translatable in the user interface with the _Content Translation_ module.
   `langcode` field is automatically generated by
   `ContentEntityBase::baseFieldDefinitions()`.
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
   Note that the `{event_field_data}` table has been created and the `type`
   column has been added to the `{event}` table.
@@ -3539,7 +3588,7 @@ translatable in the user interface with the _Content Translation_ module.
   ->setTranslatable(TRUE)
   ```
 
-* Run `drush entity-updates`
+* Run `drush entity:updates`
 
 * Mark all fields of all event types as translatable
 
@@ -3578,9 +3627,9 @@ translatable in the user interface with the _Content Translation_ module.
 
 * Re-add the _Events_ view
 
-### 12. Translating configuration
+### 13. Translating configuration
 
-#### 12.1. Install the Configuration Translation module
+#### 13.1. Install the Configuration Translation module
 
 * Install the _Content Translation_ module on `/admin/modules`
 
