@@ -2973,6 +2973,8 @@ _revision_ of an entity each time it is saved.
   use Drupal\Core\Entity\RevisionLogEntityTrait;
   ```
 
+<!-- add the revision entity key -->
+
 * Add the following to the annotation of the `Event` class:
 
   ```
