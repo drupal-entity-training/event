@@ -863,8 +863,8 @@ interface
 ### 2. Viewing entities on a page
 
 Viewing an entity on a page requires a route on which the entity's field values
-are output on a given path. This can be automated by amending the entity
-annotation.
+are output on a given path. This can be automated by amending the entity class
+attributes.
 
 #### 2.1. Install the contributed _Entity API_ module.
 
@@ -886,17 +886,17 @@ provide permissions entity types which we will now use.
 * Add the following to the annotation in `src/Entity/Event.php`:
 
   ```php
-   *   handlers = {
-   *     "access" = "Drupal\entity\EntityAccessControlHandler",
-   *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-   *     "route_provider" = {
-   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-   *     },
-   *   },
-   *   links = {
-   *     "canonical" = "/event/{event}",
-   *   },
-   *   admin_permission = "administer event",
+    handlers: [
+      'access' => EntityAccessControlHandler::class,
+      'permission_provider' => EntityPermissionProvider::class,
+      'route_provider' => [
+        'default' => DefaultHtmlRouteProvider::class,
+      ],
+    ],
+    links: [
+      'canonical' => "/event/{event}",
+    ],
+    admin_permission: 'administer event',
   ```
 
   <details><summary>The entire <code>Event.php</code> file at this point</summary>
@@ -906,117 +906,124 @@ provide permissions entity types which we will now use.
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-    * @ContentEntityType(
-    *   id = "event",
-    *   label = @Translation("Event"),
-    *   base_table = "event",
-    *   entity_keys = {
-    *     "id" = "id",
-    *     "uuid" = "uuid",
-    *     "label" = "title",
-    *     "owner" = "author",
-    *     "published" = "published",
-    *   },
-    *   handlers = {
-    *     "access" = "Drupal\entity\EntityAccessControlHandler",
-    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-    *     "route_provider" = {
-    *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-    *     },
-    *   },
-    *   links = {
-    *     "canonical" = "/event/{event}",
-    *   },
-    *   admin_permission = "administer event"
-    * )
-    */
+     * Defines the event entity class.
+     */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
+      ],
+      links: [
+        'canonical' => "/event/{event}",
+      ],
+      admin_permission: 'administer event',
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
-    use EntityOwnerTrait, EntityPublishedTrait;
+      use EntityOwnerTrait, EntityPublishedTrait;
 
-    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-      // Get the field definitions for 'id' and 'uuid' from the parent.
-      $fields = parent::baseFieldDefinitions($entity_type);
+      public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+        // Get the field definitions for 'id' and 'uuid' from the parent.
+        $fields = parent::baseFieldDefinitions($entity_type);
 
-      $fields['title'] = BaseFieldDefinition::create('string')
-        ->setLabel(t('Title'))
-        ->setRequired(TRUE);
+        $fields['title'] = BaseFieldDefinition::create('string')
+          ->setLabel(t('Title'))
+          ->setRequired(TRUE);
 
-      $fields['date'] = BaseFieldDefinition::create('datetime')
-        ->setLabel(t('Date'))
-        ->setRequired(TRUE);
+        $fields['date'] = BaseFieldDefinition::create('datetime')
+          ->setLabel(t('Date'))
+          ->setRequired(TRUE);
 
-      $fields['description'] = BaseFieldDefinition::create('text_long')
-        ->setLabel(t('Description'));
+        $fields['description'] = BaseFieldDefinition::create('text_long')
+          ->setLabel(t('Description'));
 
-      // Get the field definitions for 'owner' and 'published' from the traits.
-      $fields += static::ownerBaseFieldDefinitions($entity_type);
-      $fields += static::publishedBaseFieldDefinitions($entity_type);
+        // Get the field definitions for 'author' and 'published' from the trait.
+        $fields += static::ownerBaseFieldDefinitions($entity_type);
+        $fields += static::publishedBaseFieldDefinitions($entity_type);
 
-      return $fields;
-    }
+        return $fields;
+      }
 
-    /**
-     * @return string
-     */
-    public function getTitle() {
-      return $this->get('title')->value;
-    }
+      /**
+       * @return string
+       */
+      public function getTitle() {
+        return $this->get('title')->value;
+      }
 
-    /**
-     * @param string $title
-     *
-     * @return $this
-     */
-    public function setTitle($title) {
-      return $this->set('title', $title);
-    }
+      /**
+       * @param string $title
+       *
+       * @return $this
+       */
+      public function setTitle($title) {
+        return $this->set('title', $title);
+      }
 
-    /**
-     * @return \Drupal\Core\Datetime\DrupalDateTime
-     */
-    public function getDate() {
-      return $this->get('date')->date;
-    }
+      /**
+       * @return \Drupal\Core\Datetime\DrupalDateTime
+       */
+      public function getDate() {
+        return $this->get('date')->date;
+      }
 
-    /**
-     * @param \Drupal\Core\Datetime\DrupalDateTime $date
-     *
-     * @return $this
-     */
-    public function setDate(DrupalDateTime $date) {
-      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
-    }
+      /**
+       * @param \Drupal\Core\Datetime\DrupalDateTime $date
+       *
+       * @return $this
+       */
+      public function setDate(DrupalDateTime $date) {
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+      }
 
-    /**
-     * @return \Drupal\filter\Render\FilteredMarkup
-     */
-    public function getDescription() {
-      return $this->get('description')->processed;
-    }
+      /**
+       * @return \Drupal\filter\Render\FilteredMarkup
+       */
+      public function getDescription() {
+        return $this->get('description')->processed;
+      }
 
-    /**
-     * @param string $description
-     * @param string $format
-     *
-     * @return $this
-     */
-    public function setDescription($description, $format) {
-      return $this->set('description', [
-        'value' => $description,
-        'format' => $format,
-      ]);
-    }
+      /**
+       * @param string $description
+       * @param string $format
+       *
+       * @return $this
+       */
+      public function setDescription($description, $format) {
+        return $this->set('description', [
+          'value' => $description,
+          'format' => $format,
+        ]);
+      }
 
     }
     ```
@@ -1028,9 +1035,9 @@ provide permissions entity types which we will now use.
     * Entity handlers:
 
       ```php
-       *   handlers = {
-      ...
-       *   },
+        handlers: [
+          ...
+        ],
       ```
 
       Entity _handlers_ are objects that take over certain tasks related to
@@ -1044,9 +1051,9 @@ provide permissions entity types which we will now use.
     * Route providers:
 
       ```php
-       *     "route_provider" = {
-       *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-       *     },
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
       ```
 
       Instead of declaring routes belonging to entities in a `*.routing.yml`
@@ -1058,9 +1065,9 @@ provide permissions entity types which we will now use.
     * Links:
 
       ```php
-       *   links = {
-       *     "canonical" = "/event/{event}",
-       *   },
+        links: [
+          'canonical' => "/event/{event}",
+        ],
       ```
 
       Entity links denote at which paths on the website we can see an entity (or
@@ -1184,128 +1191,135 @@ displayed unless explicitly configured to.
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-    * @ContentEntityType(
-    *   id = "event",
-    *   label = @Translation("Event"),
-    *   base_table = "event",
-    *   entity_keys = {
-    *     "id" = "id",
-    *     "uuid" = "uuid",
-    *     "label" = "title",
-    *     "owner" = "author",
-    *     "published" = "published",
-    *   },
-    *   handlers = {
-    *     "access" = "Drupal\entity\EntityAccessControlHandler",
-    *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-    *     "route_provider" = {
-    *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-    *     },
-    *   },
-    *   links = {
-    *     "canonical" = "/event/{event}",
-    *   },
-    *   admin_permission = "administer event"
-    * )
-    */
+     * Defines the event entity class.
+     */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
+      ],
+      links: [
+        'canonical' => "/event/{event}",
+      ],
+      admin_permission: 'administer event',
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
-    use EntityOwnerTrait, EntityPublishedTrait;
+      use EntityOwnerTrait, EntityPublishedTrait;
 
-    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-      // Get the field definitions for 'id' and 'uuid' from the parent.
-      $fields = parent::baseFieldDefinitions($entity_type);
+      public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+        // Get the field definitions for 'id' and 'uuid' from the parent.
+        $fields = parent::baseFieldDefinitions($entity_type);
 
-      $fields['title'] = BaseFieldDefinition::create('string')
-        ->setLabel(t('Title'))
-        ->setRequired(TRUE);
+        $fields['title'] = BaseFieldDefinition::create('string')
+          ->setLabel(t('Title'))
+          ->setRequired(TRUE);
 
-      $fields['date'] = BaseFieldDefinition::create('datetime')
-        ->setLabel(t('Date'))
-        ->setRequired(TRUE)
-        ->setDisplayOptions('view', [
-          'label' => 'inline',
-          'settings' => [
-            'format_type' => 'html_date',
-          ],
-          'weight' => 0,
+        $fields['date'] = BaseFieldDefinition::create('datetime')
+          ->setLabel(t('Date'))
+          ->setRequired(TRUE)
+          ->setDisplayOptions('view', [
+            'label' => 'inline',
+            'settings' => [
+              'format_type' => 'html_date',
+            ],
+            'weight' => 0,
+          ]);
+
+        $fields['description'] = BaseFieldDefinition::create('text_long')
+          ->setLabel(t('Description'))
+          ->setDisplayOptions('view', [
+            'label' => 'hidden',
+            'weight' => 10,
+          ]);
+
+        // Get the field definitions for 'author' and 'published' from the trait.
+        $fields += static::ownerBaseFieldDefinitions($entity_type);
+        $fields += static::publishedBaseFieldDefinitions($entity_type);
+
+        return $fields;
+      }
+
+      /**
+       * @return string
+       */
+      public function getTitle() {
+        return $this->get('title')->value;
+      }
+
+      /**
+       * @param string $title
+       *
+       * @return $this
+       */
+      public function setTitle($title) {
+        return $this->set('title', $title);
+      }
+
+      /**
+       * @return \Drupal\Core\Datetime\DrupalDateTime
+       */
+      public function getDate() {
+        return $this->get('date')->date;
+      }
+
+      /**
+       * @param \Drupal\Core\Datetime\DrupalDateTime $date
+       *
+       * @return $this
+       */
+      public function setDate(DrupalDateTime $date) {
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+      }
+
+      /**
+       * @return \Drupal\filter\Render\FilteredMarkup
+       */
+      public function getDescription() {
+        return $this->get('description')->processed;
+      }
+
+      /**
+       * @param string $description
+       * @param string $format
+       *
+       * @return $this
+       */
+      public function setDescription($description, $format) {
+        return $this->set('description', [
+          'value' => $description,
+          'format' => $format,
         ]);
-
-      $fields['description'] = BaseFieldDefinition::create('text_long')
-        ->setLabel(t('Description'))
-        ->setDisplayOptions('view', [
-          'label' => 'hidden',
-          'weight' => 10,
-        ]);
-
-      // Get the field definitions for 'owner' and 'published' from the traits.
-      $fields += static::ownerBaseFieldDefinitions($entity_type);
-      $fields += static::publishedBaseFieldDefinitions($entity_type);
-
-      return $fields;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitle() {
-      return $this->get('title')->value;
-    }
-
-    /**
-     * @param string $title
-     *
-     * @return $this
-     */
-    public function setTitle($title) {
-      return $this->set('title', $title);
-    }
-
-    /**
-     * @return \Drupal\Core\Datetime\DrupalDateTime
-     */
-    public function getDate() {
-      return $this->get('date')->date;
-    }
-
-    /**
-     * @param \Drupal\Core\Datetime\DrupalDateTime $date
-     *
-     * @return $this
-     */
-    public function setDate(DrupalDateTime $date) {
-      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
-    }
-
-    /**
-     * @return \Drupal\filter\Render\FilteredMarkup
-     */
-    public function getDescription() {
-      return $this->get('description')->processed;
-    }
-
-    /**
-     * @param string $description
-     * @param string $format
-     *
-     * @return $this
-     */
-    public function setDescription($description, $format) {
-      return $this->set('description', [
-        'value' => $description,
-        'format' => $format,
-      ]);
-    }
+      }
 
     }
     ```
