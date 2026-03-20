@@ -1342,27 +1342,27 @@ displayed unless explicitly configured to.
 
 #### 3.1. Add the routes
 
-* Add the following to the `handlers` section of the annotation in
+  * Add the following to the `handlers` section of the attributes in
   `src/Entity/Event.php`:
 
-  ```php
-   *     "form" = {
-   *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-   *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-   *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-   *     },
-  ```
+    ```php
+    'form' => [
+      'add' => ContentEntityForm::class,
+      'edit' => ContentEntityForm::class,
+      'delete' => ContentEntityDeleteForm::class,
+    ]
+    ```
 
   <!-- TODO: Explain this -->
 
-* Add the following to the `links` section of the annotation in
-  `src/Entity/Event.php`:
+  * Add the following to the `links` section of the attributes in
+    `src/Entity/Event.php`:
 
-  ```php
-   *     "add-form" = "/admin/content/events/add",
-   *     "edit-form" = "/admin/content/events/manage/{event}",
-   *     "delete-form" = "/admin/content/events/manage/{event}/delete",
-  ```
+    ```php
+    'add-form' => '/admin/content/events/add',
+    'edit-form' => '/admin/content/events/manage/{event}',
+    'delete-form' => '/admin/content/events/manage/{event}/delete',
+    ```
 
   <details><summary>The entire <code>Event.php</code> file at this point</summary>
 
@@ -1371,48 +1371,57 @@ displayed unless explicitly configured to.
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\ContentEntityDeleteForm;
+    use Drupal\Core\Entity\ContentEntityForm;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-     * @ContentEntityType(
-     *   id = "event",
-     *   label = @Translation("Event"),
-     *   base_table = "event",
-     *   entity_keys = {
-     *     "id" = "id",
-     *     "uuid" = "uuid",
-     *     "label" = "title",
-     *     "owner" = "author",
-     *     "published" = "published",
-     *   },
-     *   handlers = {
-     *     "access" = "Drupal\entity\EntityAccessControlHandler",
-     *     "form" = {
-     *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-     *     },
-     *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-     *     "route_provider" = {
-     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-     *     },
-     *   },
-     *   links = {
-     *     "canonical" = "/event/{event}",
-     *     "add-form" = "/admin/content/events/add",
-     *     "edit-form" = "/admin/content/events/manage/{event}",
-     *     "delete-form" = "/admin/content/events/manage/{event}/delete",
-     *   },
-     *   admin_permission = "administer event"
-     * )
+     * Defines the event entity class.
      */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
+        'form' => [
+          'add' => ContentEntityForm::class,
+          'edit' => ContentEntityForm::class,
+          'delete' => ContentEntityDeleteForm::class,
+        ]
+      ],
+      links: [
+        'canonical' => "/event/{event}",
+        'add-form' => '/admin/content/events/add',
+        'edit-form' => '/admin/content/events/manage/{event}',
+        'delete-form' => '/admin/content/events/manage/{event}/delete',
+      ],
+      admin_permission: 'administer event',
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
       use EntityOwnerTrait, EntityPublishedTrait;
@@ -1443,7 +1452,7 @@ displayed unless explicitly configured to.
             'weight' => 10,
           ]);
 
-        // Get the field definitions for 'owner' and 'published' from the traits.
+        // Get the field definitions for 'author' and 'published' from the trait.
         $fields += static::ownerBaseFieldDefinitions($entity_type);
         $fields += static::publishedBaseFieldDefinitions($entity_type);
 
@@ -1479,7 +1488,7 @@ displayed unless explicitly configured to.
        * @return $this
        */
       public function setDate(DrupalDateTime $date) {
-        return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
       }
 
       /**
@@ -1516,7 +1525,7 @@ displayed unless explicitly configured to.
   Note that a route exists and a _Save_ button is shown, but no
   actual form fields are shown.
 
-* Visit `/admin/content/events/manage/1`
+* Visit `/admin/content/events/manage/2`
 
   Note that a route exists and _Save_ and _Delete_ buttons are shown, but no
   actual form fields are shown.
@@ -1567,48 +1576,57 @@ displayed unless explicitly configured to.
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\ContentEntityDeleteForm;
+    use Drupal\Core\Entity\ContentEntityForm;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-     * @ContentEntityType(
-     *   id = "event",
-     *   label = @Translation("Event"),
-     *   base_table = "event",
-     *   entity_keys = {
-     *     "id" = "id",
-     *     "uuid" = "uuid",
-     *     "label" = "title",
-     *     "owner" = "author",
-     *     "published" = "published",
-     *   },
-     *   handlers = {
-     *     "access" = "Drupal\entity\EntityAccessControlHandler",
-     *     "form" = {
-     *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-     *     },
-     *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-     *     "route_provider" = {
-     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-     *     },
-     *   },
-     *   links = {
-     *     "canonical" = "/event/{event}",
-     *     "add-form" = "/admin/content/events/add",
-     *     "edit-form" = "/admin/content/events/manage/{event}",
-     *     "delete-form" = "/admin/content/events/manage/{event}/delete",
-     *   },
-     *   admin_permission = "administer event"
-     * )
+     * Defines the event entity class.
      */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
+        'form' => [
+          'add' => ContentEntityForm::class,
+          'edit' => ContentEntityForm::class,
+          'delete' => ContentEntityDeleteForm::class,
+        ]
+      ],
+      links: [
+        'canonical' => "/event/{event}",
+        'add-form' => '/admin/content/events/add',
+        'edit-form' => '/admin/content/events/manage/{event}',
+        'delete-form' => '/admin/content/events/manage/{event}/delete',
+      ],
+      admin_permission: 'administer event',
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
       use EntityOwnerTrait, EntityPublishedTrait;
@@ -1685,7 +1703,7 @@ displayed unless explicitly configured to.
        * @return $this
        */
       public function setDate(DrupalDateTime $date) {
-        return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
       }
 
       /**
@@ -1770,9 +1788,13 @@ displayed unless explicitly configured to.
   }
   ```
 
-* Replace the value of the `add` and `edit` annotation keys in the form handlers
+* Add the following use statement to `src/Entity/Event.php`
+  ```php
+  use Drupal\event\Form\EventForm;
+  ```
+  and replace the value of the `add` and `edit` annotation keys in the form handlers
   section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Form\EventForm"`.
+  `EventForm::class`.
 
 * Rebuild caches
 
@@ -1780,7 +1802,7 @@ displayed unless explicitly configured to.
 
 * Edit an event in the user interface
 
-  Visit `/admin/content/events/manage/2`
+  Visit `/admin/content/events/manage/3`
 
   Note that a route exists and form fields are displayed including proper
   default values.
@@ -1795,7 +1817,7 @@ displayed unless explicitly configured to.
 
 * Delete an event in the user interface
 
-  Visit `/admin/content/events/manage/2/delete`
+  Visit `/admin/content/events/manage/3/delete`
 
   Note that a route exists and a confirmation form is shown.
 
