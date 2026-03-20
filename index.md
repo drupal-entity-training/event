@@ -3677,7 +3677,7 @@ translatable in the user interface with the _Content Translation_ module.
 [contrib-entity-api]: https://www.drupal.org/project/entity
 [drush]: https://www.drush.org/13.x
 [api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
-[api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
+[attribute-based-plugins]: https://www.drupal.org/node/3403921
 [api-field-types]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldType.php/class/annotations/FieldType/8.2.x
 [api-field-formatters]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldFormatter.php/class/annotations/FieldFormatter/8.2.x
 [wikipedia-link-relation]: https://en.wikipedia.org/wiki/Link_relation
