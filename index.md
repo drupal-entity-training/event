@@ -8,11 +8,11 @@ using the example of an  _Event_ entity type.
 
 You can reach this guide at [https://git.io/d8entity][guide-short-url].
 
-The starting point is a stock Drupal 8.6 core _Standard_ installation with the
+The starting point is a stock Drupal 11 core _Standard_ installation with the
 contributed [Entity API][contrib-entity-api] available at `modules/entity` and an
 empty module directory at `modules/event`.
 
-Having [Drush 9][drush] available is required to follow along. When Drush
+Having [Drush 13][drush] available is required to follow along. When Drush
 commands are to be run, run them from within the Drupal installation. When PHP
 code is to be executed, this can be done by running `drush core:cli` or by
 creating a test script and then running `drush php:script <name-of-script>`.
@@ -80,7 +80,8 @@ creating a test script and then running `drush php:script <name-of-script>`.
   ```yaml
   name: Event
   type: module
-  core: 8.x
+  description: Provides a custom entity type for events.
+  core_version_requirement: ^11
   ```
 
 * Run `drush pm:enable event` or visit `/admin/modules` and install the _Event_
@@ -95,7 +96,7 @@ functionality.
 
 * <details><summary>Create a <code>src</code> directory</summary>
 
-    In Drupal 8 the `src` directory contains all object-oriented code (classes,
+    In Drupal 11 the `src` directory contains all object-oriented code (classes,
     interfaces, traits). Procedural code (functions) is placed in the `.module`
     file (or other files) outside of the `src` directory.
 
@@ -117,19 +118,22 @@ functionality.
 
   namespace Drupal\event\Entity;
 
+  use Drupal\Core\Entity\Attribute\ContentEntityType;
   use Drupal\Core\Entity\ContentEntityBase;
+  use Drupal\Core\StringTranslation\TranslatableMarkup;
 
   /**
-   * @ContentEntityType(
-   *   id = "event",
-   *   label = @Translation("Event"),
-   *   base_table = "event",
-   *   entity_keys = {
-   *     "id" = "id",
-   *     "uuid" = "uuid",
-   *   },
-   * )
+   * Defines the event entity class.
    */
+  #[ContentEntityType(
+    id: 'event',
+    label: new TranslatableMarkup('Event'),
+    entity_keys: [
+      'id' => 'id',
+      'uuid' => 'uuid',
+    ],
+    base_table: 'event',
+  )]
   class Event extends ContentEntityBase {
 
   }
@@ -160,10 +164,10 @@ functionality.
     `ContentEntityBase` class used below also belongs to a namespace. Thus, in
     order to use it below, we need to import the class using the full namespace.
 
-  * Annotation:
+  * Attributes:
 
-    _Annotations_ are a way to provide metadata about code. Because the
-    annotation is placed right next to the code itself, this makes classes truly
+    _Attributes_ are a way to provide metadata about code. Because the
+    attributes are placed right next to the code itself, this makes classes truly
     self-contained as both functionality and metadata are in the same file.
 
     Even though the annotation is part of a comment block, it is required for
@@ -172,7 +176,7 @@ functionality.
     * ID:
 
       ```php
-       *   id = "event",
+        id: 'event',
       ```
 
       This is the ID of the entity type that is needed whenever interacting with
@@ -181,22 +185,22 @@ functionality.
     * Label:
 
       ```php
-       *   label = @Translation("Event"),
+        label: new TranslatableMarkup('Event'),
       ```
 
       This is the label of this entity type when presented to a user.
 
       To make the values we provide in the annotation translatable we need to
-      wrap them in `@Translation` which is themself an annotations.
+      wrap them in `new TranslatableMarkup`.
 
     * Storage information:
 
       ```php
-       *   base_table = "event",
-       *   entity_keys = {
-       *     "id" = "id",
-       *     "uuid" = "uuid",
-       *   },
+        entity_keys: [
+          'id' => 'id',
+          'uuid' => 'uuid',
+        ],
+        base_table: 'event',
       ```
 
       We need to specify the name of the database table we want the event data
@@ -209,9 +213,11 @@ functionality.
       Similarly entity types can (and are encouraged to) provide a UUID field.
       Again, we can specify the name of the UUID field.
 
-      Note that top-level keys of the annotation are not quoted, but keys in
+      Note that top-level keys of the attributes are not quoted, but keys in
       mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
       commas are allowed in mappings.
+
+    @TODO: Find appropriate alternative for the following line.
 
     See [Drupal API: Annotations][api-annotations] for more information.
 
@@ -341,13 +347,13 @@ events.
   use Drupal\user\EntityOwnerTrait;
   ```
 
-* Add the following to the `entity_keys` part of the annotation of the `Event`
+* Add the following to the `entity_keys` part of the attributes of the `Event`
   class:
 
   ```php
-   *     "label" = "title",
-   *     "owner" = "author",
-   *     "published" = "published",
+    'label' => 'title',
+    'owner' => 'author',
+    'published' => 'published',
   ```
 
   Declaring a `label` key makes the (inherited) `label()` method on the `Event`
@@ -477,44 +483,45 @@ events.
     use Drupal\user\EntityOwnerTrait;
 
     /**
-    * @ContentEntityType(
-    *   id = "event",
-    *   label = @Translation("Event"),
-    *   base_table = "event",
-    *   entity_keys = {
-    *     "id" = "id",
-    *     "uuid" = "uuid",
-    *     "label" = "title",
-    *     "owner" = "author",
-    *     "published" = "published",
-    *   },
-    * )
+     * Defines the event entity class.
     */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
-    use EntityOwnerTrait, EntityPublishedTrait;
+      use EntityOwnerTrait, EntityPublishedTrait;
 
-    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-      // Get the field definitions for 'id' and 'uuid' from the parent.
-      $fields = parent::baseFieldDefinitions($entity_type);
+      public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+        // Get the field definitions for 'id' and 'uuid' from the parent.
+        $fields = parent::baseFieldDefinitions($entity_type);
 
-      $fields['title'] = BaseFieldDefinition::create('string')
-        ->setLabel(t('Title'))
-        ->setRequired(TRUE);
+        $fields['title'] = BaseFieldDefinition::create('string')
+          ->setLabel(t('Title'))
+          ->setRequired(TRUE);
 
-      $fields['date'] = BaseFieldDefinition::create('datetime')
-        ->setLabel(t('Date'))
-        ->setRequired(TRUE);
+        $fields['date'] = BaseFieldDefinition::create('datetime')
+          ->setLabel(t('Date'))
+          ->setRequired(TRUE);
 
-      $fields['description'] = BaseFieldDefinition::create('text_long')
-        ->setLabel(t('Description'));
+        $fields['description'] = BaseFieldDefinition::create('text_long')
+          ->setLabel(t('Description'));
 
-      // Get the field definitions for 'author' and 'published' from the traits.
-      $fields += static::ownerBaseFieldDefinitions($entity_type);
-      $fields += static::publishedBaseFieldDefinitions($entity_type);
+        // Get the field definitions for 'author' and 'published' from the traits.
+        $fields += static::ownerBaseFieldDefinitions($entity_type);
+        $fields += static::publishedBaseFieldDefinitions($entity_type);
 
-      return $fields;
-    }
+        return $fields;
+      }
 
     }
     ```
@@ -540,11 +547,12 @@ update it automatically.
   Run the following PHP code:
 
   ```php
+  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
   use Drupal\event\Entity\Event;
 
   $event = Event::create([
     'title' => 'Drupal User Group',
-    'date' => (new \DateTime())->format(DATETIME_DATETIME_STORAGE_FORMAT),
+    'date' => (new \DateTime())->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
     'description' => [
       'value' => '<p>The monthly meeting of Drupalists is happening today!</p>',
       'format' => 'restricted_html',
@@ -563,7 +571,7 @@ update it automatically.
   ```php
   use Drupal\event\Entity\Event;
 
-  $event = Event::load(1);
+  $event = Event::load(2);
 
   print 'Title: ' . $event->get('title')->value . "\n\n";
 
@@ -590,13 +598,14 @@ update it automatically.
   Run the following PHP code:
 
   ```php
+  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
   use Drupal\event\Entity\Event;
 
   $event = Event::load(2);
 
   $event
     ->set('title', 'DrupalCon')
-    ->set('date', (new \DateTime('yesterday'))->format(DATETIME_DATETIME_STORAGE_FORMAT))
+    ->set('date', (new \DateTime('yesterday'))->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT))
     ->set('description', [
       'value' => '<p>DrupalCon is a great place to meet international Drupal superstars.</p>',
       'format' => 'basic_html',
@@ -696,106 +705,110 @@ interface
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-    * @ContentEntityType(
-    *   id = "event",
-    *   label = @Translation("Event"),
-    *   base_table = "event",
-    *   entity_keys = {
-    *     "id" = "id",
-    *     "uuid" = "uuid",
-    *     "label" = "title",
-    *     "owner" = "author",
-    *     "published" = "published",
-    *   },
-    * )
-    */
+     * Defines the event entity class.
+     */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
-    use EntityOwnerTrait, EntityPublishedTrait;
+      use EntityOwnerTrait, EntityPublishedTrait;
 
-    public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-      // Get the field definitions for 'id' and 'uuid' from the parent.
-      $fields = parent::baseFieldDefinitions($entity_type);
+      public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+        // Get the field definitions for 'id' and 'uuid' from the parent.
+        $fields = parent::baseFieldDefinitions($entity_type);
 
-      $fields['title'] = BaseFieldDefinition::create('string')
-        ->setLabel(t('Title'))
-        ->setRequired(TRUE);
+        $fields['title'] = BaseFieldDefinition::create('string')
+          ->setLabel(t('Title'))
+          ->setRequired(TRUE);
 
-      $fields['date'] = BaseFieldDefinition::create('datetime')
-        ->setLabel(t('Date'))
-        ->setRequired(TRUE);
+        $fields['date'] = BaseFieldDefinition::create('datetime')
+          ->setLabel(t('Date'))
+          ->setRequired(TRUE);
 
-      $fields['description'] = BaseFieldDefinition::create('text_long')
-        ->setLabel(t('Description'));
+        $fields['description'] = BaseFieldDefinition::create('text_long')
+          ->setLabel(t('Description'));
 
-      // Get the field definitions for 'author' and 'published' from the traits.
-      $fields += static::ownerBaseFieldDefinitions($entity_type);
-      $fields += static::publishedBaseFieldDefinitions($entity_type);
+        // Get the field definitions for 'author' and 'published' from the trait.
+        $fields += static::ownerBaseFieldDefinitions($entity_type);
+        $fields += static::publishedBaseFieldDefinitions($entity_type);
 
-      return $fields;
-    }
+        return $fields;
+      }
 
-    /**
-     * @return string
-     */
-    public function getTitle() {
-      return $this->get('title')->value;
-    }
+      /**
+       * @return string
+       */
+      public function getTitle() {
+        return $this->get('title')->value;
+      }
 
-    /**
-     * @param string $title
-     *
-     * @return $this
-     */
-    public function setTitle($title) {
-      return $this->set('title', $title);
-    }
+      /**
+       * @param string $title
+       *
+       * @return $this
+       */
+      public function setTitle($title) {
+        return $this->set('title', $title);
+      }
 
-    /**
-     * @return \Drupal\Core\Datetime\DrupalDateTime
-     */
-    public function getDate() {
-      return $this->get('date')->date;
-    }
+      /**
+       * @return \Drupal\Core\Datetime\DrupalDateTime
+       */
+      public function getDate() {
+        return $this->get('date')->date;
+      }
 
-    /**
-     * @param \Drupal\Core\Datetime\DrupalDateTime $date
-     *
-     * @return $this
-     */
-    public function setDate(DrupalDateTime $date) {
-      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
-    }
+      /**
+       * @param \Drupal\Core\Datetime\DrupalDateTime $date
+       *
+       * @return $this
+       */
+      public function setDate(DrupalDateTime $date) {
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+      }
 
-    /**
-     * @return \Drupal\filter\Render\FilteredMarkup
-     */
-    public function getDescription() {
-      return $this->get('description')->processed;
-    }
+      /**
+       * @return \Drupal\filter\Render\FilteredMarkup
+       */
+      public function getDescription() {
+        return $this->get('description')->processed;
+      }
 
-    /**
-     * @param string $description
-     * @param string $format
-     *
-     * @return $this
-     */
-    public function setDescription($description, $format) {
-      return $this->set('description', [
-        'value' => $description,
-        'format' => $format,
-      ]);
-    }
+      /**
+       * @param string $description
+       * @param string $format
+       *
+       * @return $this
+       */
+      public function setDescription($description, $format) {
+        return $this->set('description', [
+          'value' => $description,
+          'format' => $format,
+        ]);
+      }
 
     }
     ```
@@ -809,12 +822,18 @@ interface
   ```php
   use Drupal\event\Entity\Event;
 
-  $event = Event::load(1);
+  $event = Event::load(2);
 
-  $event->getTitle();
-  $event->getDate();
-  $event->getDescription();
-  $event->isPublished();
+  print 'Title: ' . $event->getTitle() . "\n\n";
+
+  print 'Date value: ' . $event->getDate() . "\n";
+  print 'Date (object): ' . var_export($event->getDate(), TRUE) . "\n\n";
+
+  print 'Description: ' . $event->getDescription() . "\n\n";
+  print 'Description (object): ' . var_export($event->getDescription(), TRUE) . "\n\n";
+
+  print 'Published: ' . $event->isPublished() . "\n";
+  print 'Published (boolean value): ' . var_export($event->isPublished(), TRUE) . "\n";
   ```
 
   Note that the returned values match the values in the database.
@@ -827,16 +846,18 @@ interface
   use Drupal\Core\Datetime\DrupalDateTime;
   use Drupal\event\Entity\Event;
 
+  $event = Event::load(2);
+
   $event
-    ->setTitle('Drupal Developer Days')
-    ->setDate(new DrupalDateTime('tomorrow'))
-    ->setDescription(
-      '<p>The Drupal Developer Days are a great place to nerd out about all things Drupal!</p>',
-      'basic_html'
-    )
-    ->setOwnerId(0)
-    ->setPublished(FALSE)
-    ->save();
+  ->setTitle('Drupal Developer Days')
+  ->setDate(new DrupalDateTime('tomorrow'))
+  ->setDescription(
+    '<p>The Drupal Developer Days are a great place to nerd out about all things Drupal!</p>',
+    'basic_html'
+  )
+  ->setOwnerId(0)
+  ->setPublished(TRUE)
+  ->save();
   ```
 
   Note that the values in the database have been updated accordingly.
@@ -1335,9 +1356,9 @@ displayed unless explicitly configured to.
 
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -1346,7 +1367,7 @@ displayed unless explicitly configured to.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
      * @ContentEntityType(
      *   id = "event",
@@ -1381,17 +1402,17 @@ displayed unless explicitly configured to.
      * )
      */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
       use EntityOwnerTrait, EntityPublishedTrait;
-    
+
       public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
         // Get the field definitions for 'id' and 'uuid' from the parent.
         $fields = parent::baseFieldDefinitions($entity_type);
-    
+
         $fields['title'] = BaseFieldDefinition::create('string')
           ->setLabel(t('Title'))
           ->setRequired(TRUE);
-    
+
         $fields['date'] = BaseFieldDefinition::create('datetime')
           ->setLabel(t('Date'))
           ->setRequired(TRUE)
@@ -1402,28 +1423,28 @@ displayed unless explicitly configured to.
             ],
             'weight' => 0,
           ]);
-    
+
         $fields['description'] = BaseFieldDefinition::create('text_long')
           ->setLabel(t('Description'))
           ->setDisplayOptions('view', [
             'label' => 'hidden',
             'weight' => 10,
           ]);
-    
+
         // Get the field definitions for 'owner' and 'published' from the traits.
         $fields += static::ownerBaseFieldDefinitions($entity_type);
         $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
         return $fields;
       }
-    
+
       /**
        * @return string
        */
       public function getTitle() {
         return $this->get('title')->value;
       }
-    
+
       /**
        * @param string $title
        *
@@ -1432,14 +1453,14 @@ displayed unless explicitly configured to.
       public function setTitle($title) {
         return $this->set('title', $title);
       }
-    
+
       /**
        * @return \Drupal\Core\Datetime\DrupalDateTime
        */
       public function getDate() {
         return $this->get('date')->date;
       }
-    
+
       /**
        * @param \Drupal\Core\Datetime\DrupalDateTime $date
        *
@@ -1448,14 +1469,14 @@ displayed unless explicitly configured to.
       public function setDate(DrupalDateTime $date) {
         return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
       }
-    
+
       /**
        * @return \Drupal\filter\Render\FilteredMarkup
        */
       public function getDescription() {
         return $this->get('description')->processed;
       }
-    
+
       /**
        * @param string $description
        * @param string $format
@@ -1468,7 +1489,7 @@ displayed unless explicitly configured to.
           'format' => $format,
         ]);
       }
-    
+
     }
     ```
 
@@ -1531,9 +1552,9 @@ displayed unless explicitly configured to.
 
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -1542,7 +1563,7 @@ displayed unless explicitly configured to.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
      * @ContentEntityType(
      *   id = "event",
@@ -1577,18 +1598,18 @@ displayed unless explicitly configured to.
      * )
      */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
       use EntityOwnerTrait, EntityPublishedTrait;
-    
+
       public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
         // Get the field definitions for 'id' and 'uuid' from the parent.
         $fields = parent::baseFieldDefinitions($entity_type);
-    
+
         $fields['title'] = BaseFieldDefinition::create('string')
           ->setLabel(t('Title'))
           ->setRequired(TRUE)
           ->setDisplayOptions('form', ['weight' => 0]);
-    
+
         $fields['date'] = BaseFieldDefinition::create('datetime')
           ->setLabel(t('Date'))
           ->setRequired(TRUE)
@@ -1600,7 +1621,7 @@ displayed unless explicitly configured to.
             'weight' => 0,
           ])
           ->setDisplayOptions('form', ['weight' => 10]);
-    
+
         $fields['description'] = BaseFieldDefinition::create('text_long')
           ->setLabel(t('Description'))
           ->setDisplayOptions('view', [
@@ -1608,28 +1629,28 @@ displayed unless explicitly configured to.
             'weight' => 10,
           ])
           ->setDisplayOptions('form', ['weight' => 20]);
-    
+
         // Get the field definitions for 'owner' and 'published' from the traits.
         $fields += static::ownerBaseFieldDefinitions($entity_type);
         $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
         $fields['published']->setDisplayOptions('form', [
           'settings' => [
             'display_label' => TRUE,
           ],
           'weight' => 30,
         ]);
-    
+
         return $fields;
       }
-    
+
       /**
        * @return string
        */
       public function getTitle() {
         return $this->get('title')->value;
       }
-    
+
       /**
        * @param string $title
        *
@@ -1638,14 +1659,14 @@ displayed unless explicitly configured to.
       public function setTitle($title) {
         return $this->set('title', $title);
       }
-    
+
       /**
        * @return \Drupal\Core\Datetime\DrupalDateTime
        */
       public function getDate() {
         return $this->get('date')->date;
       }
-    
+
       /**
        * @param \Drupal\Core\Datetime\DrupalDateTime $date
        *
@@ -1654,14 +1675,14 @@ displayed unless explicitly configured to.
       public function setDate(DrupalDateTime $date) {
         return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
       }
-    
+
       /**
        * @return \Drupal\filter\Render\FilteredMarkup
        */
       public function getDescription() {
         return $this->get('description')->processed;
       }
-    
+
       /**
        * @param string $description
        * @param string $format
@@ -1674,7 +1695,7 @@ displayed unless explicitly configured to.
           'format' => $format,
         ]);
       }
-    
+
     }
     ```
 
@@ -1805,9 +1826,9 @@ displayed unless explicitly configured to.
 
     ```php
     <?php
-    
+
     namespace Drupal\event\Entity;
-    
+
     use Drupal\Core\Datetime\DrupalDateTime;
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\Entity\EntityPublishedInterface;
@@ -1816,7 +1837,7 @@ displayed unless explicitly configured to.
     use Drupal\Core\Field\BaseFieldDefinition;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
-    
+
     /**
      * @ContentEntityType(
      *   id = "event",
@@ -1859,18 +1880,18 @@ displayed unless explicitly configured to.
      * )
      */
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
-    
+
       use EntityOwnerTrait, EntityPublishedTrait;
-    
+
       public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
         // Get the field definitions for 'id' and 'uuid' from the parent.
         $fields = parent::baseFieldDefinitions($entity_type);
-    
+
         $fields['title'] = BaseFieldDefinition::create('string')
           ->setLabel(t('Title'))
           ->setRequired(TRUE)
           ->setDisplayOptions('form', ['weight' => 0]);
-    
+
         $fields['date'] = BaseFieldDefinition::create('datetime')
           ->setLabel(t('Date'))
           ->setRequired(TRUE)
@@ -1882,7 +1903,7 @@ displayed unless explicitly configured to.
             'weight' => 0,
           ])
           ->setDisplayOptions('form', ['weight' => 10]);
-    
+
         $fields['description'] = BaseFieldDefinition::create('text_long')
           ->setLabel(t('Description'))
           ->setDisplayOptions('view', [
@@ -1890,28 +1911,28 @@ displayed unless explicitly configured to.
             'weight' => 10,
           ])
           ->setDisplayOptions('form', ['weight' => 20]);
-    
+
         // Get the field definitions for 'owner' and 'published' from the traits.
         $fields += static::ownerBaseFieldDefinitions($entity_type);
         $fields += static::publishedBaseFieldDefinitions($entity_type);
-    
+
         $fields['published']->setDisplayOptions('form', [
           'settings' => [
             'display_label' => TRUE,
           ],
           'weight' => 30,
         ]);
-    
+
         return $fields;
       }
-    
+
       /**
        * @return string
        */
       public function getTitle() {
         return $this->get('title')->value;
       }
-    
+
       /**
        * @param string $title
        *
@@ -1920,14 +1941,14 @@ displayed unless explicitly configured to.
       public function setTitle($title) {
         return $this->set('title', $title);
       }
-    
+
       /**
        * @return \Drupal\Core\Datetime\DrupalDateTime
        */
       public function getDate() {
         return $this->get('date')->date;
       }
-    
+
       /**
        * @param \Drupal\Core\Datetime\DrupalDateTime $date
        *
@@ -1936,14 +1957,14 @@ displayed unless explicitly configured to.
       public function setDate(DrupalDateTime $date) {
         return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
       }
-    
+
       /**
        * @return \Drupal\filter\Render\FilteredMarkup
        */
       public function getDescription() {
         return $this->get('description')->processed;
       }
-    
+
       /**
        * @param string $description
        * @param string $format
@@ -1956,7 +1977,7 @@ displayed unless explicitly configured to.
           'format' => $format,
         ]);
       }
-    
+
     }
     ```
 
@@ -2486,11 +2507,11 @@ entities.
 
   ```php
   <?php
-  
+
   namespace Drupal\event\Plugin\Validation\Constraint;
-  
+
   use Symfony\Component\Validator\Constraint;
-  
+
   /**
    * @Constraint(
    *   id = "AttendeeCount",
@@ -2498,12 +2519,12 @@ entities.
    * )
    */
   class AttendeeCountConstraint extends Constraint {
-  
+
     /**
      * @var string
      */
     public $message = 'The event %title only allows %maximum attendees.';
-  
+
   }
   ```
 
@@ -2512,14 +2533,14 @@ entities.
 
   ```php
   <?php
-  
+
   namespace Drupal\event\Plugin\Validation\Constraint;
-  
+
   use Symfony\Component\Validator\Constraint;
   use Symfony\Component\Validator\ConstraintValidator;
-  
+
   class AttendeeCountConstraintValidator extends ConstraintValidator {
-  
+
     public function validate($value, Constraint $constraint) {
       /* @var \Drupal\Core\Field\FieldItemListInterface $value */
       /* @var \Drupal\event\Plugin\Validation\Constraint\AttendeeCountConstraint $constraint */
@@ -2535,7 +2556,7 @@ entities.
           ->addViolation();
       }
     }
-  
+
   }
   ```
 
@@ -2544,11 +2565,11 @@ entities.
 
   ```php
   <?php
-  
+
   namespace Drupal\event\Plugin\Validation\Constraint;
-  
+
   use Symfony\Component\Validator\Constraint;
-  
+
   /**
    * @Constraint(
    *   id = "UniqueAttendees",
@@ -2556,12 +2577,12 @@ entities.
    * )
    */
   class UniqueAttendeesConstraint extends Constraint {
-  
+
     /**
      * @var string
      */
     public $message = 'The user %name is already attending this event.';
-  
+
   }
   ```
 
@@ -2617,23 +2638,23 @@ entities.
 
   ```php
   <?php
-  
+
   namespace Drupal\event\Field;
-  
+
   use Drupal\Core\Field\FieldItemList;
   use Drupal\Core\TypedData\ComputedItemListTrait;
-  
+
   class RemainingFieldItemList extends FieldItemList {
-  
+
     use ComputedItemListTrait;
-  
+
     protected function computeValue() {
       /* @var \Drupal\event\Entity\Event $event */
       $event = $this->getEntity();
       $remaining = $event->getMaximum() - count($event->getAttendees());
       $this->list[0] = $this->createItem(0, $remaining);
     }
-  
+
   }
   ```
 
@@ -2656,9 +2677,9 @@ entities.
 
   ```php
   <?php
-  
+
   namespace Drupal\event\Entity;
-  
+
   use Drupal\Core\Datetime\DrupalDateTime;
   use Drupal\Core\Entity\ContentEntityBase;
   use Drupal\Core\Entity\EntityChangedInterface;
@@ -2672,7 +2693,7 @@ entities.
   use Drupal\user\EntityOwnerInterface;
   use Drupal\user\EntityOwnerTrait;
   use Drupal\user\UserInterface;
-  
+
   /**
    * @ContentEntityType(
    *   id = "event",
@@ -2716,18 +2737,18 @@ entities.
    * )
    */
   class Event extends ContentEntityBase implements EntityChangedInterface, EntityOwnerInterface, EntityPublishedInterface {
-  
+
     use EntityChangedTrait, EntityOwnerTrait, EntityPublishedTrait;
-  
+
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
       $fields = parent::baseFieldDefinitions($entity_type);
-  
+
       $fields['title'] = BaseFieldDefinition::create('string')
         ->setLabel(t('Title'))
         ->setRequired(TRUE)
         ->setDisplayOptions('form', ['weight' => 0]);
-  
+
       $fields['date'] = BaseFieldDefinition::create('datetime')
         ->setLabel(t('Date'))
         ->setRequired(TRUE)
@@ -2739,7 +2760,7 @@ entities.
           'weight' => 0,
         ])
         ->setDisplayOptions('form', ['weight' => 10]);
-  
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'))
         ->setDisplayOptions('view', [
@@ -2747,25 +2768,25 @@ entities.
           'weight' => 10,
         ])
         ->setDisplayOptions('form', ['weight' => 20]);
-  
+
       // Get the field definitions for 'owner' and 'published' from the traits.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
-  
+
       $fields['published']->setDisplayOptions('form', [
         'settings' => [
           'display_label' => TRUE,
         ],
         'weight' => 30,
       ]);
-  
+
       $fields['maximum'] = BaseFieldDefinition::create('integer')
         ->setLabel(t('Maximum number of attendees'))
         ->setSetting('min', 1)
         ->setRequired(TRUE)
         ->setDefaultValue(10)
         ->setDisplayOptions('form', ['weight' => 23]);
-  
+
       $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
         ->setLabel(t('Attendees'))
         ->setSetting('target_type', 'user')
@@ -2774,7 +2795,7 @@ entities.
         ->addConstraint('UniqueAttendees')
         ->setDisplayOptions('view', ['weight' => 20])
         ->setDisplayOptions('form', ['weight' => 27]);
-  
+
       $fields['remaining'] = BaseFieldDefinition::create('integer')
         ->setLabel(t('Remaining number of attendees'))
         ->setComputed(TRUE)
@@ -2783,25 +2804,25 @@ entities.
           'label' => 'inline',
           'weight' => 30,
         ]);
-  
+
       $fields['path'] = BaseFieldDefinition::create('path')
         ->setLabel(t('Path'))
         ->setComputed(TRUE)
         ->setDisplayOptions('form', ['weight' => 5]);
-  
+
       $fields['changed'] = BaseFieldDefinition::create('changed')
         ->setLabel(t('Changed'));
-  
+
       return $fields;
     }
-  
+
     /**
      * @return string
      */
     public function getTitle() {
       return $this->get('title')->value;
     }
-  
+
     /**
      * @param string $title
      *
@@ -2810,14 +2831,14 @@ entities.
     public function setTitle($title) {
       return $this->set('title', $title);
     }
-  
+
     /**
      * @return \Drupal\Core\Datetime\DrupalDateTime
      */
     public function getDate() {
       return $this->get('date')->date;
     }
-  
+
     /**
      * @param \Drupal\Core\Datetime\DrupalDateTime $date
      *
@@ -2826,14 +2847,14 @@ entities.
     public function setDate(DrupalDateTime $date) {
       return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
     }
-  
+
     /**
      * @return \Drupal\filter\Render\FilteredMarkup
      */
     public function getDescription() {
       return $this->get('description')->processed;
     }
-  
+
     /**
      * @param string $description
      * @param string $format
@@ -2846,21 +2867,21 @@ entities.
         'format' => $format,
       ]);
     }
-  
+
     /**
      * @return int
      */
     public function getMaximum() {
       return $this->get('maximum')->value;
     }
-  
+
     /**
      * @return \Drupal\user\UserInterface[]
      */
     public function getAttendees() {
       return $this->get('attendees')->referencedEntities();
     }
-  
+
     /**
      * @param \Drupal\user\UserInterface $attendee
      *
@@ -2868,21 +2889,21 @@ entities.
      */
     public function addAttendee(UserInterface $attendee) {
       $field_items = $this->get('attendees');
-  
+
       $exists = FALSE;
       foreach ($field_items as $field_item) {
         if ($field_item->target_id === $attendee->id()) {
           $exists = TRUE;
         }
       }
-  
+
       if (!$exists) {
         $field_items->appendItem($attendee);
       }
-  
+
       return $this;
     }
-  
+
     /**
      * @param \Drupal\user\UserInterface $attendee
      *
@@ -2898,14 +2919,14 @@ entities.
       $field_items->filterEmptyItems();
       return $this;
     }
-  
+
     /**
      * @return int
      */
     public function getRemaining() {
       return $this->get('remaining')->value;
     }
-  
+
   }
   ```
 
@@ -3656,7 +3677,7 @@ translatable in the user interface with the _Content Translation_ module.
 [guide-short-url]: https://git.io/d8entity
 [repository]: https://github.com/drupal-entity-training/event
 [contrib-entity-api]: https://www.drupal.org/project/entity
-[drush]: http://docs.drush.org/en/master
+[drush]: https://www.drush.org/13.x
 [api-oop]: https://api.drupal.org/api/drupal/core%21core.api.php/group/oo_conventions/8.2.x
 [api-annotations]: https://api.drupal.org/api/drupal/core%21core.api.php/group/annotation/8.2.x
 [api-field-types]: https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21Annotation%21FieldType.php/class/annotations/FieldType/8.2.x
