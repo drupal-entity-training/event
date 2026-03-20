@@ -217,9 +217,7 @@ functionality.
       mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
       commas are allowed in mappings.
 
-    @TODO: Find appropriate alternative for the following line.
-
-    See [Drupal API: Annotations][api-annotations] for more information.
+    See [Drupal API: Attribute based plugins][attribute-based-plugins] for more information.
 
   * Class declaration:
 
