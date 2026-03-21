@@ -1831,29 +1831,36 @@ displayed unless explicitly configured to.
 
 #### 4.1. Add a route
 
-* Add the following to the annotation of the `Event` class:
+* Add the following use statements to the `Event` class:
+
+  ```php
+   use Drupal\Core\Entity\EntityListBuilder;
+   use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+  ```
+
+* Add the following to the attributes of the `Event` class:
 
   ```
-   *   label_collection = @Translation("Events"),
-   *   label_singular = @Translation("event"),
-   *   label_plural = @Translation("events"),
+   label_collection: new TranslatableMarkup('Events'),
+   label_singular: new TranslatableMarkup('event'),
+   label_plural: new TranslatableMarkup('events'),
   ```
 
-* Add the following to the `handlers` section of the annotation of the `Event`
+* Add the following to the `handlers` section of the attributes of the `Event`
   class:
 
   ```php
-   *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
-   *     "local_action_provider" = {
-   *       "collection" = "Drupal\entity\Menu\EntityCollectionLocalActionProvider",
-   *     },
+   'list_builder' => EntityListBuilder::class,
+   'local_action_provider' => [
+     'collection' => EntityCollectionLocalActionProvider::class,
+   ],
   ```
 
-* Add the following to the `links` section of the annotation in
+* Add the following to the `links` section of the attributes in
   `src/Entity/Event.php`:
 
   ```php
-   *     "collection" = "/admin/content/events",
+   'collection' => '/admin/content/events',
   ```
 
   <details><summary>The entire <code>Event.php</code> file at this point</summary>
@@ -1863,56 +1870,67 @@ displayed unless explicitly configured to.
 
     namespace Drupal\event\Entity;
 
-    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
     use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\ContentEntityDeleteForm;
+    use Drupal\Core\Entity\EntityListBuilder;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
     use Drupal\Core\Entity\EntityPublishedInterface;
     use Drupal\Core\Entity\EntityPublishedTrait;
     use Drupal\Core\Entity\EntityTypeInterface;
     use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
+    use Drupal\event\Form\EventForm;
     use Drupal\user\EntityOwnerInterface;
     use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
     /**
-     * @ContentEntityType(
-     *   id = "event",
-     *   label = @Translation("Event"),
-     *   label_collection = @Translation("Events"),
-     *   label_singular = @Translation("event"),
-     *   label_plural = @Translation("events"),
-     *   base_table = "event",
-     *   entity_keys = {
-     *     "id" = "id",
-     *     "uuid" = "uuid",
-     *     "label" = "title",
-     *     "owner" = "author",
-     *     "published" = "published",
-     *   },
-     *   handlers = {
-     *     "access" = "Drupal\entity\EntityAccessControlHandler",
-     *     "form" = {
-     *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-     *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-     *     },
-     *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
-     *     "local_action_provider" = {
-     *       "collection" = "Drupal\entity\Menu\EntityCollectionLocalActionProvider",
-     *     },
-     *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-     *     "route_provider" = {
-     *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-     *     },
-     *   },
-     *   links = {
-     *     "canonical" = "/event/{event}",
-     *     "collection" = "/admin/content/events",
-     *     "add-form" = "/admin/content/events/add",
-     *     "edit-form" = "/admin/content/events/manage/{event}",
-     *     "delete-form" = "/admin/content/events/manage/{event}/delete",
-     *   },
-     *   admin_permission = "administer event"
-     * )
+     * Defines the event entity class.
      */
+    #[ContentEntityType(
+      id: 'event',
+      label: new TranslatableMarkup('Event'),
+      label_collection: new TranslatableMarkup('Events'),
+      label_singular: new TranslatableMarkup('event'),
+      label_plural: new TranslatableMarkup('events'),
+      entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+      ],
+      handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+          'default' => DefaultHtmlRouteProvider::class,
+        ],
+        'form' => [
+          'add' => EventForm::class,
+          'edit' => EventForm::class,
+          'delete' => ContentEntityDeleteForm::class,
+        ],
+        'list_builder' => EntityListBuilder::class,
+        'local_action_provider' => [
+          'collection' => EntityCollectionLocalActionProvider::class,
+        ],
+      ],
+      links: [
+        'canonical' => "/event/{event}",
+        'add-form' => '/admin/content/events/add',
+        'edit-form' => '/admin/content/events/manage/{event}',
+        'delete-form' => '/admin/content/events/manage/{event}/delete',
+        'collection' => '/admin/content/events',
+      ],
+      admin_permission: 'administer event',
+      base_table: 'event',
+    )]
     class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
       use EntityOwnerTrait, EntityPublishedTrait;
@@ -1946,7 +1964,7 @@ displayed unless explicitly configured to.
           ])
           ->setDisplayOptions('form', ['weight' => 20]);
 
-        // Get the field definitions for 'owner' and 'published' from the traits.
+        // Get the field definitions for 'author' and 'published' from the trait.
         $fields += static::ownerBaseFieldDefinitions($entity_type);
         $fields += static::publishedBaseFieldDefinitions($entity_type);
 
@@ -1989,7 +2007,7 @@ displayed unless explicitly configured to.
        * @return $this
        */
       public function setDate(DrupalDateTime $date) {
-        return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+        return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
       }
 
       /**
@@ -2182,9 +2200,15 @@ displayed unless explicitly configured to.
 
   </details>
 
-* Replace the value of the `list_builder` annotation key in the `handlers`
-  section of the annotation in `src/Entity/Event.php` with
-  `"Drupal\event\Controller\EventListBuilder"`.
+* Add the following use statement to the `Event` class:
+
+  ```php
+   use Drupal\event\Controller\EventListBuilder;
+  ```
+
+* Replace the value of the `list_builder` key in the `handlers`
+  section of the attributes in `src/Entity/Event.php` with
+  `EventListBuilder::class`.
 
 * Rebuild caches
 
@@ -2208,11 +2232,17 @@ While a specialized entity list builder has the benefit of being re-usable one
 can also take advantage of Drupal's _Views_ module to create an administrative
 listing of events.
 
+* Add the following use statement to the `Event` class:
+
+  ```php
+   use Drupal\views\EntityViewsData;;
+  ```
+
 * Add the following to the `handlers` section of the annotation in
   `src/Entity/Event.php`:
 
   ```php
-   *     "views_data" = "Drupal\views\EntityViewsData",
+   'views_data' => EntityViewsData::class,
   ```
 
   Note that the views data that is provided by the default views data handler is
