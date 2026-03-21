@@ -2322,6 +2322,9 @@ need to be connected and enriched with Drupal's standard administrative links.
 
 #### 5.1. Add a menu link for the event listing
 
+// @TODO: No second level menu links are shown in the core admin toolbar, so
+//  perhaps figure out something else here.
+
 For the event listing to show up in the toolbar menu under _Content_, we need
 to provide a menu link for it.
 
@@ -2382,7 +2385,7 @@ to provide a menu link for it.
 
   Run `drush cache:rebuild`
 
-* Visit `/events/4`
+* Visit `/events/2`
 
   Verify that _View_, _Edit_ and _Delete_ local tasks are shown.
 
