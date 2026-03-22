@@ -3153,24 +3153,22 @@ similar to creating a content entity type.
 
   use Drupal\Core\Config\Entity\ConfigEntityBase;
 
-  /**
-   * @ConfigEntityType(
-   *   id = "event_type",
-   *   label = @Translation("Event type"),
-   *   label_collection = @Translation("Event types"),
-   *   label_singular = @Translation("event type"),
-   *   label_plural = @Translation("event types"),
-   *   config_prefix = "type",
-   *   config_export = {
-   *     "id",
-   *     "label",
-   *   },
-   *   entity_keys = {
-   *     "id" = "id",
-   *     "label" = "label",
-   *   },
-   * )
-   */
+  #[ConfigEntityType(
+    id: 'event_type',
+    label: new TranslatableMarkup('Event type'),
+    label_collection: new TranslatableMarkup('Event types'),
+    label_singular: new TranslatableMarkup('event type'),
+    label_plural: new TranslatableMarkup('event types'),
+    config_prefix: 'type',
+    entity_keys: [
+      'id' => 'id',
+      'label' => 'label',
+    ],
+    config_export: [
+      'id',
+      'label',
+    ],
+  )]
   class EventType extends ConfigEntityBase {
 
     protected $id;
@@ -3185,7 +3183,7 @@ similar to creating a content entity type.
   * Configuration prefix:
 
     ```php
-    config_prefix = "type"
+    config_prefix: 'type',
     ```
 
     To clearly identify the source of all configuration, the names of the
@@ -3200,10 +3198,10 @@ similar to creating a content entity type.
   * Export properties:
 
     ```php
-    config_export = {
-      "id",
-      "label",
-    }
+    config_export: [
+      'id',
+      'label',
+    ],
     ```
 
     ```php
