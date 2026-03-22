@@ -3113,7 +3113,7 @@ _revision_ of an entity each time it is saved.
 * Add the following use statements to `src/Entity/Event.php`:
 
   ```php
-  use Drupal\entity\Routing\RevisionRouteProvider;;
+  use Drupal\entity\Routing\RevisionRouteProvider;
   ```
 
 * Add the following to the `route_provider` entry of the `handlers` section of
@@ -3320,34 +3320,47 @@ configuration object is validated against this schema.
       return $header + parent::buildHeader();
     }
 
-    public function buildRow(EntityInterface $event) {
+    public function buildRow(EntityInterface $entity) {
       $row = [];
-      $row['label'] = $event->label();
-      return $row + parent::buildRow($event);
+      $row['label'] = $entity->label();
+      return $row + parent::buildRow($entity);
     }
 
   }
   ```
 
-* Add the following to the annotation in `src/Entity/EventType.php`:
+* Add the following use statements to `src/Entity/EventType.php`:
 
   ```php
-   *   handlers = {
-   *     "access" = "Drupal\entity\EntityAccessControlHandler",
-   *     "list_builder" = "Drupal\event\Controller\EventTypeListBuilder",
-   *     "local_action_provider" = {
-   *       "collection" = "Drupal\entity\Menu\EntityCollectionLocalActionProvider",
-   *     },
-   *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-   *     "route_provider" = {
-   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-   *     },
-   *   },
-   *   links = {
-   *     "collection" = "/admin/structure/event-types",
-   *   },
-   *   admin_permission = "administer event_type",
+  use Drupal\entity\EntityAccessControlHandler;
+  use Drupal\event\Controller\EventTypeListBuilder;
+  use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+  use Drupal\entity\EntityPermissionProvider;
+  use Drupal\entity\Routing\DefaultHtmlRouteProvider;
   ```
+
+* Add the following to the attributes in `src/Entity/EventType.php`:
+
+  ```php
+  handlers: [
+    'access' => EntityAccessControlHandler::class,
+    'list_builder' => EventTypeListBuilder::class,
+    'local_action_provider' => [
+      'collection' => EntityCollectionLocalActionProvider::class,
+    ],
+    'permission_provider' => EntityPermissionProvider::class,
+    'route_provider' => [
+      'default' => DefaultHtmlRouteProvider::class,
+    ],
+  ],
+  links: [
+    'collection' => '/admin/structure/event-types',
+  ],
+  admin_permission: 'administer event type',
+  ```
+
+// @TODO: No second level menu links are shown in the core admin toolbar, so
+//  perhaps figure out something else here.
 
 * Add the following to `event.links.menu.yml`:
 
@@ -3421,13 +3434,13 @@ elements ourselves.
       $entity_type = $entity->getEntityType();
 
       $arguments = [
-        '@entity_type' => $entity_type->getLowercaseLabel(),
+        '@entity_type' => $entity_type->getSingularLabel(),
         '%entity' => $entity->label(),
         'link' => $entity->toLink($this->t('Edit'), 'edit-form')->toString(),
       ];
 
       $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
-      drupal_set_message($this->t('The @entity_type %entity has been saved.', $arguments));
+      $this->messenger()->addMessage($this->t('The @entity_type %entity has been saved.', $arguments));
 
       $form_state->setRedirectUrl($entity->toUrl('collection'));
     }
@@ -3437,24 +3450,31 @@ elements ourselves.
 
 <!-- TODO: Explain callables -->
 
-* Add the following to the `handlers` section of the annotation in
-  `src/Entity/EventType.php`:
+* Add the following use statements to `src/Entity/EventType.php`:
 
   ```php
-   *     "form" = {
-   *       "add" = "Drupal\event\Form\EventTypeForm",
-   *       "edit" = "Drupal\event\Form\EventTypeForm",
-   *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
-   *     },
+  use Drupal\event\Form\EventTypeForm;
+  use Drupal\Core\Entity\EntityDeleteForm;
   ```
 
-* Add the following to the `links` section of the annotation in
+* Add the following to the `handlers` section of the attributes in
   `src/Entity/EventType.php`:
 
   ```php
-   *     "add-form" = "/admin/structure/event-types/add",
-   *     "edit-form" = "/admin/structure/event-types/manage/{event_type}",
-   *     "delete-form" = "/admin/structure/event-types/manage/{event_type}/delete",
+    'form' => [
+      'add' => EventTypeForm::class,
+      'edit' => EventTypeForm::class,
+      'delete' => EntityDeleteForm::class,
+    ]
+  ```
+
+* Add the following to the `links` section of the attributes in
+  `src/Entity/EventType.php`:
+
+  ```php
+    'add-form' => '/admin/structure/event-types/add',
+    'edit-form' => '/admin/structure/event-types/manage/{event_type}',
+    'delete-form' => '/admin/structure/event-types/manage/{event_type}/delete',
   ```
 
 * Add the following to `event.links.task.yml`:
