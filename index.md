@@ -2408,10 +2408,10 @@ entities.
   use Drupal\Core\Field\FieldStorageDefinitionInterface;
   ```
 
-* Add `EntityChangedInterface, ` to the `implements` part of the class declaration
+* Add `, EntityChangedInterface` to the `implements` part of the class declaration
   of the `Event` class
 
-* Add `EntityChangedTrait, ` to the `use` part inside of the `Event` class
+* Add `, EntityChangedTrait` to the `use` part inside of the `Event` class
 
 * Add the following to the `baseFieldDefinitions()` method in
   `src/Entity/Event.php` above the `return` statement:
@@ -2747,65 +2747,77 @@ entities.
 
   namespace Drupal\event\Entity;
 
-  use Drupal\Core\Datetime\DrupalDateTime;
+  use Drupal\Core\Entity\Attribute\ContentEntityType;
   use Drupal\Core\Entity\ContentEntityBase;
-  use Drupal\Core\Entity\EntityChangedInterface;
-  use Drupal\Core\Entity\EntityChangedTrait;
+  use Drupal\Core\Entity\ContentEntityDeleteForm;
+  use Drupal\Core\StringTranslation\TranslatableMarkup;
   use Drupal\Core\Entity\EntityPublishedInterface;
   use Drupal\Core\Entity\EntityPublishedTrait;
   use Drupal\Core\Entity\EntityTypeInterface;
   use Drupal\Core\Field\BaseFieldDefinition;
-  use Drupal\Core\Field\FieldStorageDefinitionInterface;
-  use Drupal\event\Field\RemainingFieldItemList;
+  use Drupal\entity\EntityAccessControlHandler;
+  use Drupal\entity\EntityPermissionProvider;
+  use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+  use Drupal\entity\Routing\DefaultHtmlRouteProvider;
+  use Drupal\event\Controller\EventListBuilder;
+  use Drupal\event\Form\EventForm;
   use Drupal\user\EntityOwnerInterface;
   use Drupal\user\EntityOwnerTrait;
+  use Drupal\Core\Datetime\DrupalDateTime;
+  use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+  use Drupal\views\EntityViewsData;
+  use Drupal\Core\Entity\EntityChangedInterface;
+  use Drupal\Core\Entity\EntityChangedTrait;
+  use Drupal\Core\Field\FieldStorageDefinitionInterface;
   use Drupal\user\UserInterface;
+  use Drupal\event\Field\RemainingFieldItemList;
 
   /**
-   * @ContentEntityType(
-   *   id = "event",
-   *   label = @Translation("Event"),
-   *   label_collection = @Translation("Events"),
-   *   label_singular = @Translation("event"),
-   *   label_plural = @Translation("events"),
-   *   base_table = "event",
-   *   entity_keys = {
-   *     "id" = "id",
-   *     "uuid" = "uuid",
-   *     "label" = "title",
-   *     "owner" = "author",
-   *     "published" = "published",
-   *   },
-   *   handlers = {
-   *     "access" = "Drupal\entity\EntityAccessControlHandler",
-   *     "form" = {
-   *       "add" = "Drupal\Core\Entity\ContentEntityForm",
-   *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
-   *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
-   *     },
-   *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
-   *     "local_action_provider" = {
-   *       "collection" = "Drupal\entity\Menu\EntityCollectionLocalActionProvider",
-   *     },
-   *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
-   *     "route_provider" = {
-   *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
-   *     },
-   *     "views_data" = "Drupal\views\EntityViewsData",
-   *   },
-   *   links = {
-   *     "canonical" = "/event/{event}",
-   *     "collection" = "/admin/content/events",
-   *     "add-form" = "/admin/content/events/add",
-   *     "edit-form" = "/admin/content/events/manage/{event}",
-   *     "delete-form" = "/admin/content/events/manage/{event}/delete",
-   *   },
-   *   admin_permission = "administer event"
-   * )
+   * Defines the event entity class.
    */
-  class Event extends ContentEntityBase implements EntityChangedInterface, EntityOwnerInterface, EntityPublishedInterface {
+  #[ContentEntityType(
+    id: 'event',
+    label: new TranslatableMarkup('Event'),
+    label_collection: new TranslatableMarkup('Events'),
+    label_singular: new TranslatableMarkup('event'),
+    label_plural: new TranslatableMarkup('events'),
+    entity_keys: [
+      'id' => 'id',
+      'uuid' => 'uuid',
+      'label' => 'title',
+      'owner' => 'author',
+      'published' => 'published',
+    ],
+    handlers: [
+      'access' => EntityAccessControlHandler::class,
+      'permission_provider' => EntityPermissionProvider::class,
+      'route_provider' => [
+        'default' => DefaultHtmlRouteProvider::class,
+      ],
+      'form' => [
+        'add' => EventForm::class,
+        'edit' => EventForm::class,
+        'delete' => ContentEntityDeleteForm::class,
+      ],
+      'list_builder' => EventListBuilder::class,
+      'local_action_provider' => [
+        'collection' => EntityCollectionLocalActionProvider::class,
+      ],
+      'views_data' => EntityViewsData::class,
+    ],
+    links: [
+      'canonical' => "/event/{event}",
+      'add-form' => '/admin/content/events/add',
+      'edit-form' => '/admin/content/events/manage/{event}',
+      'delete-form' => '/admin/content/events/manage/{event}/delete',
+      'collection' => '/admin/content/events',
+    ],
+    admin_permission: 'administer event',
+    base_table: 'event',
+  )]
+  class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface, EntityChangedInterface {
 
-    use EntityChangedTrait, EntityOwnerTrait, EntityPublishedTrait;
+    use EntityOwnerTrait, EntityPublishedTrait, EntityChangedTrait;
 
     public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
       // Get the field definitions for 'id' and 'uuid' from the parent.
@@ -2827,7 +2839,7 @@ entities.
           'weight' => 0,
         ])
         ->setDisplayOptions('form', ['weight' => 10]);
-
+  
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'))
         ->setDisplayOptions('view', [
@@ -2836,7 +2848,7 @@ entities.
         ])
         ->setDisplayOptions('form', ['weight' => 20]);
 
-      // Get the field definitions for 'owner' and 'published' from the traits.
+      // Get the field definitions for 'author' and 'published' from the trait.
       $fields += static::ownerBaseFieldDefinitions($entity_type);
       $fields += static::publishedBaseFieldDefinitions($entity_type);
 
@@ -2850,27 +2862,25 @@ entities.
       $fields['maximum'] = BaseFieldDefinition::create('integer')
         ->setLabel(t('Maximum number of attendees'))
         ->setSetting('min', 1)
-        ->setRequired(TRUE)
-        ->setDefaultValue(10)
         ->setDisplayOptions('form', ['weight' => 23]);
 
       $fields['attendees'] = BaseFieldDefinition::create('entity_reference')
         ->setLabel(t('Attendees'))
         ->setSetting('target_type', 'user')
         ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-        ->addConstraint('AttendeeCount')
-        ->addConstraint('UniqueAttendees')
         ->setDisplayOptions('view', ['weight' => 20])
-        ->setDisplayOptions('form', ['weight' => 27]);
+        ->setDisplayOptions('form', ['weight' => 27])
+        ->addConstraint('AttendeeCount')
+        ->addConstraint('UniqueAttendees');
 
       $fields['remaining'] = BaseFieldDefinition::create('integer')
         ->setLabel(t('Remaining number of attendees'))
         ->setComputed(TRUE)
-        ->setClass(RemainingFieldItemList::class)
         ->setDisplayOptions('view', [
           'label' => 'inline',
           'weight' => 30,
-        ]);
+        ])
+        ->setClass(RemainingFieldItemList::class);
 
       $fields['path'] = BaseFieldDefinition::create('path')
         ->setLabel(t('Path'))
@@ -2912,7 +2922,7 @@ entities.
      * @return $this
      */
     public function setDate(DrupalDateTime $date) {
-      return $this->set('date', $date->format(DATETIME_DATETIME_STORAGE_FORMAT));
+      return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
     }
 
     /**
@@ -2979,7 +2989,7 @@ entities.
     public function removeAttendee(UserInterface $attendee) {
       $field_items = $this->get('attendees');
       foreach ($field_items as $delta => $field_item) {
-        if ($field_item->target_id == $attendee->id()) {
+        if ($field_item->target_id === $attendee->id()) {
           $field_items->set($delta, NULL);
         }
       }
@@ -2995,6 +3005,7 @@ entities.
     }
 
   }
+
   ```
 
 #### 6.5. Install the fields
