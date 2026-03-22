@@ -2839,7 +2839,7 @@ entities.
           'weight' => 0,
         ])
         ->setDisplayOptions('form', ['weight' => 10]);
-  
+
       $fields['description'] = BaseFieldDefinition::create('text_long')
         ->setLabel(t('Description'))
         ->setDisplayOptions('view', [
@@ -3074,16 +3074,22 @@ _revision_ of an entity each time it is saved.
 
 <!-- add the revision entity key -->
 
-* Add the following to the annotation of the `Event` class:
+* Add the following to the `entity_keys` of the `Event` class attributes:
 
   ```
-   *   revision_table = "event_revision",
-   *   revision_metadata_keys = {
-   *     "revision_user" = "revision_author",
-   *     "revision_created" = "revision_created",
-   *     "revision_log_message" = "revision_log_message",
-   *   },
-   *   show_revision_ui = true,
+  'revision' => 'revision_id',
+  ```
+
+* Add the following to the attributes of the `Event` class:
+
+  ```
+  revision_table: 'event_revision',
+  show_revision_ui: TRUE,
+  revision_metadata_keys: [
+    'revision_user' => 'revision_author',
+    'revision_created' => 'revision_created',
+    'revision_log_message' => 'revision_log_message',
+  ],
   ```
 
 * Add `, RevisionLogEntityTrait` to the `use` part inside of the `Event` class
@@ -3104,21 +3110,26 @@ _revision_ of an entity each time it is saved.
 
 #### 7.2. Add a user interface for managing revisions
 
-
-* Add the following to the `route_provider` entry of the `handlers` section of
-  the annotation of the `Event` class:
+* Add the following use statements to `src/Entity/Event.php`:
 
   ```php
-   *       "revision" = "Drupal\entity\Routing\RevisionRouteProvider",
+  use Drupal\entity\Routing\RevisionRouteProvider;;
+  ```
+
+* Add the following to the `route_provider` entry of the `handlers` section of
+  the attributes of the `Event` class:
+
+  ```php
+     'revision' => RevisionRouteProvider::class,
   ```
 
 * Add the following to the `links` section of the annotation of the `Event`
   class:
 
   ```php
-   *     "version-history" = "/event/{event}/revisions",
-   *     "revision" = "/event/{event}/revisions/{event_revision}",
-   *     "revision-revert-form" = "/event/{event}/revisions/{event_revision}/revert",
+    'version-history' => '/event/{event}/revisions',
+    'revision' => '/event/{event}/revisions/{event_revision}',
+    'revision-revert-form' => '/event/{event}/revisions/{event_revision}/revert',
   ```
 
 ### 8. Storing dynamic data in configuration
