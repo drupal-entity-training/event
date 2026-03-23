@@ -3521,40 +3521,40 @@ the _Event_ entity type.
 
 * Delete the existing event(s)
 
-  Visit `/admin/content/event/manage/4/delete` and press _Delete_.
+  Visit `/admin/content/events/manage/2/delete` and press _Delete_.
 
   Adding a bundle field cannot be done when there are existing entities.
 
-* Add the following to the `entity_keys` section of the annotation in
+* Add the following to the `entity_keys` section of the attributes in
   `src/Entity/Event.php`:
 
   ```php
-   *     "bundle" = "type",
+    'bundle' => 'type',
   ```
 
-* Add the following to the annotation in `src/Entity/Event.php`:
+* Add the following to the attributes in `src/Entity/Event.php`:
 
   ```php
-   *   bundle_entity_type = "event_type",
+    bundle_entity_type: 'event_type',
   ```
 
-* Replace the `add-form` link in the annotation in `src/Entity/Event.php` with:
+* Replace the `add-form` link in the attributes in `src/Entity/Event.php` with:
 
   ```php
-  "/admin/content/events/add/{event_type}"
+  '/admin/content/events/add/{event_type}'
   ```
 
-* Add the following to the `links` section of the annotation in
+* Add the following to the `links` section of the attributes in
   `src/Entity/Event.php` with:
 
   ```php
-   *     "add-page" = "/admin/content/events/add",
+    'add-page' => '/admin/content/events/add',
   ```
 
-* Add the following to the annotation in `src/Entity/EventType.php`:
+* Add the following to the attributes in `src/Entity/EventType.php`:
 
   ```php
-   *   bundle_of = "event",
+    bundle_of: 'event',
   ```
 
 Like for the `id` and `uuid` fields, the field definition for the `type` field
