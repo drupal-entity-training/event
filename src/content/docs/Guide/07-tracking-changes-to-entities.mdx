@@ -1,0 +1,73 @@
+---
+title: 7. Tracking changes to entities
+description: Tracking changes to entities
+---
+
+Drupal provides a mechanism to track changes of entities by storing a new
+_revision_ of an entity each time it is saved.
+
+## 7.1. Make events revisionable
+
+* Add the following use statements to `src/Entity/Event.php`:
+
+    ```php
+    use Drupal\Core\Entity\RevisionLogEntityTrait;
+    ```
+
+* Add the following to the `entity_keys` of the `Event` class attributes:
+
+    ```php
+    'revision' => 'revision_id',
+    ```
+
+* Add the following to the attributes of the `Event` class:
+
+    ```php
+    revision_table: 'event_revision',
+    show_revision_ui: TRUE,
+    revision_metadata_keys: [
+      'revision_user' => 'revision_author',
+      'revision_created' => 'revision_created',
+      'revision_log_message' => 'revision_log_message',
+    ],
+    ```
+
+* Add `, RevisionLogEntityTrait` to the `use` part inside of the `Event` class
+
+* Add the following before the `return` statement of the
+`baseFieldDefinitions()` method of the `Event` class:
+
+    ```php
+     $fields += static::revisionLogBaseFieldDefinitions($entity_type);
+    ```
+
+* Run `drush entity:updates`
+
+* Verify that the `event_revision` table was created
+
+* Verify that the _Revision information_ vertical tab appears on the event edit
+form
+
+## 7.2. Add a user interface for managing revisions
+
+* Add the following use statements to `src/Entity/Event.php`:
+
+    ```php
+    use Drupal\entity\Routing\RevisionRouteProvider;
+    ```
+
+* Add the following to the `route_provider` entry of the `handlers` section of
+the attributes of the `Event` class:
+
+    ```php
+    'revision' => RevisionRouteProvider::class,
+    ```
+
+* Add the following to the `links` section of the annotation of the `Event`
+class:
+
+    ```php
+    'version-history' => '/event/{event}/revisions',
+    'revision' => '/event/{event}/revisions/{event_revision}',
+    'revision-revert-form' => '/event/{event}/revisions/{event_revision}/revert',
+    ```

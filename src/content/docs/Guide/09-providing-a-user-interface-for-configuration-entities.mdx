@@ -1,0 +1,210 @@
+---
+title: 9. Providing a user interface for configuration entities
+description: Providing a user interface for configuration entities
+sidebar:
+    label: 9. Config entity user interface
+---
+
+## 9.1. Add a list of event types
+
+* Add a `src/Controller/EventTypeListBuilder.php` file with the following:
+
+    ```php
+    <?php
+
+    namespace Drupal\event\Controller;
+
+    use Drupal\Core\Entity\EntityInterface;
+    use Drupal\Core\Entity\EntityListBuilder;
+
+    class EventTypeListBuilder extends EntityListBuilder {
+
+      public function buildHeader() {
+        $header = [];
+        $header['label'] = $this->t('Label');
+        return $header + parent::buildHeader();
+      }
+
+      public function buildRow(EntityInterface $entity) {
+        $row = [];
+        $row['label'] = $entity->label();
+        return $row + parent::buildRow($entity);
+      }
+
+    }
+    ```
+
+* Add the following use statements to `src/Entity/EventType.php`:
+
+    ```php
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\event\Controller\EventTypeListBuilder;
+    use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
+    ```
+
+* Add the following to the attributes in `src/Entity/EventType.php`:
+
+    ```php
+    handlers: [
+      'access' => EntityAccessControlHandler::class,
+      'list_builder' => EventTypeListBuilder::class,
+      'local_action_provider' => [
+        'collection' => EntityCollectionLocalActionProvider::class,
+      ],
+      'permission_provider' => EntityPermissionProvider::class,
+      'route_provider' => [
+        'default' => DefaultHtmlRouteProvider::class,
+      ],
+    ],
+    links: [
+      'collection' => '/admin/structure/event-types',
+    ],
+    admin_permission: 'administer event type',
+    ```
+
+[//]: # (<!- TODO: No second level menu links are shown in the core admin toolbar, so)
+[//]: # (  perhaps figure out something else here. -->)
+
+* Add the following to `event.links.menu.yml`:
+
+    ```yaml
+    entity.event_type.collection:
+      title: 'Event types'
+      route_name: entity.event_type.collection
+      parent: system.admin_structure
+    ```
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Verify that there is a _Event types_ menu link in the toolbar menu
+
+* Visit `/admin/structure/event-types`
+
+    Note that a listing of event types is shown.
+
+## 9.2. Add forms for event types
+
+In contrast to content entities, configuration entities do not have the ability
+to use widgets for their forms, so we need to provide the respective form
+elements ourselves.
+
+* Add a `src/Form/EventTypeForm.php` file with the
+following:
+
+    ```php
+    <?php
+
+    namespace Drupal\event\Form;
+
+    use Drupal\Core\Entity\EntityForm;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Form\FormStateInterface;
+
+    class EventTypeForm extends EntityForm {
+
+      public function form(array $form, FormStateInterface $form_state) {
+        $form = parent::form($form, $form_state);
+
+        $event_type = $this->getEntity();
+
+        $form['label'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Label'),
+          '#default_value' => $event_type->label(),
+          '#required' => TRUE,
+        ];
+
+        $form['id'] = [
+          '#type' => 'machine_name',
+          '#title' => $this->t('ID'),
+          '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
+          '#default_value' => $event_type->id(),
+          '#machine_name' => [
+            'exists' => [$event_type->getEntityType()->getClass(), 'load'],
+          ],
+          '#disabled' => !$event_type->isNew(),
+        ];
+
+        return $form;
+      }
+
+      public function save(array $form, FormStateInterface $form_state) {
+        parent::save($form, $form_state);
+
+        $entity = $this->getEntity();
+        $entity_type = $entity->getEntityType();
+
+        $arguments = [
+          '@entity_type' => $entity_type->getSingularLabel(),
+          '%entity' => $entity->label(),
+          'link' => $entity->toLink($this->t('Edit'), 'edit-form')->toString(),
+        ];
+
+        $this->logger($entity->getEntityTypeId())->notice('The @entity_type %entity has been saved.', $arguments);
+        $this->messenger()->addMessage($this->t('The @entity_type %entity has been saved.', $arguments));
+
+        $form_state->setRedirectUrl($entity->toUrl('collection'));
+      }
+
+    }
+    ```
+
+[//]: # (<!-- TODO: Explain callables -->)
+
+* Add the following use statements to `src/Entity/EventType.php`:
+
+    ```php
+    use Drupal\event\Form\EventTypeForm;
+    use Drupal\Core\Entity\EntityDeleteForm;
+    ```
+
+* Add the following to the `handlers` section of the attributes in
+`src/Entity/EventType.php`:
+
+    ```php
+    'form' => [
+        'add' => EventTypeForm::class,
+        'edit' => EventTypeForm::class,
+        'delete' => EntityDeleteForm::class,
+    ]
+    ```
+
+* Add the following to the `links` section of the attributes in
+`src/Entity/EventType.php`:
+
+    ```php
+    'add-form' => '/admin/structure/event-types/add',
+    'edit-form' => '/admin/structure/event-types/manage/{event_type}',
+    'delete-form' => '/admin/structure/event-types/manage/{event_type}/delete',
+    ```
+
+* Add the following to `event.links.task.yml`:
+
+    ```yaml
+    entity.event_type.edit_form:
+      title: 'Edit'
+      route_name: entity.event_type.edit_form
+      base_route: entity.event_type.edit_form
+    entity.event_type.delete_form:
+      title: 'Delete'
+      route_name: entity.event_type.delete_form
+      base_route: entity.event_type.edit_form
+    ```
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Verify that a local action appears to add an event type
+
+* Add an event type.
+
+* Edit an event type.
+
+* Verify that _Edit_ and _Delete_ local tasks are shown.
+
+* Delete an event type.

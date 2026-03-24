@@ -1,0 +1,170 @@
+---
+title: 8. Storing dynamic data in configuration
+description: Storing dynamic data in configuration
+sidebar:
+    label: 8. Storing dynamic configuration
+---
+
+Apart from content entities there is a second type of entities in Drupal, the
+configuration entities. These have a machine-readable string ID and can be
+deployed between different environments along with the rest of the site
+configuration.
+
+## 8.1. Create an entity class
+
+While there are some distinctions, creating a configuration entity type is very
+similar to creating a content entity type.
+
+Create a `src/Entity/EventType.php` with the following:
+
+```php
+<?php
+
+namespace Drupal\event\Entity;
+
+use Drupal\Core\Config\Entity\ConfigEntityBase;
+
+#[ConfigEntityType(
+  id: 'event_type',
+  label: new TranslatableMarkup('Event type'),
+  label_collection: new TranslatableMarkup('Event types'),
+  label_singular: new TranslatableMarkup('event type'),
+  label_plural: new TranslatableMarkup('event types'),
+  config_prefix: 'type',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  config_export: [
+    'id',
+    'label',
+  ],
+)]
+class EventType extends ConfigEntityBase {
+
+  protected $id;
+
+  protected $label;
+
+}
+```
+
+<details>
+    <summary>More information on the above</summary>
+
+    * Configuration prefix:
+
+        ```php
+        config_prefix: 'type',
+        ```
+
+        To clearly identify the source of all configuration, the names of the
+        respective configuration files of configuration entities are automatically
+        prefixed with the module name (`event` in this case) and a period (`.`) as a
+        separator. To distinguish different configuration entity types from the same
+        module, each configuration entity type specifies a _configuration prefix_
+        which is the second part of the configuration file name prefix followed by
+        an additional period. The full name of a configuration entity's
+        configuration file is, thus, `"$module_name.$config_prefix.$entity_id"`.
+
+    * Export properties:
+
+        ```php
+        config_export: [
+            'id',
+            'label',
+        ],
+        ```
+
+        ```php
+        protected $id;
+
+        protected $label;
+        ```
+
+        Configuration entities do not have a notion of (base) field definitions like
+        content entities. Instead simple PHP properties can be declared in the
+        entity class to hold the values of the entity. The names of those properties
+        need to be specified as export properties in the entity annotation.
+</details>
+
+## 8.2. Provide a configuration schema
+
+To ensure that the structure of each configuration object is correct, a _schema_
+is provided. When importing configuration from another environment, each
+configuration object is validated against this schema.
+
+Add a `config/schema/event.schema.yml` with the following:
+
+```yaml
+event.type.*:
+  type: config_object
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+  ```
+
+## 8.3. Install the entity type
+
+* Run `drush entity:updates`
+
+    Note that there is no schema change
+
+* Create and save an event type
+
+    Run the following PHP code:
+
+    ```php
+    use Drupal\event\Entity\EventType;
+
+    EventType::create([
+      'id' => 'webinar',
+      'label' => 'Webinar',
+    ])->save();
+    ```
+
+    Note that there is a new row in the `{config}` table with the name
+    `event.type.webinar`
+
+* Load the event type by its ID
+
+    Run the following PHP code:
+
+    ```php
+    use Drupal\event\Entity\EventType;
+
+    $event_type = EventType::load('webinar');
+    $event_type->label();
+    ```
+
+    Note that the proper label is returned.
+
+* Update the label of the event type
+
+    Run the following PHP code:
+
+    ```php
+    use Drupal\event\Entity\EventType;
+
+    $event_type = EventType::load('webinar');
+    $event_type
+      ->set('label', 'Online webinar')
+      ->save();
+    ```
+
+* Delete the event type
+
+    Run the following PHP code:
+
+    ```php
+    use Drupal\event\Entity\EventType;
+
+    $event_type = EventType::load('webinar')
+    $event_type->delete();
+    ```
+
+Note that the row in the `{config}` table is gone.

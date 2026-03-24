@@ -1,0 +1,104 @@
+---
+title: 11. Configuring bundles in the user interface
+description: Configuring bundles in the user interface
+sidebar:
+  label: 11. Configuring entity bundles
+---
+
+## 11.1. Enable Field UI for events
+
+* Add the following to the attributes in `src/Entity/Event.php`:
+
+    ```php
+    field_ui_base_route: 'entity.event_type.edit_form',
+    ```
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Visit `/admin/structure/event-types` and edit an event type.
+
+    Note that there is a _Manage fields_, _Manage form display_ and _Manage
+    display_ operation for each event type.
+
+## 11.2. Add dynamic fields to events
+
+The ability to have comments is managed as a field in Drupal, so we can use
+Field UI to add a _Comments_ field to an event type.
+
+* Add a comment type on `/admin/structure/comment/types/add`
+
+    Select _Event_ as the target entity type
+
+* Add a _Comments_ field to an event type
+
+## 11.3. Configure view modes
+
+* Visit the _Manage display_ page
+
+    Note that only the _Comments_ field appears
+
+* Add the following to all field definitions in the `baseFieldDefinitions()`
+method of the `Event` class before the semicolon:
+
+    ```php
+    ->setDisplayConfigurable('view', TRUE)
+    ```
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Verify that all fields now appear
+
+* Upload user pictures for the existing users
+
+* Use _Rendered entity_ for the _Attendees_ field on the _Manage display_ page
+
+* Add a _Teaser_ view mode on `/admin/structure/display-modes/view/add/event`
+
+* Make the _Teaser_ view mode configurable on the event type's _Manage display_ page
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Configure the _Teaser_ view mode
+
+* Add an _Event teasers_ view
+
+* Add a _Page_ views display with the path `events`
+
+    Note that the path is entered without a leading slash in Views.
+
+* Use the _Unformatted list_ style for the display
+
+    Display _Events_ in the _Teaser_ view mode
+
+* Verify that the event teasers are displayed correctly
+
+## 11.4. Configure the form
+
+* Visit the _Manage form display_ page
+
+    Note that only the _Comments_ field appears
+
+* Add the following to all field definitions in the `baseFieldDefinitions()`
+method of the `Event` class before the semicolon:
+
+    ```php
+    ->setDisplayConfigurable('form', TRUE)
+    ```
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Note that all fields now appear
+
+* Configure the form display
+
+* Use the _Select list_ widget for the _Date_ field
+
+* Use the _Check boxes/radio buttons_ widget for the _Attendees_ field

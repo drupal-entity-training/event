@@ -1,0 +1,491 @@
+---
+title: 4. Listing entities
+description: Listing entities
+---
+
+import { Steps } from '@astrojs/starlight/components'
+
+## 4.1. Add a route
+
+* Add the following use statements to the `Event` class:
+
+    ```php
+    use Drupal\Core\Entity\EntityListBuilder;
+    use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+    ```
+
+* Add the following to the attributes of the `Event` class:
+
+    ```
+    label_collection: new TranslatableMarkup('Events'),
+    label_singular: new TranslatableMarkup('event'),
+    label_plural: new TranslatableMarkup('events'),
+    ```
+
+* Add the following to the `handlers` section of the attributes of the `Event`
+class:
+
+    ```php
+    'list_builder' => EntityListBuilder::class,
+    'local_action_provider' => [
+      'collection' => EntityCollectionLocalActionProvider::class,
+    ],
+    ```
+
+* Add the following to the `links` section of the attributes in
+`src/Entity/Event.php`:
+
+    ```php
+    'collection' => '/admin/content/events',
+    ```
+
+<details>
+    <summary>The entire <code>Event.php</code> file at this point</summary>
+
+    ```php
+    <?php
+
+    namespace Drupal\event\Entity;
+
+    use Drupal\Core\Entity\Attribute\ContentEntityType;
+    use Drupal\Core\Entity\ContentEntityBase;
+    use Drupal\Core\Entity\ContentEntityDeleteForm;
+    use Drupal\Core\Entity\EntityListBuilder;
+    use Drupal\Core\StringTranslation\TranslatableMarkup;
+    use Drupal\Core\Entity\EntityPublishedInterface;
+    use Drupal\Core\Entity\EntityPublishedTrait;
+    use Drupal\Core\Entity\EntityTypeInterface;
+    use Drupal\Core\Field\BaseFieldDefinition;
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Menu\EntityCollectionLocalActionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
+    use Drupal\event\Form\EventForm;
+    use Drupal\user\EntityOwnerInterface;
+    use Drupal\user\EntityOwnerTrait;
+    use Drupal\Core\Datetime\DrupalDateTime;
+    use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+
+    /**
+     * Defines the event entity class.
+     */
+    #[ContentEntityType(
+    id: 'event',
+    label: new TranslatableMarkup('Event'),
+    label_collection: new TranslatableMarkup('Events'),
+    label_singular: new TranslatableMarkup('event'),
+    label_plural: new TranslatableMarkup('events'),
+    entity_keys: [
+        'id' => 'id',
+        'uuid' => 'uuid',
+        'label' => 'title',
+        'owner' => 'author',
+        'published' => 'published',
+    ],
+    handlers: [
+        'access' => EntityAccessControlHandler::class,
+        'permission_provider' => EntityPermissionProvider::class,
+        'route_provider' => [
+            'default' => DefaultHtmlRouteProvider::class,
+        ],
+        'form' => [
+            'add' => EventForm::class,
+            'edit' => EventForm::class,
+            'delete' => ContentEntityDeleteForm::class,
+        ],
+        'list_builder' => EntityListBuilder::class,
+        'local_action_provider' => [
+            'collection' => EntityCollectionLocalActionProvider::class,
+        ],
+    ],
+    links: [
+        'canonical' => "/event/{event}",
+        'add-form' => '/admin/content/events/add',
+        'edit-form' => '/admin/content/events/manage/{event}',
+        'delete-form' => '/admin/content/events/manage/{event}/delete',
+        'collection' => '/admin/content/events',
+    ],
+    admin_permission: 'administer event',
+    base_table: 'event',
+    )]
+    class Event extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
+
+        use EntityOwnerTrait, EntityPublishedTrait;
+
+        public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+            // Get the field definitions for 'id' and 'uuid' from the parent.
+            $fields = parent::baseFieldDefinitions($entity_type);
+
+            $fields['title'] = BaseFieldDefinition::create('string')
+                ->setLabel(t('Title'))
+                ->setRequired(TRUE)
+                ->setDisplayOptions('form', ['weight' => 0]);
+
+            $fields['date'] = BaseFieldDefinition::create('datetime')
+                ->setLabel(t('Date'))
+                ->setRequired(TRUE)
+                ->setDisplayOptions('view', [
+                    'label' => 'inline',
+                    'settings' => [
+                        'format_type' => 'html_date',
+                    ],
+                    'weight' => 0,
+                ])
+                ->setDisplayOptions('form', ['weight' => 10]);
+
+            $fields['description'] = BaseFieldDefinition::create('text_long')
+                ->setLabel(t('Description'))
+                ->setDisplayOptions('view', [
+                    'label' => 'hidden',
+                    'weight' => 10,
+                ])
+                ->setDisplayOptions('form', ['weight' => 20]);
+
+            // Get the field definitions for 'author' and 'published' from the trait.
+            $fields += static::ownerBaseFieldDefinitions($entity_type);
+            $fields += static::publishedBaseFieldDefinitions($entity_type);
+
+            $fields['published']->setDisplayOptions('form', [
+                'settings' => [
+                    'display_label' => TRUE,
+                ],
+                'weight' => 30,
+            ]);
+
+            return $fields;
+        }
+
+        /**
+         * @return string
+         */
+        public function getTitle() {
+            return $this->get('title')->value;
+        }
+
+        /**
+         * @param string $title
+         *
+         * @return $this
+         */
+        public function setTitle($title) {
+            return $this->set('title', $title);
+        }
+
+        /**
+         * @return \Drupal\Core\Datetime\DrupalDateTime
+         */
+        public function getDate() {
+            return $this->get('date')->date;
+        }
+
+        /**
+         * @param \Drupal\Core\Datetime\DrupalDateTime $date
+         *
+         * @return $this
+         */
+        public function setDate(DrupalDateTime $date) {
+            return $this->set('date', $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+        }
+
+        /**
+         * @return \Drupal\filter\Render\FilteredMarkup
+         */
+        public function getDescription() {
+            return $this->get('description')->processed;
+        }
+
+        /**
+         * @param string $description
+         * @param string $format
+         *
+         * @return $this
+         */
+        public function setDescription($description, $format) {
+            return $this->set('description', [
+                'value' => $description,
+                'format' => $format,
+            ]);
+        }
+
+    }
+    ```
+
+</details>
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Visit `/admin/content/events`
+
+    Note that a route is provided and a list of entities is provided with
+    _Edit_ and _Delete_ operation links for each entity.
+
+    By not showing at least the title of each event the list is not actually
+    usable so we need to provide a specialized list builder.
+
+## 4.2. Add a specialized list builder
+
+* Create a `src/Controller` directory
+
+* Add a `src/Controller/EventListBuilder.php` file with the following:
+
+    ```php
+    <?php
+
+    namespace Drupal\event\Controller;
+
+    use Drupal\Core\Entity\EntityInterface;
+    use Drupal\Core\Entity\EntityListBuilder;
+
+    class EventListBuilder extends EntityListBuilder {
+
+      public function buildHeader() {
+        $header = [];
+        $header['title'] = $this->t('Title');
+        $header['date'] = $this->t('Date');
+        $header['published'] = $this->t('Published');
+        return $header + parent::buildHeader();
+      }
+
+      public function buildRow(EntityInterface $event) {
+        /** @var \Drupal\event\Entity\Event $event */
+        $row = [];
+        $row['title'] = $event->toLink();
+        $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
+        $row['published'] = $event->isPublished() ? $this->t('Yes') : $this->t('No');
+        return $row + parent::buildRow($event);
+      }
+
+    }
+    ```
+
+<details>
+    <summary>More information on the above</summary>
+
+    * Separate methods:
+
+        ```php
+        public function buildHeader() {
+        ```
+
+        List builders build the table header and the table rows in separate methods.
+
+    * Translation:
+
+        ```php
+        $this->t('Title')
+        ```
+
+        The base `EntityListBuilder` class, like many other base classes in Drupal,
+        provides a `t()` function that can be used to translate strings.
+
+    * Array merging:
+
+        ```php
+        $header + parent::buildHeader()
+        ```
+
+        Arrays with string keys can be merged in PHP by "adding" them. Because the
+        base class provides the operations column we put our own part of the header
+        first and add the part from the parent last.
+
+    * Inline type hint:
+
+        ```php
+        /** @var \Drupal\event\Entity\EventInterface $event */
+        ```
+
+        Because `EntityListBuilderInterface`, the interface for list builders,
+        dictates that we type hint the `$event` variable with `EntityInterface`
+        instead of our more specific `EventInterface`, IDEs are not aware that the
+        `$event` variable has the methods `getTitle()` and `getDate()` in this case.
+        To inform IDEs that these methods are in fact available an inline type hint
+        can be added to the `$event` variable.
+
+    * Entity links:
+
+        ```php
+        $event->toLink()
+        ```
+
+        Entities have a `toLink()` method to generate links with a specified link
+        text to a specified link relation of the entity. By default a link with the
+        entity label as link text to the `canonical` link relation is generated
+        which is precisely what we want here.
+
+    * Date formatting:
+
+        ```php
+        $row['date'] = $event->getDate()->format('m/d/y h:i:s a');
+        ```
+
+        Because the `getDate()` method returns a date object we can attain the
+        formatted date by using its `format()` method. If the same date format is to
+        be used in multiple places on the site, hardcoding it here can lead to
+        duplication or worse, inconsistent user interfaces. To prevent this, Drupal
+        associates PHP date formats with machine-readable names to form a _Date
+        format_ configuration entity. (More on configuration entities in general
+        below.) That way the name, such as `short`, `medium` or `long` can be
+        used without having to remember the associated PHP date format. This also
+        allows changing the PHP date format later without having to update each
+        place it is used. To utilize Drupal's date format system the
+        `date.formatter` service can be used. Unfortunately, Drupal's date formatter
+        cannot handle date objects but works with timestamps instead. It is not used
+        above because it would be more verbose and introduce new concepts, such as
+        services and dependency injection, even though it would be the preferred
+        implementation. For reference, the respective parts of
+        `EventListBuilder.php` would then be:
+
+        ```php
+        use Drupal\Core\Datetime\DateFormatterInterface;
+        ...
+        use Drupal\Core\Entity\EntityStorageInterface;
+        use Drupal\Core\Entity\EntityTypeInterface;
+        use Symfony\Component\DependencyInjection\ContainerInterface;
+
+        class EventListBuilder extends EntityListBuilder {
+
+            /**
+             * @var \Drupal\Core\Datetime\DateFormatterInterface
+             */
+            protected $dateFormatter;
+
+            public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter) {
+                parent::__construct($entity_type, $storage);
+                $this->dateFormatter = $date_formatter;
+            }
+
+            public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+                return new static(
+                    $entity_type,
+                    $container->get('entity.manager')->getStorage($entity_type->id()),
+                    $container->get('date.formatter')
+                );
+            }
+
+            ...
+
+            public function buildRow(EntityInterface $event) {
+                /** @var \Drupal\event\Entity\EventInterface $event */
+                ...
+                $row['date'] = $this->dateFormatter->format($event->getDate()->getTimestamp(), 'medium');
+                ...
+            }
+
+        }
+        ```
+</details>
+
+* Add the following use statement to the `Event` class:
+
+    ```php
+    use Drupal\event\Controller\EventListBuilder;
+    ```
+
+* Replace the value of the `list_builder` key in the `handlers`
+section of the attributes in `src/Entity/Event.php` with
+`EventListBuilder::class`.
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Visit `/admin/content/events`
+
+    Note that the entity list now shows the event title and date.
+
+* Delete an event again
+
+    Visit `/admin/content/events/manage/2/delete` and press _Delete_.
+
+    Note that this time you are redirected to the administrative event listing.
+    The redirect to the front page that happened above is only a fallback in case
+    no `collection` route exists.
+
+## 4.3. Add an administrative view
+
+While a specialized entity list builder has the benefit of being re-usable one
+can also take advantage of Drupal's _Views_ module to create an administrative
+listing of events.
+
+* Add the following use statement to the `Event` class:
+
+    ```php
+    use Drupal\views\EntityViewsData;;
+    ```
+
+* Add the following to the `handlers` section of the annotation in
+`src/Entity/Event.php`:
+
+    ```php
+    'views_data' => EntityViewsData::class,
+    ```
+
+    Note that the views data that is provided by the default views data handler is
+    partially incomplete so - in particular when dealing with date or entity
+    reference fields - using Views for entity listings should be evaluated
+    carefully.
+
+* Rebuild caches
+
+    Run `drush cache:rebuild`
+
+* Add an _Events_ view to replace the list builder
+
+    <Steps>
+        1. Select _Show: Event_
+
+        2. Check _Create a page_
+
+        3. Use `admin/content/events` as the _Path_
+
+            This will make Views replace the previously existing collection route.
+
+            Note that the path is entered without a leading slash in Views.
+
+        4. Select _Display format: Table_
+
+        5. Press _Save and edit_
+
+        6. Click on _Settings_ in the _Format_ section and check _Sortable_ for the
+        _Title_, _Date_ and _Published_ fields, as well as
+        _Enable Drupal style "sticky" table headers (Javascript)_ and
+        _Show the empty text in the table_
+
+        7. Add an empty text field to the _No results behavior_ area
+
+        8. Add _Date_ and _Published_ fields and select _Output format: ✔ / ✖ for the
+        _Published field_
+
+        9. Add _Link to edit Event_ and _Link to delete Event_ fields and check the
+        _Exclude from display_ checkbox
+
+        10. Add a _Dropbutton_ field for the operations and enable the edit and delete
+        links
+
+    </Steps>
+
+Views provides a number of features that increase the usability of
+administrative listings when compared to the stock entity list builder. These
+include:
+
+* Exposed filters
+
+* Using formatters for fields
+
+    This allows using Drupal's date formatting system for the date field (as
+    discussed above), for example, and using check (✔) and cross (✖) marks for
+    the published field.
+
+* A click-sortable table header
+
+* An Ajax-enabled pager
+
+* A "sticky" table header
+
+* The ability to add a menu link or local task for the view from the user
+interface. (Note that adding a local task does not work in this case as it
+conflicts with the overriding of the list-builder route.)
+
+[//]: # (<!-- TODO: Move previously mentioned JSON:API integration to perhaps it's own section. -->)
