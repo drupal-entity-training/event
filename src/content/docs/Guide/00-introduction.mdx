@@ -3,13 +3,26 @@ title: Introduction
 description: Step-by-step instructions to create a custom entity type in Drupal 11.
 ---
 
-This guide documents the process of creating a custom entity type in Drupal 11 using the example of an Event entity type.
+This guide documents the process of creating a custom entity type in Drupal 11
+using the example of an Event entity type.
 
-You can reach this guide at https://git.io/d8entity.
+You can reach this guide at https://git.io/d8entity. If you find any errors or
+have improvement suggestions, feel free to open an issue or pull request in the
+[source repository][repository].
 
-The starting point is a stock Drupal 11 core Standard installation with the contributed [Entity API][contrib-entity-api] available at `modules/entity` and an empty module directory at `modules/event`.
+The starting point is a stock Drupal 11 Core Standard installation with the
+contributed [Entity API][contrib-entity-api] available at
+`modules/contrib/entity` and an empty module directory at
+`modules/custom/event`. See the [installation instructions][drupal-install]
+on Drupal.org for more information on installing Drupal.
 
-Having [Drush 13][drush] available is required to follow along. When Drush commands are to be run, run them from within the Drupal installation. When PHP code is to be executed, this can be done by running `drush core:cli` or by creating a test script and then running `drush php:script <name-of-script>`.
+Having [Drush 13][drush] available is required to follow along. When Drush
+commands are to be run, run them from within the Drupal installation. When PHP
+code is to be executed, you can create a script file in the project root, for
+example `event.php`, paste the given PHP code into the file and then running the
+script with `drush php:script`, for example `drush php:script event.php`.
 
+[repository]: https://github.com/drupal-entity-training/event/
+[drupal-install]: 
 [contrib-entity-api]: https://www.drupal.org/project/entity
 [drush]: https://www.drush.org/13.x

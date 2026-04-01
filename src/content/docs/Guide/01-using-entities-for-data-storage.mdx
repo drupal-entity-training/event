@@ -6,7 +6,7 @@ description: Using entities for data storage
 ## 1.1. Create a module
 
 * Within the `/modules/event` directory create an `event.info.yml` file with the
-following:
+  following:
 
     ```yaml
     name: Event
@@ -15,32 +15,13 @@ following:
     core_version_requirement: ^11
     ```
 
+  See the [documentation](https://www.drupal.org/docs/develop/creating-modules/let-drupal-know-about-your-module-with-an-infoyml-file)
+  on Drupal.org for more information about module info files.
+
 * Run `drush pm:enable event` or visit `/admin/modules` and install the _Event_
-module
+  module
 
 ## 1.2. Create a minimal entity class
-
-_Classes_ allow categorizing objects as being of a certain type. Event
-entities, that will be created below, will be _instances_ of the entity
-class. In terms of code organization, classes can be used to group related
-functionality.
-
-* <details>
-    <summary>Create a <code>src</code> directory</summary>
-    In Drupal
-        11 the `src` directory contains all object-oriented code (classes,
-        interfaces, traits). Procedural code (functions) is placed in the
-        `.module` file (or other files) outside of the `src`
-        directory.
-    </details>
-
-* <details>
-    <summary>Create a <code>src/Entity</code> directory</summary>As
-        modules often contain many classes, they can be placed into arbitrary
-        subdirectories for organizational purposes. Certain directory names
-        have a special meaning in Drupal and are required for certain things.
-    In particular, Drupal looks in `Entity` for entity types.
-    </details>
 
 * Create a `src/Entity/Event.php` file with the following:
 
@@ -53,9 +34,6 @@ functionality.
     use Drupal\Core\Entity\ContentEntityBase;
     use Drupal\Core\StringTranslation\TranslatableMarkup;
 
-    /**
-     * Defines the event entity class.
-     */
     #[ContentEntityType(
         id: 'event',
         label: new TranslatableMarkup('Event'),
@@ -73,116 +51,173 @@ functionality.
     <details>
         <summary>More information on the above</summary>
 
+        * File and Directory Structure:
+        
+          The `src` directory contains all object-oriented PHP code of a 
+          module. Each file contains a single unit of code: a class, trait,
+          interface or an enum. In this tutorial only classes will be created.
+
+          See the [PHP documentation](https://www.php.net/manual/de/language.oop5.php)
+          for more information on object-oriented PHP.
+
+          Files can either be directly in the `src` directory or in any (direct 
+          or nested) subdirectory. Certain directory names have a special
+          meaning in Drupal, however. In particular, Drupal looks in `Entity`
+          for entity type classes.
+
+          See [Drupal API: Object-oriented programming conventions][api-oop] for
+          more information.
+
         * Namespace:
 
-            ```php
-            namespace Drupal\event\Entity;
-            ```
+          ```php
+          namespace Drupal\event\Entity;
+          ```
 
-            Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
-            used simultaneously without risking naming conflicts. Namespaces can have
-            multiple parts. All classes in Drupal core and modules have `Drupal` as the
-            top-level namespace. The second part of module classes must be the module
-            name. Further sub-namespaces correspond to the directory structure within
-            the `src` directory of the module.
+          Namespaces allow code from different frameworks (Drupal, Symfony, …) to be
+          used simultaneously without risking naming conflicts. Namespaces can have
+          multiple parts. All classes in Drupal core and modules have `Drupal` as the
+          top-level namespace. The second part of module classes must be the module
+          name. Further sub-namespaces correspond to the directory structure within
+          the `src` directory of the module.
 
         * Import:
 
-            ```php
-            use Drupal\Core\Entity\ContentEntityBase;
-            ```
+          ```php
+          use Drupal\Core\Entity\Attribute\ContentEntityType;
+          ```
 
-            In the same way we declare a namespace for the `Event` class the
-            `ContentEntityBase` class used below also belongs to a namespace. Thus, in
-            order to use it below, we need to import the class using the full namespace.
+          In the same way we declare a namespace for the `Event` class the
+          `ContentEntityType` class used below also belongs to a namespace. Thus,
+          in order to use it below, we need to import the class using the full 
+          namespace.
 
         * Attributes:
 
-            _Attributes_ are a way to provide metadata about code. Because the
-            attributes are placed right next to the code itself, this makes classes truly
-            self-contained as both functionality and metadata are in the same file.
+          ```php
+          #[ContentEntityType(
+          )]
+          ```          
 
-            Even though the annotation is part of a comment block, it is required for
-            the entity type to function.
+          _Attributes_ are a way to provide metadata about code. Because the
+          attributes are placed right next to the code itself, this allows
+          making classes truly self-contained as both functionality and metadata
+          are in the same file. Note that we have not registered or declared
+          this class in any way to Drupal (and will not do so below, either). 
 
-        * ID:
+          The concrete values that are part of the attribute are defined by the
+          `ContentEntityType` attribute class. The ones used here will be
+          explained below as they are used. See the [class API documentation]()
+          for more information.
 
-            ```php
-            id: 'event',
-            ```
+          See [Drupal API: Attribute based plugins][attribute-based-plugins] for more information.
 
-            This is the ID of the entity type that is needed whenever interacting with
-            a specific entity type in code.
+        * Entity Type ID:
+
+          ```php
+          id: 'event',
+          ```
+
+          This is the ID of the entity type that is needed whenever interacting
+          with a specific entity type in code. Other entity type IDs used in
+          Drupal are `media`, `node`, `taxonomy_term` or `user`, for example.
 
         * Label:
 
-            ```php
-            label: new TranslatableMarkup('Event'),
-            ```
+          ```php
+          label: new TranslatableMarkup('Event'),
+          ```
 
-            This is the label of this entity type when presented to a user.
+          This is the label of this entity type when presented to a user. This
+          is only used in administrative interfaces.
 
-            To make the values we provide in the annotation translatable we need to
-            wrap them in `new TranslatableMarkup`.
+          To make the values we provide in the annotation translatable we need
+          to wrap them in `new TranslatableMarkup()`. This would allow us to
+          translate this label as part of Drupal's _Interface Translation_
+          system, but we will not do this as part of this tutorial.
 
         * Storage information:
 
-            ```php
-            entity_keys: [
-              'id' => 'id',
-              'uuid' => 'uuid',
-            ],
-            base_table: 'event',
+          ```php
+          entity_keys: [
+            'id' => 'id',
+            'uuid' => 'uuid',
+          ],
+          base_table: 'event',
             ```
 
-            We need to specify the name of the database table we want the event data
-            to be stored. (This is called _base_ table, as there can be multiple
-            tables that store entity information, as will be seen below.)
+          We need to specify the name of the database table we want the event
+          data to be stored. This is called the _base_ table, as there can be
+          multiple tables that store entity information, as we will see below.
 
-            Entities are required to have an ID which they can be loaded by. We need
-            to specify what the ID field will be called for our entity. This will also
-            determine the name of the database column that will hold the entity IDs.
-            Similarly entity types can (and are encouraged to) provide a UUID field.
-            Again, we can specify the name of the UUID field.
+          Entities are required to have an ID which they can be loaded by. We
+          need to specify what the ID field will be called for our entity. This
+          will also determine the name of the database column that will hold the
+          entity IDs. Other entity types use the convention of prefixing the ID
+          field with the first letter of the entity type ID. For example the
+          `media` entity type uses `mid` as the name of its ID field and the 
+          `node` entity type uses `nid`. Following that convention we could name
+          our field `eid` and replace the respective line with
 
-            Note that top-level keys of the attributes are not quoted, but keys in
-            mappings (such as the `entity_keys` declaration) _are_ quoted and trailing
-            commas are allowed in mappings.
+          ```php
+          'id' => 'eid',
+          ```
 
-            See [Drupal API: Attribute based plugins][attribute-based-plugins] for more information.
+          This is only pointed out to clarify the difference between the key and
+          the value in the `'id' => 'id'` line. We do not actually follow that
+          convention here as it makes the field naming inconsistent.
+          
+          Similarly to the ID entity types can (and are encouraged to) provide a
+          UUID field. We specify the name of the UUID field to be `uuid`.
+
+          Note that the parameter names of the attribute (such as `entity_keys`)
+          are not quoted, but keys in arrays (such as `id` and `uuid`) are
+          strings and need to be quoted as such. Also note that trailing commas
+          are allowed both for the parameter list and for arrays.
+
+          See the [PHP documentation](https://www.php.net/manual/en/functions.arguments.php#functions.named-arguments)
+          for more information on the parameter syntax.
 
         * Class declaration:
 
-            ```php
-            class Event extends ContentEntityBase {
+          ```php
+          class Event extends ContentEntityBase {
 
-            }
-            ```
+          }
+          ```
 
-            The file name must correspond to class name (including capitalization).
+          The file name (without the file extension) must correspond to class
+          name (including capitalization).
+
+          Classes allow categorizing objects as being of a certain type. Event
+          entities, that will be created below, will be objects that are 
+          _instances_ of the entity class `Event`. In terms of code 
+          organization, classes can be used to group related functionality,
+          which will also be done below.
 
         * Inheritance:
 
-            ```php
-            extends
-            ```
+          ```php
+          extends
+          ```
 
-            Base classes can be used to implement functionality that is generic and
-            useful for many classes. Classes can inherit all functionality from such a
-            base class by using the `extends` keyword. Then they only need to provide
-            functionality specific to them, which avoids code duplication.
+          Base classes can be used to implement functionality that is generic
+          and useful for many classes. Classes can inherit all functionality
+          from such a base class by using the `extends` keyword. Then they only
+          need to provide functionality specific to them, which avoids code
+          duplication.
 
         * Content entities:
 
-            ```php
-            ContentEntityBase
-            ```
+          ```php
+          ContentEntityBase
+          ```
 
-            Content entities are entities that are created by site users. They are
-            typically stored in the database, often with a auto-incrementing integer ID.
+          Content entities are entities that are created by site users. They are
+          typically stored in the database, often with a auto-incrementing
+          integer ID. The examples noted above (_Media_, _Nodes_, _Taxonomy 
+          terms_ and _Users_) are all examples of content entities.
 
-        See [Drupal API: Object-oriented programming conventions][api-oop] for more
-        information.
     </details>
 
 ## 1.3. Install the entity type
