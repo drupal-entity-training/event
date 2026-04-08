@@ -24,6 +24,14 @@ _Entity API_ module
 
 ## 2.2. Add a route
 
+* Add the following use statements to `src/Entity/Event.php`:
+
+    ```php
+    use Drupal\entity\EntityAccessControlHandler;
+    use Drupal\entity\EntityPermissionProvider;
+    use Drupal\entity\Routing\DefaultHtmlRouteProvider;
+    ```
+
 * Add the following to the annotation in `src/Entity/Event.php`:
 
     ```php
